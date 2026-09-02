@@ -1,0 +1,26 @@
+{
+  "resumen_ejecutivo": [
+    "El agente procesa notas de texto y entrega una minuta estructurada.",
+    "La contradicción sobre el piloto permanece abierta para revisión."
+  ],
+  "decisiones": [
+    "Mantener el alcance en archivos de texto.",
+    "No distribuir la minuta sin revisión humana."
+  ],
+  "acciones": [
+    {
+      "accion": "Actualizar el prompt para acciones sin responsable",
+      "responsable": "Bruno",
+      "plazo": "No informado"
+    },
+    {
+      "accion": "Enviar ejemplo de notas",
+      "responsable": "Carla",
+      "plazo": "viernes 04/09"
+    }
+  ],
+  "validaciones_abiertas": [
+    "Ana indicó 10/09 y Bruno indicó 17/09 para el piloto."
+  ],
+  "requiere_revision_humana": true
+}

@@ -1,0 +1,27 @@
+{
+  "resumen_ejecutivo": [
+    "El agente se implementará inicialmente para notas de texto y no para audio.",
+    "La minuta requiere revisión humana antes de distribuirse.",
+    "La fecha del piloto tiene dos versiones y debe validarse."
+  ],
+  "decisiones": [
+    "La primera versión trabajará con archivos de texto.",
+    "La minuta se revisará antes de distribuirse."
+  ],
+  "acciones": [
+    {
+      "accion": "Actualizar el prompt para que las acciones sin responsable usen No definido",
+      "responsable": "Bruno",
+      "plazo": "No informado"
+    },
+    {
+      "accion": "Enviar el ejemplo de notas con la contradicción de fechas",
+      "responsable": "Carla",
+      "plazo": "viernes 04/09"
+    }
+  ],
+  "validaciones_abiertas": [
+    "La fecha del piloto aparece como 10/09 según Ana y 17/09 según Bruno."
+  ],
+  "requiere_revision_humana": true
+}
