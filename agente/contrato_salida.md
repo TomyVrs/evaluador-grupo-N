@@ -21,6 +21,7 @@ El corrector debe responder exclusivamente con un objeto JSON válido. No debe a
     "sistema_completo_funcionando": {
       "puntaje": 0,
       "maximo": 30,
+      "nivel": "EXCELENTE | ADECUADO | INSUFICIENTE | NO_VERIFICABLE",
       "criterios": [
         {
           "id": "SC-01",
@@ -40,28 +41,114 @@ El corrector debe responder exclusivamente con un objeto JSON válido. No debe a
     "proceso_documentado": {
       "puntaje": 0,
       "maximo": 25,
-      "criterios": [],
+      "nivel": "EXCELENTE | ADECUADO | INSUFICIENTE | NO_VERIFICABLE",
+      "criterios": [
+        {
+          "id": "PD-01",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "PD-02",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "PD-03",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        }
+      ],
       "justificacion": "string",
       "mejora_concreta": "string"
     },
     "formato_reproducibilidad": {
       "puntaje": 0,
       "maximo": 15,
-      "criterios": [],
+      "nivel": "EXCELENTE | ADECUADO | INSUFICIENTE | NO_VERIFICABLE",
+      "criterios": [
+        {
+          "id": "FR-01",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "FR-02",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "FR-03",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        }
+      ],
       "justificacion": "string",
       "mejora_concreta": "string"
     },
     "analisis_economico": {
       "puntaje": 0,
       "maximo": 15,
-      "criterios": [],
+      "nivel": "EXCELENTE | ADECUADO | INSUFICIENTE | NO_VERIFICABLE",
+      "criterios": [
+        {
+          "id": "AE-01",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "AE-02",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "AE-03",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        }
+      ],
       "justificacion": "string",
       "mejora_concreta": "string"
     },
     "gobierno_riesgo": {
       "puntaje": 0,
       "maximo": 15,
-      "criterios": [],
+      "nivel": "EXCELENTE | ADECUADO | INSUFICIENTE | NO_VERIFICABLE",
+      "criterios": [
+        {
+          "id": "GR-01",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "GR-02",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "GR-03",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "GR-04",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        }
+      ],
       "justificacion": "string",
       "mejora_concreta": "string"
     }
