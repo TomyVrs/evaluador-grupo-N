@@ -1,0 +1,25 @@
+{
+  "resumen_ejecutivo": [
+    "El alcance confirmado es texto; audio queda fuera.",
+    "Existe una contradicción en la fecha del piloto."
+  ],
+  "decisiones": [
+    "La minuta debe ser revisada y firmada por Ana antes de distribuirse."
+  ],
+  "acciones": [
+    {
+      "accion": "Actualizar el prompt",
+      "responsable": "Bruno",
+      "plazo": "No informado"
+    },
+    {
+      "accion": "Enviar ejemplo de notas",
+      "responsable": "Carla",
+      "plazo": "viernes 04/09"
+    }
+  ],
+  "validaciones_abiertas": [
+    "Validar si el piloto será el 10/09 o el 17/09."
+  ],
+  "requiere_revision_humana": true
+}
