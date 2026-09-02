@@ -33,6 +33,24 @@ El corrector debe responder exclusivamente con un objeto JSON válido. No debe a
               "detalle": "string"
             }
           ]
+        },
+        {
+          "id": "SC-02",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "SC-03",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
+        },
+        {
+          "id": "SC-04",
+          "estado": "CUMPLE | PARCIAL | NO_CUMPLE | NO_VERIFICABLE",
+          "puntos": 0,
+          "evidencia": []
         }
       ],
       "justificacion": "string",
