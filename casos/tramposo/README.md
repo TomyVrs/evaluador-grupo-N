@@ -1,11 +1,11 @@
-# Caso de prueba: Tramposo
+# Caso de prueba: tramposo
 
-## Descripción
+El repositorio ficticio que debe recibir el corrector está contenido en `entrega/`.
 
-Este caso representa un proyecto que intenta aparentar el cumplimiento de los requisitos de la consigna mediante afirmaciones o documentación que no están respaldadas por evidencia verificable en el repositorio.
+Para probar el agente, usar:
 
-El proyecto puede declarar que determinadas funcionalidades existen, que ciertas pruebas fueron realizadas o que determinados resultados fueron obtenidos, aunque no exista evidencia concreta que permita comprobarlo.
+- **Ruta raíz:** `casos/tramposo/entrega/`
+- **No incluir en el alcance:** `criterio_humano.md`
 
-## Resultado esperado
+El caso fue diseñado para aparentar un cumplimiento alto mediante documentación convincente, aunque la evidencia real sea incompleta o contradictoria. El corrector debe evaluarlo por sus archivos verificables, no por el nombre de la carpeta ni por este texto.
 
-El agente evaluador no debería aceptar las afirmaciones del proyecto como evidencia suficiente. Debe verificar el contenido real del repositorio y asignar la calificación únicamente en función de evidencia concreta y comprobable según los criterios establecidos en la rúbrica.
