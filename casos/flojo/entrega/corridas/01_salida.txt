@@ -1,0 +1,7 @@
+# Corrida 01 — incompleta
+
+Se probó el asistente pegando un texto manualmente, pero no se conservaron la entrada original, la fecha ni los datos de uso. La salida fue una respuesta libre y no un JSON validado.
+
+**Salida parcial registrada:**
+
+> Hay que revisar el proyecto y definir próximos pasos.

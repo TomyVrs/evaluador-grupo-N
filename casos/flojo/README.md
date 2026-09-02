@@ -1,9 +1,5 @@
-# Caso de prueba: Flojo
+# Caso de prueba: flojo
 
-## Descripción
+Este repositorio ficticio representa una entrega insuficiente. Tiene un prompt breve y una descripción general, pero no demuestra un sistema completo ni corridas reconstruibles.
 
-Este caso representa un proyecto que cumple solo parcialmente con los requisitos de la consigna. Presenta documentación incompleta y poca evidencia verificable del trabajo realizado.
-
-## Resultado esperado
-
-El agente evaluador debería asignar una calificación baja, ya que varios de los criterios establecidos en la rúbrica no pueden comprobarse mediante evidencia concreta en el repositorio.
+El corrector debe puntuar únicamente lo que pueda verificar dentro de `entrega/` y no completar faltantes por buena voluntad.
