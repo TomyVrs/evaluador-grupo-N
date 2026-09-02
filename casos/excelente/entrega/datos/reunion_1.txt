@@ -1,0 +1,11 @@
+# Reunión de seguimiento comercial
+
+Fecha: 2026-08-28
+Tema: implementación del agente de minutas
+Participantes: Ana (Líder), Bruno (Producto), Carla (Operaciones)
+
+Ana confirma que el agente trabajará con archivos de texto y no con audio en esta versión. Bruno debe actualizar el prompt para que las acciones sin responsable queden como "No definido". Carla enviará el ejemplo de notas con la contradicción de fechas antes del viernes 04/09.
+
+Se acuerda que la minuta se revisa antes de distribuirse. La fecha del piloto queda pendiente: Ana menciona 10/09, pero en el cierre de la reunión Bruno menciona 17/09. Requiere validación.
+
+Costo estimado: 0,03 USD por corrida, con 3 corridas semanales y 52 semanas al año. El cálculo es una estimación documentada, no un consumo facturado.
