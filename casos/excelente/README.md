@@ -1,9 +1,9 @@
-# Caso de prueba: Excelente
+# Caso de prueba: excelente
 
-## Descripción
+El repositorio ficticio que debe recibir el corrector está contenido en `entrega/`.
 
-Este caso representa un proyecto que cumple de manera completa y correcta con los requisitos de la consigna.
+- **Ruta raíz:** `casos/excelente/entrega/`
+- **No incluir en el alcance:** `criterio_humano.md`
 
-## Resultado esperado
+El caso representa un trabajo final sólido, pero no perfecto. El corrector debe asignar puntos por evidencia verificable y conservar capacidad crítica ante mejoras menores.
 
-El agente evaluador debería asignar una calificación alta, ya que el proyecto presenta evidencia verificable del cumplimiento de los criterios establecidos en la rúbrica.
