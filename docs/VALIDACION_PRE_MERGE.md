@@ -29,7 +29,7 @@
 - [x] Inventario previo a afirmaciones de ausencia.
 - [x] Cobertura parcial no se transforma en ausencia: ejercitado con el repo externo.
 - [x] Solo operaciones de lectura forman parte del corrector.
-- [x] Workflow V5 usa `Contents: read` y `Metadata: read`.
+- [x] Workflow V5 usa permisos de lectura.
 - [x] Ref, ruta y repo inexistentes producen `NO_EVALUABLE`.
 
 ## Batería V5
@@ -62,6 +62,10 @@ VALIDACION V5: OK
 - SC-02 V5: implementación local reproducible reconocida — OK
 ```
 
+El workflow V5 está configurado para validar cambios relevantes tanto en `work/final-hardening-v4` como en `main`. De este modo, al integrarse la candidata, los artefactos guardados vuelven a validarse en la rama pública por defecto.
+
+**Alcance exacto de esta automatización:** valida los JSON/resultados ya guardados, sus puntajes, estructura, SHA, repetibilidad y casos de borde. No lanza autónomamente un modelo de IA para volver a evaluar un repositorio nuevo.
+
 ## Calibración humana
 
 - [x] Se evaluaron excelente, flojo y tramposo sobre el mismo `FREEZE_V5`.
@@ -77,12 +81,20 @@ VALIDACION V5: OK
 
 El plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica en los archivos de instrucciones, pero no fue el procedimiento finalmente ejecutado. `calibracion.md` documenta explícitamente la desviación y el procedimiento real.
 
+## Proceso grupal
+
+- [x] El historial de `main` conserva commits e integraciones por PR previas a V5.
+- [x] El PR #13 mantiene el hardening V5 como una secuencia de cambios trazables, no como un único commit final.
+- [x] Se documenta de forma explícita que el tramo V5 fue implementado desde la cuenta `TomyVrs`; no se atribuye falsamente autoría técnica a otros integrantes.
+- [ ] Antes de integrar, los integrantes deben dejar evidencia auténtica de revisión del PR #13 mediante comentarios, observaciones, aprobaciones o cambios concretos según corresponda.
+
 ## Pendiente antes de integrar
 
 - [ ] Revisión final del grupo sobre el PR y su diff.
-- [ ] Confirmar que los aportes del equipo sean legibles en historial/PRs.
+- [ ] Evidencia auténtica de las revisiones/aportes del equipo visible en GitHub.
 - [ ] Decidir en equipo si corresponde sacar el PR de draft e integrar.
+- [ ] Antes del cierre de la entrega, confirmar que la candidata elegida quedó efectivamente integrada en `main`.
 
 ## Cierre
 
-No queda una mejora técnica o de calibración material que justifique modificar la candidata V5 antes de la revisión del grupo. El `FREEZE_V5` permanece inalterado y `main` no debe tocarse hasta decisión explícita del equipo.
+No queda una corrección funcional material identificada en la V5. El `FREEZE_V5` permanece inalterado y `main` no debe tocarse hasta decisión explícita del equipo. Las acciones pendientes son de revisión grupal e integración final, no de rediseño del agente.
