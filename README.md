@@ -44,7 +44,7 @@ El repo externo permitió comprobar que V5 reconoce una herramienta XLSX local r
 
 Los tres casos de borde `NO_EVALUABLE` —referencia inexistente, ruta inexistente y repo inexistente— fueron ejecutados nuevamente en V5.
 
-GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con permisos de lectura y conclusión **success**. El validador confirmó JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5.
+GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con permisos de lectura y conclusión **success**. El validador confirma la consistencia de los resultados guardados: JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5. **No ejecuta por sí solo una nueva evaluación LLM sobre un repositorio nuevo.** El workflow V5 corre sobre la rama activa y queda preparado para volver a validar al integrarse en `main`.
 
 ## Evolución de V4 a V5
 
@@ -75,6 +75,10 @@ No fue necesario modificar la rúbrica ni el agente V5.
 
 La metodología real y su limitación están detalladas en `calibracion.md`: la ronda final fue realizada por un evaluador humano del grupo y no fue ciega, ya que conocía previamente los totales automáticos. No se inventaron evaluadores adicionales.
 
+## Proceso grupal y revisión final
+
+El historial previo de `main` conserva la evolución mediante commits y PRs ya integrados. El endurecimiento V5 del PR #13 fue implementado desde la cuenta `TomyVrs`; por eso no se presenta ese tramo como si hubiera sido escrito por seis autores distintos. La participación adicional del grupo debe quedar reflejada de forma auténtica en la revisión del PR —comentarios, observaciones, aprobaciones o cambios concretos— antes de decidir el merge.
+
 ## Qué falta
 
 La candidata V5 ya tiene cerradas la validación técnica y la calibración humano-agente.
@@ -84,6 +88,8 @@ Queda únicamente la **revisión final del grupo** sobre el PR antes de decidir 
 - `main` no se modifica;
 - no se crean ramas nuevas;
 - no se mergea el PR.
+
+Antes de la entrega, la versión elegida debe quedar efectivamente integrada en `main` para que el repositorio público por defecto exponga la candidata final.
 
 ## Qué aprendimos
 
