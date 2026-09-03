@@ -1,0 +1,33 @@
+{
+  "estado_evaluacion":"COMPLETA",
+  "repositorio":{"url":"https://github.com/TomyVrs/evaluador-grupo-N","ref_solicitada":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","ref_evaluada":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","commit_sha":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","ruta_raiz":"casos/flojo/entrega/","fecha_evaluacion":"2026-09-03","inventario_completo":true,"archivos_revisados":["README.md","DECISIONES.md","prompts/system_prompt.md","prompts/user_prompt.md","corridas/01_salida.txt"],"limitaciones":[]},
+  "rubrica_version":"v4",
+  "evaluacion":{
+    "sistema_completo_funcionando":{"puntaje":4,"maximo":30,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"SC-01","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Hay rol básico, tarea y regla para completar información faltante; faltan contexto operativo suficiente, formato observable y ejemplo/criterio verificable."}]},
+      {"id":"SC-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"El propio caso registra ausencia de herramienta o conector real."}]},
+      {"id":"SC-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La salida preservada es libre y no responde a un contrato estructurado."}]},
+      {"id":"SC-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No existe nivel de supervisión ni aprobador/firmante definido."}]}
+    ],"justificacion":"Solo existe un contrato parcial; no se acredita sistema completo ni controlado.","mejora_concreta":"Completar contrato, herramienta, salida estable y esquema de supervisión."},
+    "proceso_documentado":{"puntaje":0,"maximo":25,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"PD-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No hay versiones o iteraciones reconstruibles."}]},
+      {"id":"PD-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se conservaron errores ni resultados fallidos concretos."}]},
+      {"id":"PD-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se vinculan decisiones con fallas previas."}]}
+    ],"justificacion":"No puede reconstruirse un ciclo de mejora.","mejora_concreta":"Documentar una versión inicial, una falla y el cambio consecuente."},
+    "formato_reproducibilidad":{"puntaje":5,"maximo":15,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"Están los cuatro archivos mínimos exigidos."}]},
+      {"id":"FR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"No existe ninguna corrida completa con entrada original, salida y fecha."}]},
+      {"id":"FR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La salida no puede reconstruirse contra entrada y versión/configuración."}]}
+    ],"justificacion":"La estructura formal existe, pero la ejecución no es reproducible.","mejora_concreta":"Conservar tres corridas completas y versionadas."},
+    "analisis_economico":{"puntaje":0,"maximo":15,"nivel":"INSUFICIENTE","criterios":[{"id":"AE-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},{"id":"AE-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},{"id":"AE-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[]}],"justificacion":"No hay artefacto económico dentro del alcance inventariado.","mejora_concreta":"Agregar costo unitario con base, proyección y criterio de modelo."},
+    "gobierno_riesgo":{"puntaje":0,"maximo":15,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"GR-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Permisos no definidos."}]},
+      {"id":"GR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},
+      {"id":"GR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Contingencias no definidas."}]},
+      {"id":"GR-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Supervisión y firmante no definidos."}]}
+    ],"justificacion":"El caso carece de gobierno operable.","mejora_concreta":"Definir permisos mínimos, riesgos/controles, contingencias y aprobación humana."}
+  },
+  "inconsistencias":[],"alertas_manipulacion":[],"puntaje_total":9,
+  "validacion":{"sha_anclado":true,"inventario_verificado":true,"criterios_completos":true,"puntajes_permitidos":true,"sumas_verificadas":true,"niveles_verificados":true,"evidencia_verificada":true,"formato_valido":true},
+  "resumen_final":"Caso bajo: 9/100. La reaplicación conserva exactamente estados y puntajes; la documentación no demuestra funcionamiento ni proceso más allá de una estructura mínima."
+}
