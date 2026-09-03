@@ -1,5 +1,7 @@
 # Instrucciones para evaluación humana ciega — v5
 
+> **Documento histórico del protocolo previo.** Este archivo conserva el plan metodológico diseñado antes de la calibración. La calibración finalmente ejecutada no fue de tres evaluadores ni ciega. El procedimiento real, los resultados, la limitación metodológica y la adjudicación de desacuerdos están documentados en `calibracion.md`.
+
 ## Objetivo
 
 Obtener una referencia humana independiente para comparar con el agente evaluador. La evaluación humana no debe intentar confirmar ni aproximarse a una nota automática previa.
@@ -59,7 +61,7 @@ Para el caso tramposo responder además Sí/No:
 - ¿Encontró contradicciones entre claims y evidencia?
 - ¿Verificó la aritmética económica en vez de aceptar el total declarado?
 
-## Consolidación
+## Consolidación prevista en este protocolo
 
 Después de recibir las tres evaluaciones independientes:
 
@@ -70,3 +72,5 @@ Después de recibir las tres evaluaciones independientes:
 5. considerar diferencia material si supera **5 puntos en el total** o **2 puntos en cualquier dimensión**;
 6. explicar toda diferencia material antes de modificar rúbrica o agente;
 7. si hay una modificación, versionar una nueva candidata y repetir los casos afectados.
+
+Este procedimiento quedó como plan previo y no debe confundirse con la calibración finalmente realizada. Ver `calibracion.md` para el registro definitivo.
