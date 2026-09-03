@@ -1,4 +1,4 @@
-# Instrucciones para evaluación humana ciega — v4
+# Instrucciones para evaluación humana ciega — v5
 
 ## Objetivo
 
@@ -8,24 +8,25 @@ Obtener una referencia humana independiente para comparar con el agente evaluado
 
 Evaluar únicamente este SHA:
 
-`3edf04e478c515698305ac534c5a7b1cf3ab01d5`
+`5fdd304c26097aa16dc6d065e8b1c3d6359e7010`
 
-No evaluar la punta actual de `work/final-hardening-v4`: los commits posteriores al SHA congelado contienen solamente registro de calibración y, eventualmente, resultados automáticos que no deben formar parte de la evidencia.
+No evaluar la punta actual de `work/final-hardening-v4`: los commits posteriores al SHA congelado contienen registro y resultados técnicos que no deben formar parte de la evidencia.
 
 ## Regla de ceguera
 
 Antes de entregar sus puntajes, cada evaluador debe evitar consultar:
 
-- cualquier salida automática creada después del SHA congelado;
+- cualquier salida automática V5 creada después del SHA congelado;
+- resultados V4 históricos;
 - conversaciones o mensajes donde se hayan compartido resultados automáticos;
 - puntuaciones de otros integrantes;
 - archivos `criterio_humano.md` completados por otros integrantes.
 
-Por diseño, las salidas automáticas V4 **no existen** dentro del árbol del SHA que se debe evaluar.
+Por diseño, las salidas automáticas V5 **no existen** dentro del árbol del SHA que se debe evaluar.
 
 ## Evidencia a evaluar
 
-Aplicar `rubrica.md` v4 del mismo SHA y evaluar exclusivamente:
+Aplicar `rubrica.md` v5 del mismo SHA y evaluar exclusivamente:
 
 1. `casos/excelente/entrega/`
 2. `casos/flojo/entrega/`
@@ -40,24 +41,16 @@ Para cada criterio:
 1. completar el inventario del alcance;
 2. identificar evidencia concreta;
 3. aplicar la precedencia de evidencia definida en la rúbrica;
-4. elegir literalmente `CUMPLE`, `PARCIAL`, `NO_CUMPLE` o `NO_VERIFICABLE`;
-5. asignar únicamente el puntaje fijo de la tabla;
-6. registrar contradicciones materiales;
-7. sumar criterios para obtener dimensión y total;
-8. no ajustar la nota por impresión general.
+4. para SC-02, admitir como evidencia de operabilidad cualquiera de las vías definidas por V5: traza/corrida, implementación local reproducible o integración reproducible;
+5. elegir literalmente `CUMPLE`, `PARCIAL`, `NO_CUMPLE` o `NO_VERIFICABLE`;
+6. asignar únicamente el puntaje fijo de la tabla;
+7. registrar contradicciones materiales;
+8. sumar criterios para obtener dimensión y total;
+9. no ajustar la nota por impresión general.
 
 ## Registro individual
 
-Cada evaluador entrega por caso:
-
-| Dimensión | Puntaje | Evidencia / nota breve |
-|---|---:|---|
-| Sistema completo y funcionando /30 |  |  |
-| Proceso documentado /25 |  |  |
-| Formato y reproducibilidad /15 |  |  |
-| Análisis económico /15 |  |  |
-| Gobierno y riesgo /15 |  |  |
-| **TOTAL /100** |  |  |
+Usar `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md` y completar una copia por caso.
 
 Para el caso tramposo responder además Sí/No:
 
@@ -72,7 +65,7 @@ Después de recibir las tres evaluaciones independientes:
 
 1. registrar los tres puntajes individuales;
 2. calcular la mediana por dimensión y total;
-3. recién entonces consultar las salidas automáticas V4;
+3. recién entonces consultar las salidas automáticas V5;
 4. comparar agente vs. mediana humana;
 5. considerar diferencia material si supera **5 puntos en el total** o **2 puntos en cualquier dimensión**;
 6. explicar toda diferencia material antes de modificar rúbrica o agente;
