@@ -1,0 +1,74 @@
+{
+  "estado_evaluacion": "COMPLETA",
+  "repositorio": {
+    "url": "https://github.com/TomyVrs/evaluador-grupo-N",
+    "ref_solicitada": "3edf04e478c515698305ac534c5a7b1cf3ab01d5",
+    "ref_evaluada": "3edf04e478c515698305ac534c5a7b1cf3ab01d5",
+    "commit_sha": "3edf04e478c515698305ac534c5a7b1cf3ab01d5",
+    "ruta_raiz": "casos/excelente/entrega/",
+    "fecha_evaluacion": "2026-09-03",
+    "inventario_completo": true,
+    "archivos_revisados": ["README.md","DECISIONES.md","prompts/system_prompt.md","prompts/user_prompt.md","datos/reunion_1.txt","corridas/01_registro.md","corridas/01_salida.json","corridas/02_registro.md","corridas/02_salida.json","corridas/03_registro.md","corridas/03_salida.json","analisis_economico.md","gobierno_riesgo.md"],
+    "limitaciones": ["No se identifica por nombre una herramienta/conector real de lectura.","La falla inicial está descripta pero no preservada como salida original.","Las corridas carecen de ref/version exacta del agente y tokens medidos.","El costo unitario es estimado sin base de cálculo documentada y no hay comparación verificable de modelos."]
+  },
+  "rubrica_version": "v4",
+  "evaluacion": {
+    "sistema_completo_funcionando": {
+      "puntaje": 22,"maximo": 30,"nivel": "ADECUADO",
+      "criterios": [
+        {"id":"SC-01","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Rol, contexto, tarea, restricciones, formato JSON y ejemplos/criterios están explicitados junto con user_prompt.md."}]},
+        {"id":"SC-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"README.md","detalle":"La herramienta se describe genéricamente como lector de archivos y no como un conector/producto concreto con evidencia de disponibilidad."}]},
+        {"id":"SC-03","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"El contrato define campos JSON observables y tratamiento de ausencias/contradicciones."}]},
+        {"id":"SC-04","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"L2, momento de revisión, líder responsable y firma están definidos."}]}
+      ],
+      "justificacion":"Tres de cuatro criterios cumplen plenamente; la herramienta real no está identificada ni demostrada.",
+      "mejora_concreta":"Nombrar la herramienta concreta y adjuntar una configuración o traza de uso real con permisos delimitados."
+    },
+    "proceso_documentado": {
+      "puntaje":21,"maximo":25,"nivel":"ADECUADO",
+      "criterios":[
+        {"id":"PD-01","estado":"CUMPLE","puntos":9,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Hay versión inicial y múltiples cambios posteriores identificables en secuencia."}]},
+        {"id":"PD-02","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Se especifica el error de inferir responsables/plazos, aunque no se guarda la salida fallida original."}]},
+        {"id":"PD-03","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Las reglas No definido/No informado y validaciones abiertas se explican como respuesta al problema previo."}]}
+      ],
+      "justificacion":"La historia de cambios es reconstruible y causal; falta un artefacto original del error inicial.",
+      "mejora_concreta":"Preservar al menos una salida fallida original y enlazarla con la decisión correctiva."
+    },
+    "formato_reproducibilidad": {
+      "puntaje":13,"maximo":15,"nivel":"EXCELENTE",
+      "criterios":[
+        {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"Están presentes los cuatro artefactos mínimos exigidos."}]},
+        {"id":"FR-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"corridas/","detalle":"Tres corridas fechadas conservan la entrada identificable y la salida asociada."}]},
+        {"id":"FR-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"corridas/02_registro.md","detalle":"Entrada, prompt y salida están vinculados, pero no se fija una referencia/version exacta de ejecución."}]}
+      ],
+      "justificacion":"La reproducción de entrada/salida es fuerte, pero falta congelar versión/configuración de ejecución.",
+      "mejora_concreta":"Registrar ref del agente y configuración/modelo en cada corrida."
+    },
+    "analisis_economico": {
+      "puntaje":11,"maximo":15,"nivel":"ADECUADO",
+      "criterios":[
+        {"id":"AE-01","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"analisis_economico.md","detalle":"USD 0,03/corrida está identificado como estimación, pero la cifra no tiene base de cálculo documentada."}]},
+        {"id":"AE-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"analisis_economico.md","detalle":"3 x 52 = 156 corridas/año y 156 x USD 0,03 = USD 4,68; frecuencia, horizonte y aritmética son explícitos."}]},
+        {"id":"AE-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"analisis_economico.md","detalle":"Existe el criterio de elegir el modelo más pequeño suficiente, pero no una comparación verificable ni modelo plenamente identificado."}]}
+      ],
+      "justificacion":"La proyección cierra; el costo base y la elección de modelo siguen parcialmente sustentados.",
+      "mejora_concreta":"Documentar base del costo y una comparación mínima de calidad/costo entre modelos."
+    },
+    "gobierno_riesgo": {
+      "puntaje":15,"maximo":15,"nivel":"EXCELENTE",
+      "criterios":[
+        {"id":"GR-01","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Se limita la lectura al archivo autorizado y se excluyen explícitamente capacidades de escritura/envío."}]},
+        {"id":"GR-02","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Hay múltiples riesgos específicos con controles asociados."}]},
+        {"id":"GR-03","estado":"CUMPLE","puntos":3,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Las contingencias indican cuándo revisar, escalar/no publicar, detener o corregir."}]},
+        {"id":"GR-04","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Supervisión L2, revisor responsable y firma previa están operables."}]}
+      ],
+      "justificacion":"El gobierno está especificado con mínimo privilegio, controles y contingencias concretas.",
+      "mejora_concreta":"Revalidar estas restricciones al conectar una herramienta real."
+    }
+  },
+  "inconsistencias": [],
+  "alertas_manipulacion": [],
+  "puntaje_total": 82,
+  "validacion": {"sha_anclado":true,"inventario_verificado":true,"criterios_completos":true,"puntajes_permitidos":true,"sumas_verificadas":true,"niveles_verificados":true,"evidencia_verificada":true,"formato_valido":true},
+  "resumen_final":"Caso alto: 82/100. La segunda aplicación reproduce exactamente estados y puntajes; las brechas permanecen en herramienta concreta, evidencia original de fallas, versionado y sustento económico/modelo."
+}
