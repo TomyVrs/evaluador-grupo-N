@@ -10,45 +10,60 @@ Definimos una rúbrica ejecutable, system prompt, user prompt, configuración op
 
 ## Qué funciona
 
-- Cinco dimensiones y pesos oficiales: 30/25/15/15/15.
-- Puntaje fijo por criterio: no existen valores intermedios elegidos por impresión general.
-- Reglas operativas para `CUMPLE`, `PARCIAL`, `NO_CUMPLE` y `NO_VERIFICABLE`.
+- Rúbrica **V5** con cinco dimensiones y pesos oficiales: 30/25/15/15/15.
+- Puntaje fijo por criterio y reglas operativas para `CUMPLE`, `PARCIAL`, `NO_CUMPLE` y `NO_VERIFICABLE`.
 - Definición objetiva de las seis piezas del contrato del agente.
 - Precedencia explícita para resolver claims y evidencia contradictoria.
+- Tres vías tecnológicamente neutrales para demostrar una herramienta operable: traza/corrida, implementación local reproducible o integración reproducible.
 - Evaluación anclada a un SHA exacto para evitar mezclar versiones.
-- Inventario previo del alcance y controles ante cobertura incompleta o resultados truncados.
+- Inventario previo del alcance y defensa ante cobertura incompleta/truncada.
 - Distinción entre evidencia de ausencia y limitación de acceso.
 - Detección y registro de prompt injection, inconsistencias y claims no verificables.
-- Salida JSON estructurada con controles de consistencia y trazabilidad.
-- Tres casos de prueba: excelente, flojo y tramposo.
-- Casos de borde `NO_EVALUABLE` para referencia, ruta y repositorio inexistentes.
-- Validador automático y workflow de GitHub Actions con permisos de lectura.
+- Salida JSON estructurada y validador automático.
+- Casos excelente, flojo y tramposo probados dos veces sobre el mismo freeze.
+- Casos de borde para referencia, ruta y repositorio inexistentes.
+- Prueba adicional sobre un repositorio público real no usado durante el diseño de los fixtures.
 
-### Evolución reciente
+## Validación técnica V5
 
-La V4 pasó la batería técnica sobre un SHA congelado: Excelente 82/100, Flojo 9/100 y Tramposo 31/100, con dos aplicaciones idénticas criterio por criterio y validación automática exitosa.
+**FREEZE_V5:** `5fdd304c26097aa16dc6d065e8b1c3d6359e7010`.
 
-Antes de enviar la rúbrica a evaluación humana se hizo una prueba adicional sobre un repositorio real no usado durante el diseño. Esa prueba mostró que SC-02 distinguía trazas/configuración, pero no definía con suficiente precisión cómo acreditar una **herramienta local implementada y reproducible**. Para evitar que dos evaluadores trataran de manera distinta una implementación local frente a un conector externo, se creó la **V5**.
+Ese SHA fue fijado antes de crear resultados V5.
 
-La V5 admite tres vías equivalentes para demostrar operabilidad de una herramienta: traza/corrida, implementación local reproducible o integración reproducible. El cambio no busca subir o bajar un caso conocido, sino cerrar una ambigüedad detectada con evidencia externa.
+| Prueba | Resultado A | Resultado B | Diferencia por criterio |
+|---|---:|---:|---:|
+| Excelente | 82/100 | 82/100 | 0 |
+| Flojo | 9/100 | 9/100 | 0 |
+| Tramposo | 31/100 | 31/100 | 0 |
+| Repo externo no visto | 98/100 | 98/100 | 0 |
 
-## Estado actual
+El caso tramposo no altera la rúbrica: se detectan prompt injection, claims contradictorios, error aritmético y gobierno deficiente.
 
-La **V5 es la candidata activa**. `main` permanece intacta y todo el trabajo continúa en una única rama paralela.
+El repo externo permitió comprobar que V5 reconoce una herramienta XLSX local realmente implementada/reproducible sin exigir artificialmente un conector externo. También ejercitó el comportamiento conservador ante una respuesta de inventario demasiado grande para la integración: se declara limitación en vez de inferir ausencia.
 
-Antes de declarar cerrada la validación técnica V5 falta:
+Los tres casos de borde `NO_EVALUABLE` —referencia inexistente, ruta inexistente y repo inexistente— fueron ejecutados nuevamente en V5.
 
-1. fijar `FREEZE_V5`;
-2. repetir A/B sobre excelente, flojo y tramposo;
-3. volver a ejecutar los casos `NO_EVALUABLE` y el validador automático;
-4. completar la prueba sobre un repositorio real no visto;
-5. recién después realizar la calibración humana ciega.
+GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con permisos de lectura y conclusión **success**. El validador confirmó JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5.
 
-La calibración humana sigue siendo necesaria para satisfacer la consigna: tres integrantes evaluarán de manera independiente los tres casos sobre el freeze definitivo, luego se calcularán medianas y se analizarán diferencias materiales.
+## Evolución de V4 a V5
+
+V4 ya había superado su batería técnica. Antes de enviar la rúbrica a humanos, una prueba sobre un repo real no visto mostró que SC-02 podía ser interpretado distinto para una herramienta local reproducible frente a un conector externo.
+
+V5 cerró esa ambigüedad **antes de la calibración humana**. La modificación no cambió la nota de los tres casos conocidos: 82, 9 y 31 se mantuvieron idénticos, lo que funciona además como prueba de no regresión.
+
+## Qué falta
+
+La **validación técnica V5 está aprobada**. Falta la pieza que no se debe fabricar: la calibración humana del grupo.
+
+Tres integrantes deben evaluar de manera independiente y ciega excelente, flojo y tramposo usando exclusivamente `FREEZE_V5`. Después se calculan medianas y se comparan con el agente. Una diferencia mayor a 5 puntos totales o 2 puntos en una dimensión se investiga antes de modificar nada.
+
+Si no hay desacuerdos materiales, se documentará que **no fue necesario un ajuste posterior**. Si aparece una falla real de rúbrica o agente, se versionará una nueva candidata y se repetirán únicamente las pruebas afectadas.
+
+`main` no se modifica durante esta etapa. Todo el endurecimiento, pruebas y calibración permanecen en una única rama paralela hasta que el equipo decida integrar.
 
 ## Qué aprendimos
 
-Aprendimos que una rúbrica ejecutable requiere más que rangos de puntaje: necesita valores fijos, reglas de clasificación, definiciones operativas y precedencia de evidencia. También que una regla puede parecer precisa hasta enfrentar un caso real distinto de los fixtures usados para diseñarla. Por eso la validación incluye casos sintéticos, pruebas adversariales, un repositorio externo no visto y comparación posterior con criterio humano.
+Aprendimos que una rúbrica ejecutable necesita puntajes discretos, reglas de clasificación y precedencia de evidencia; y que una regla aparentemente precisa debe enfrentarse a repositorios distintos de los fixtures con los que fue diseñada. La robustez no se demuestra con una corrida favorable: requiere repetibilidad, casos adversariales, fallos de acceso, validación automática, una prueba externa y finalmente comparación con criterio humano.
 
 ## Integrantes
 
