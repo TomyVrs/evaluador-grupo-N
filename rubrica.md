@@ -53,9 +53,22 @@ El nivel se calcula **después** de sumar los criterios:
 | SC-03 | Salida estructurada, estable y definida | 7 | 7 | 4 | 0 |
 | SC-04 | Supervisión L0–L4, revisión, responsable y aprobación | 7 | 7 | 4 | 0 |
 
+### Qué cuenta como cada una de las seis piezas de SC-01
+
+Una pieza cuenta únicamente si es **identificable y operativa**, no por una palabra aislada:
+
+1. **Rol:** identifica quién/es el agente o especialidad que asume y para qué tipo de responsabilidad. “Sos un asistente” sin especialidad puede contar como rol mínimo, pero no reemplaza ninguna otra pieza.
+2. **Contexto:** define al menos el entorno, usuario, tipo de entrada o situación operacional relevante. Mencionar simplemente “un texto” sin situarlo no alcanza; “correo de licitación recibido por un equipo comercial” sí.
+3. **Tarea:** especifica la transformación/acción principal esperada sobre la entrada.
+4. **Restricciones:** incluye al menos una regla, prohibición, límite de alcance o tratamiento explícito de incertidumbre/datos faltantes.
+5. **Formato:** define una forma de salida observable —por ejemplo JSON con campos, tabla con columnas o secciones obligatorias—. Adjetivos como “claro”, “profesional” o “ordenado” **no cuentan como formato**.
+6. **Ejemplos o criterios de calidad:** incluye al menos un ejemplo concreto o una regla observable para juzgar la calidad/corrección. Expresiones vagas como “que sea útil”, “que funcione bien” o “que sea profesional” **no cuentan**.
+
+La misma frase puede aportar a más de una pieza solo si contiene de forma explícita los elementos de cada una; no inferir piezas ausentes por intención probable.
+
 **Clasificación operativa**
 
-- **SC-01 CUMPLE:** ambos prompts existen y, considerados en conjunto, permiten identificar explícitamente las seis piezas: rol, contexto, tarea, restricciones, formato y ejemplos/criterios de calidad. **PARCIAL:** ambos prompts existen y hay entre 3 y 5 piezas identificables. **NO_CUMPLE:** falta uno de los prompts o hay 0–2 piezas identificables.
+- **SC-01 CUMPLE:** ambos prompts existen y, considerados en conjunto, contienen las **6 piezas** según las definiciones anteriores. **PARCIAL:** ambos prompts existen y contienen **3–5 piezas**. **NO_CUMPLE:** falta uno de los prompts o contienen **0–2 piezas**.
 - **SC-02 CUMPLE:** se identifica una herramienta/conector concreto, su uso, el alcance de acceso y existe al menos una configuración, traza o corrida que demuestra que esa herramienta es realmente utilizable en el sistema. **PARCIAL:** la herramienta concreta y su uso están identificados, pero falta evidencia de disponibilidad/ejecución o el alcance de permisos es incompleto. **NO_CUMPLE:** solo se menciona una clase genérica de herramienta, se afirma uso sin identificarla o no hay herramienta.
 - **SC-03 CUMPLE:** existe un esquema/contrato verificable con campos y restricciones estables. **PARCIAL:** se exige formato estructurado pero no existe esquema suficiente para validarlo. **NO_CUMPLE:** salida libre o variable sin contrato.
 - **SC-04 CUMPLE:** nivel L0–L4 + momento de revisión + rol responsable + quién aprueba/firma. **PARCIAL:** existe revisión humana y responsable, pero falta el nivel o la aprobación/firma. **NO_CUMPLE:** supervisión genérica, responsable a definir o ausencia de supervisión.
