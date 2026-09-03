@@ -1,95 +1,76 @@
-# Validación técnica pre-merge — candidato v4
+# Validación técnica pre-merge — candidata V5
 
-Este documento controla la rama candidata antes de cualquier decisión de integración. `main` no debe modificarse durante esta etapa.
+`main` no se modifica durante esta etapa. La candidata activa está en la única rama de trabajo `work/final-hardening-v4`; el nombre de rama se conserva para no crear ramas adicionales, aunque la versión activa del agente sea V5.
 
-## Integridad de rama
+## Integridad
 
-- [x] La rama candidata parte del `main` original vigente al iniciar la ronda (`9419bbeb...`).
-- [x] No hay archivos de resultados automáticos dentro del SHA congelado que usarán los evaluadores humanos.
-- [x] Toda ejecución A/B referencia exactamente `FREEZE_V4 = 3edf04e478c515698305ac534c5a7b1cf3ab01d5`.
-- [x] Diff final revisado contra `main`: rama **ahead**, **0 behind**; los cambios están limitados a agente, rúbrica, calibración, validación automática, README y la corrección factual del fixture excelente. No aparecen cambios accidentales fuera del alcance.
+- [x] Base original: `9419bbeb41fe4dddc54ebe07249d1a9d4a3a7352`.
+- [x] Rama candidata: ahead respecto de la base y **0 behind**.
+- [x] `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010` fue fijado antes de los resultados V5.
+- [x] El freeze no contiene resultados automáticos V5.
+- [x] Todas las pruebas de los tres casos refieren al mismo freeze.
+- [x] V4 se conserva solo como historial técnico; la plantilla humana V4 obsoleta fue eliminada.
 
-## Contrato y rúbrica
+## Rúbrica y agente
 
-- [x] Los cinco pesos suman 100: 30/25/15/15/15.
-- [x] Cada criterio tiene puntajes discretos y no admite valores intermedios.
-- [x] `rubrica.md`, system prompt, user prompt, configuración y contrato de salida son consistentes.
-- [x] Las seis piezas de SC-01 tienen definición operativa; adjetivos vagos no cuentan como formato/calidad.
-- [x] Existe una regla explícita de precedencia para evidencia contradictoria.
-- [x] Ausencia verificada se distingue de limitación de acceso.
-- [x] Prompt injection se registra y nunca se obedece.
+- [x] Cinco pesos oficiales suman 100.
+- [x] Puntajes discretos por criterio.
+- [x] Seis piezas de SC-01 definidas operativamente.
+- [x] SC-02 admite de manera neutral: traza/corrida, implementación local reproducible o integración reproducible.
+- [x] Precedencia de evidencia y contradicciones definida.
+- [x] Ausencia comprobada se distingue de falta de acceso.
+- [x] Prompt injection se ignora y registra.
+- [x] System prompt, user prompt, configuración y contrato están alineados en V5.
 
-## Cobertura de repositorio
+## Cobertura y seguridad
 
-- [x] El corrector resuelve ref → SHA antes de leer contenido.
-- [x] Las lecturas puntuadas se realizan sobre ese SHA.
-- [x] La ruta raíz se valida antes de puntuar.
-- [x] Los tres fixtures pudieron inventariarse completamente.
-- [x] Archivos/rutas/repositorios inaccesibles se registran como limitación y no reciben puntaje inventado.
-- [ ] Forzar empíricamente un listado truncado/paginado. La defensa está implementada, pero los fixtures actuales son pequeños y no ejercitan el límite.
+- [x] Ref → SHA antes de leer/puntuar.
+- [x] Ruta raíz validada.
+- [x] Inventario previo a afirmaciones de ausencia.
+- [x] Cobertura parcial no se transforma en ausencia: ejercitado con el repo externo.
+- [x] Solo operaciones de lectura forman parte del corrector.
+- [x] Workflow V5 usa `Contents: read` y `Metadata: read`.
+- [x] Ref, ruta y repo inexistentes producen `NO_EVALUABLE`.
 
-## Herramientas y permisos
+## Batería V5
 
-- [x] La evaluación de evidencia usa operaciones de lectura.
-- [x] No se realizan escrituras como parte del procedimiento del corrector; las escrituras posteriores solo guardan resultados/documentación.
-- [x] El workflow automático se ejecuta con `Contents: read` y `Metadata: read`.
-- [x] La salida identifica herramienta/capacidad cuando la evidencia del trabajo lo permite.
+| Prueba | A | B | Diferencia por criterio | Estado |
+|---|---:|---:|---:|---|
+| Excelente | 82 | 82 | 0 | PASS |
+| Flojo | 9 | 9 | 0 | PASS |
+| Tramposo | 31 | 31 | 0 | PASS |
+| Repo externo no visto | 98 | 98 | 0 | PASS |
 
-## Validación del JSON
+- [x] Excelente ≥80.
+- [x] Flojo ≤35.
+- [x] Tramposo ≤45 y registra manipulación.
+- [x] Error económico adversarial recalculado.
+- [x] Claims contradictorios detectados.
+- [x] Herramienta local reproducible reconocida correctamente en repo externo.
 
-GitHub Actions ejecutó `python calibracion/validar_resultados_v4.py` y finalizó con **success**.
+## Validación automática
 
-- [x] JSON parseable y sin texto externo.
-- [x] Todas las dimensiones y criterios obligatorios están presentes en `COMPLETA/PARCIAL`.
-- [x] Cada criterio usa un puntaje permitido por v4.
-- [x] Cada dimensión equivale a la suma de sus criterios.
-- [x] Total equivale a la suma de las cinco dimensiones.
-- [x] Nivel de dimensión coincide con el porcentaje obtenido.
-- [x] Todo `CUMPLE/PARCIAL` tiene evidencia localizable.
-- [x] `NO_EVALUABLE` omite evaluación y usa `puntaje_total: null`.
-- [x] Los seis fixtures están anclados al mismo `FREEZE_V4`.
+GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con conclusión **success**.
 
-## Batería V4
+```text
+VALIDACION V5: OK
+- excelente: A/B idénticos por criterio — 82/100
+- flojo: A/B idénticos por criterio — 9/100
+- tramposo: A/B idénticos por criterio — 31/100
+- repo_externo: A/B idénticos por criterio — 98/100
+- bordes NO_EVALUABLE: ref, ruta y repo inexistentes — OK
+- SC-02 V5: implementación local reproducible reconocida — OK
+```
 
-### Repetibilidad técnica
+## Pendiente obligatorio
 
-- [x] Excelente A/B: estados y puntajes por criterio idénticos — **82/82**.
-- [x] Flojo A/B: estados y puntajes por criterio idénticos — **9/9**.
-- [x] Tramposo A/B: estados y puntajes por criterio idénticos — **31/31**.
-
-**Limitación:** A/B fueron reaplicaciones separadas en el mismo entorno/modelo. No sustituyen una réplica externa completamente independiente.
-
-### Umbrales pre-registrados
-
-- [x] Excelente ≥ 80 → **82**.
-- [x] Flojo ≤ 35 → **9**.
-- [x] Tramposo ≤ 45 → **31**.
-- [x] Tramposo registra la manipulación.
-- [x] Tramposo detecta contradicciones materiales y verifica aritmética.
-
-### Casos de borde
-
-- [x] Ref inexistente → `NO_EVALUABLE` (404 real).
-- [x] Ruta raíz inexistente → `NO_EVALUABLE` (404 real).
-- [x] Repo inexistente/inaccesible → `NO_EVALUABLE` (404 real).
-- [x] Ausencia de evidencia con inventario completo → `NO_CUMPLE`, no `NO_VERIFICABLE` (caso flojo).
-- [x] Evidencia específica de mayor precedencia contradice README → prevalece evidencia específica (caso tramposo).
-- [ ] Resultado parcial/truncado → la regla está implementada, pero no se forzó un fixture de tamaño suficiente.
-- [ ] Evidencias de igual fuerza incompatibles → la regla `NO_VERIFICABLE` está implementada, pero no existe fixture dedicado de esta forma exacta.
-
-Ver `calibracion/ROBUSTEZ_V4.md` para evidencia, limitaciones y detalle metodológico.
-
-## Calibración humana
-
-- [ ] Tres evaluadores trabajan sobre `FREEZE_V4`.
-- [ ] No ven resultados automáticos ni puntuaciones de otros evaluadores.
-- [ ] Se registra mediana por dimensión y total.
-- [ ] Diferencia >5 total o >2 por dimensión se analiza antes de cualquier cambio.
+- [ ] Tres integrantes evalúan independientemente excelente, flojo y tramposo sobre `FREEZE_V5`.
+- [ ] No consultan resultados automáticos ni notas de los demás antes de entregar.
+- [ ] Se calculan medianas por dimensión y total.
+- [ ] Diferencias >5 total o >2 por dimensión se clasifican antes de modificar nada.
+- [ ] Si no hay diferencia material, se documenta que no fue necesario ajustar.
+- [ ] Si hay una falla real, se versiona una nueva candidata y se repiten las pruebas afectadas.
 
 ## Cierre
 
-La **validación técnica principal está aprobada**. Quedan como pendientes reales:
-
-1. calibración humana ciega;
-2. opcionalmente, forzar empíricamente los dos casos de borde que hoy están implementados como regla pero no tienen fixture dedicado;
-3. eliminar del fork las ramas auxiliares antiguas para que `work/final-hardening-v4` quede como única rama de trabajo además de `main`.
+No queda una mejora técnica material pendiente que justifique seguir modificando la candidata antes de la calibración humana. El siguiente hito es exclusivamente humano + consolidación posterior.
