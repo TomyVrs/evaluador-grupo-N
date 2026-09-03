@@ -1,0 +1,27 @@
+name: Validate calibration v4
+
+on:
+  push:
+    branches:
+      - work/final-hardening-v4
+    paths:
+      - 'calibracion/resultados_v4/**'
+      - 'calibracion/validar_resultados_v4.py'
+      - '.github/workflows/validate-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate JSON, scoring and repeatability
+        run: python calibracion/validar_resultados_v4.py
