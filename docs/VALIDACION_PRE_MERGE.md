@@ -64,6 +64,8 @@ VALIDACION V5: OK
 
 El workflow V5 está configurado para validar cambios relevantes tanto en `work/final-hardening-v4` como en `main`. De este modo, al integrarse la candidata, los artefactos guardados vuelven a validarse en la rama pública por defecto.
 
+Después de incorporar este ajuste, GitHub Actions volvió a ejecutarse automáticamente sobre el commit `819eb2b6d4c65c9910cddd778322a70c11bd1295` (run #2) y concluyó nuevamente **success**.
+
 **Alcance exacto de esta automatización:** valida los JSON/resultados ya guardados, sus puntajes, estructura, SHA, repetibilidad y casos de borde. No lanza autónomamente un modelo de IA para volver a evaluar un repositorio nuevo.
 
 ## Calibración humana
