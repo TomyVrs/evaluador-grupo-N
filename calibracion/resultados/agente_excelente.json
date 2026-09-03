@@ -1,0 +1,99 @@
+{
+  "estado_evaluacion": "COMPLETA",
+  "repositorio": {
+    "url": "https://github.com/TomyVrs/evaluador-grupo-N",
+    "ref_evaluada": "e8e0f5cf65d16fc39e1aa80d5c4c7d9dd42dec9c",
+    "commit_sha": "e8e0f5cf65d16fc39e1aa80d5c4c7d9dd42dec9c",
+    "ruta_raiz": "casos/excelente/entrega/",
+    "fecha_evaluacion": "2026-09-03",
+    "archivos_revisados": [
+      "README.md",
+      "prompts/system_prompt.md",
+      "prompts/user_prompt.md",
+      "DECISIONES.md",
+      "analisis_economico.md",
+      "gobierno_riesgo.md",
+      "corridas/01_registro.md",
+      "corridas/01_salida.json",
+      "corridas/02_registro.md",
+      "corridas/02_salida.json",
+      "corridas/03_registro.md",
+      "corridas/03_salida.json",
+      "datos/reunion_1.txt"
+    ],
+    "limitaciones": [
+      "Las corridas no registran tokens medidos.",
+      "La elección del modelo no incluye comparación verificable."
+    ]
+  },
+  "rubrica_version": "v3",
+  "evaluacion": {
+    "sistema_completo_funcionando": {
+      "puntaje": 26,
+      "maximo": 30,
+      "nivel": "EXCELENTE",
+      "criterios": [
+        {"id":"SC-01","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Explicita las seis piezas y el user prompt completa la entrada operativa."}]},
+        {"id":"SC-02","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"README.md","detalle":"Describe una herramienta de lectura limitada a datos/, pero no identifica un producto/conector concreto."}]},
+        {"id":"SC-03","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Define contrato JSON con campos y restricciones estables."}]},
+        {"id":"SC-04","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Define L2, revisión previa, líder responsable y firma antes de distribuir."}]}
+      ],
+      "justificacion": "Sistema completo y controlado; la única omisión material es la identificación concreta de la herramienta.",
+      "mejora_concreta": "Identificar explícitamente la herramienta/conector de lectura utilizada y su configuración verificable."
+    },
+    "proceso_documentado": {
+      "puntaje": 21,
+      "maximo": 25,
+      "nivel": "ADECUADO",
+      "criterios": [
+        {"id":"PD-01","estado":"CUMPLE","puntos":9,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Documenta cuatro etapas de evolución en orden."}]},
+        {"id":"PD-02","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Describe el fallo de inferir responsables/plazos, pero no conserva una salida fallida textual/localizable."}]},
+        {"id":"PD-03","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Vincula el fallo de inferencia con reglas explícitas de No definido/No informado y validaciones abiertas."}]}
+      ],
+      "justificacion": "Las iteraciones y decisiones son reconstruibles, pero falta evidencia original de al menos una falla.",
+      "mejora_concreta": "Conservar una salida fallida original de una versión previa y referenciarla desde DECISIONES.md."
+    },
+    "formato_reproducibilidad": {
+      "puntaje": 13,
+      "maximo": 15,
+      "nivel": "EXCELENTE",
+      "criterios": [
+        {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"La estructura mínima está presente junto con prompts y DECISIONES.md."}]},
+        {"id":"FR-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"corridas/","detalle":"Hay tres registros fechados con entrada identificada y salida original asociada."}]},
+        {"id":"FR-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"corridas/01_registro.md","detalle":"Asocia entrada, prompt y salida, pero no registra una versión/ref exacta del agente o modelo."}]}
+      ],
+      "justificacion": "Las tres corridas son trazables; falta fijar con precisión versión/configuración de ejecución.",
+      "mejora_concreta": "Agregar a cada registro versión del agente/modelo y referencia exacta de configuración."
+    },
+    "analisis_economico": {
+      "puntaje": 13,
+      "maximo": 15,
+      "nivel": "EXCELENTE",
+      "criterios": [
+        {"id":"AE-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"analisis_economico.md","detalle":"Declara USD 0,03 por corrida como estimación, no como facturación medida."}]},
+        {"id":"AE-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"analisis_economico.md","detalle":"3 corridas/semana x 52 = 156 y 156 x USD 0,03 = USD 4,68/año."}]},
+        {"id":"AE-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"analisis_economico.md","detalle":"Propone usar el modelo más pequeño suficiente, pero reconoce que falta prueba comparativa e identificación completa."}]}
+      ],
+      "justificacion": "Costo y proyección son transparentes y reproducibles; selección de modelo no está validada experimentalmente.",
+      "mejora_concreta": "Registrar una comparación mínima entre dos modelos con calidad y costo."
+    },
+    "gobierno_riesgo": {
+      "puntaje": 15,
+      "maximo": 15,
+      "nivel": "EXCELENTE",
+      "criterios": [
+        {"id":"GR-01","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Lectura exclusiva del archivo autorizado; prohíbe escritura, borrado, renombrado y envío."}]},
+        {"id":"GR-02","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Documenta riesgos de inferencia, contradicciones, acceso y JSON con controles específicos."}]},
+        {"id":"GR-03","estado":"CUMPLE","puntos":3,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Define contingencias concretas de detener, escalar, no publicar o corregir manualmente."}]},
+        {"id":"GR-04","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"L2, líder de reunión, revisión y firma previa a distribución."}]}
+      ],
+      "justificacion": "Gobierno específico, de mínimo privilegio y con contingencias operables.",
+      "mejora_concreta": "Mantener los permisos y responsables documentados al pasar del caso de prueba a un entorno real."
+    }
+  },
+  "inconsistencias": [],
+  "alertas_manipulacion": [],
+  "puntaje_total": 88,
+  "validacion": {"suma_verificada": true, "formato_valido": true},
+  "resumen_final": "Caso alto: 88/100. Cumple ampliamente el estándar, con brechas acotadas en identificación de herramienta, evidencia textual de fallas, versión de ejecución y comparación de modelo."
+}
