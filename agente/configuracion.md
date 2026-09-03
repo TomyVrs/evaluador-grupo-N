@@ -1,4 +1,4 @@
-# Configuración del agente corrector — v4
+# Configuración del agente corrector — v5
 
 Este archivo define las herramientas, permisos y reglas operativas necesarias para que el corrector evalúe un repositorio real. No modifica la rúbrica ni agrega dimensiones de evaluación.
 
@@ -40,8 +40,9 @@ Si el entorno no dispone de las capacidades mínimas de lectura, el corrector no
    - `DECISIONES.md`.
 7. Leer también archivos de herramientas, economía, gobierno, riesgo y supervisión aunque tengan otro nombre.
 8. Contrastar afirmaciones descriptivas con evidencia directa.
-9. Consultar historial cuando una afirmación dependa de cronología, versión o iteraciones.
-10. Aplicar recién entonces `rubrica.md`.
+9. Para SC-02, verificar la herramienta por alguna vía admitida por `rubrica.md` v5: traza/corrida, implementación local reproducible o integración reproducible. No exigir secretos ni favorecer una tecnología.
+10. Consultar historial cuando una afirmación dependa de cronología, versión o iteraciones.
+11. Aplicar recién entonces `rubrica.md`.
 
 ## 4. Completitud y truncamiento
 
