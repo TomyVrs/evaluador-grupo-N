@@ -10,7 +10,7 @@ Definimos una rúbrica ejecutable, system prompt, user prompt, configuración op
 
 ## Qué funciona
 
-- Rúbrica v4 con cinco dimensiones y pesos oficiales: 30/25/15/15/15.
+- Cinco dimensiones y pesos oficiales: 30/25/15/15/15.
 - Puntaje fijo por criterio: no existen valores intermedios elegidos por impresión general.
 - Reglas operativas para `CUMPLE`, `PARCIAL`, `NO_CUMPLE` y `NO_VERIFICABLE`.
 - Definición objetiva de las seis piezas del contrato del agente.
@@ -18,31 +18,37 @@ Definimos una rúbrica ejecutable, system prompt, user prompt, configuración op
 - Evaluación anclada a un SHA exacto para evitar mezclar versiones.
 - Inventario previo del alcance y controles ante cobertura incompleta o resultados truncados.
 - Distinción entre evidencia de ausencia y limitación de acceso.
-- GitHub tratado como herramienta de lectura; las operaciones de escritura quedan fuera del contrato del corrector.
 - Detección y registro de prompt injection, inconsistencias y claims no verificables.
 - Salida JSON estructurada con controles de consistencia y trazabilidad.
 - Tres casos de prueba: excelente, flojo y tramposo.
-- SHA V4 congelado antes de guardar resultados automáticos: `3edf04e478c515698305ac534c5a7b1cf3ab01d5`.
-- Dos aplicaciones por caso sobre el mismo freeze, con estados y puntajes idénticos criterio por criterio.
-- Resultados V4: **Excelente 82/100, Flojo 9/100, Tramposo 31/100**.
-- El tramposo no altera la rúbrica: se detectan prompt injection, contradicciones, error aritmético y gobierno deficiente.
-- Casos de borde de referencia inexistente, ruta inexistente y repositorio inexistente devuelven `NO_EVALUABLE` sin inventar puntajes.
-- Validador automático en Python para estructura JSON, puntajes permitidos, sumas, niveles, evidencia, freeze, repetibilidad y umbrales.
-- GitHub Actions ejecutó ese validador con permisos de solo lectura y resultado **success**.
+- Casos de borde `NO_EVALUABLE` para referencia, ruta y repositorio inexistentes.
+- Validador automático y workflow de GitHub Actions con permisos de lectura.
 
-## Qué falta o qué falló
+### Evolución reciente
 
-La **validación técnica V4 está aprobada**, pero la calibración completa todavía no está cerrada.
+La V4 pasó la batería técnica sobre un SHA congelado: Excelente 82/100, Flojo 9/100 y Tramposo 31/100, con dos aplicaciones idénticas criterio por criterio y validación automática exitosa.
 
-Falta que **tres integrantes evalúen de manera independiente y ciega** los tres casos sobre el SHA congelado, calcular la mediana humana por dimensión y total y comparar esas notas con las del agente. Una diferencia mayor a 5 puntos en el total o a 2 puntos en una dimensión debe analizarse antes de modificar la rúbrica o el agente.
+Antes de enviar la rúbrica a evaluación humana se hizo una prueba adicional sobre un repositorio real no usado durante el diseño. Esa prueba mostró que SC-02 distinguía trazas/configuración, pero no definía con suficiente precisión cómo acreditar una **herramienta local implementada y reproducible**. Para evitar que dos evaluadores trataran de manera distinta una implementación local frente a un conector externo, se creó la **V5**.
 
-Dos defensas adicionales están implementadas pero no fueron forzadas con un fixture específico en esta ronda: inventario realmente truncado/paginado y contradicción entre dos evidencias de igual precedencia sin desempate superior. No se presentan como pruebas empíricamente aprobadas.
+La V5 admite tres vías equivalentes para demostrar operabilidad de una herramienta: traza/corrida, implementación local reproducible o integración reproducible. El cambio no busca subir o bajar un caso conocido, sino cerrar una ambigüedad detectada con evidencia externa.
 
-`main` no se modifica durante esta etapa. Todo el endurecimiento, las pruebas y la calibración permanecen en una única rama paralela hasta la decisión del equipo.
+## Estado actual
+
+La **V5 es la candidata activa**. `main` permanece intacta y todo el trabajo continúa en una única rama paralela.
+
+Antes de declarar cerrada la validación técnica V5 falta:
+
+1. fijar `FREEZE_V5`;
+2. repetir A/B sobre excelente, flojo y tramposo;
+3. volver a ejecutar los casos `NO_EVALUABLE` y el validador automático;
+4. completar la prueba sobre un repositorio real no visto;
+5. recién después realizar la calibración humana ciega.
+
+La calibración humana sigue siendo necesaria para satisfacer la consigna: tres integrantes evaluarán de manera independiente los tres casos sobre el freeze definitivo, luego se calcularán medianas y se analizarán diferencias materiales.
 
 ## Qué aprendimos
 
-Aprendimos que una rúbrica ejecutable requiere más que rangos de puntaje: necesita valores fijos, reglas de clasificación, definiciones operativas y precedencia de evidencia. También que la reproducibilidad depende de congelar la referencia evaluada, controlar la cobertura real del repositorio y separar los resultados de calibración de la evidencia que se puntúa. La robustez no se demuestra con una única corrida: requiere repetibilidad, validaciones automáticas, casos adversariales y comparación independiente con criterio humano.
+Aprendimos que una rúbrica ejecutable requiere más que rangos de puntaje: necesita valores fijos, reglas de clasificación, definiciones operativas y precedencia de evidencia. También que una regla puede parecer precisa hasta enfrentar un caso real distinto de los fixtures usados para diseñarla. Por eso la validación incluye casos sintéticos, pruebas adversariales, un repositorio externo no visto y comparación posterior con criterio humano.
 
 ## Integrantes
 
