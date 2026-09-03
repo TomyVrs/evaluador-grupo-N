@@ -1,0 +1,20 @@
+{
+  "estado_evaluacion":"NO_EVALUABLE",
+  "repositorio":{
+    "url":"https://github.com/TomyVrs/evaluador-grupo-N",
+    "ref_solicitada":"ref-que-no-existe-validacion-v4",
+    "ref_evaluada":"",
+    "commit_sha":null,
+    "ruta_raiz":"/",
+    "fecha_evaluacion":"2026-09-03",
+    "inventario_completo":false,
+    "archivos_revisados":[],
+    "limitaciones":["GitHub devolvió 404: No commit found for the requested ref. La referencia no se reemplazó silenciosamente por main u otra rama."]
+  },
+  "rubrica_version":"v4",
+  "inconsistencias":[],
+  "alertas_manipulacion":[],
+  "puntaje_total":null,
+  "validacion":{"sha_anclado":false,"inventario_verificado":false,"criterios_completos":false,"puntajes_permitidos":false,"sumas_verificadas":false,"niveles_verificados":false,"evidencia_verificada":false,"formato_valido":true},
+  "resumen_final":"NO_EVALUABLE: la referencia solicitada no existe y no pudo resolverse a un SHA inmutable."
+}
