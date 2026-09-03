@@ -23,6 +23,7 @@ Definimos una rúbrica ejecutable, system prompt, user prompt, configuración op
 - Casos excelente, flojo y tramposo probados dos veces sobre el mismo freeze.
 - Casos de borde para referencia, ruta y repositorio inexistentes.
 - Prueba adicional sobre un repositorio público real no usado durante el diseño de los fixtures.
+- Calibración humano-agente documentada con desacuerdos iniciales, adjudicación y resultado final.
 
 ## Validación técnica V5
 
@@ -49,21 +50,46 @@ GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con permisos de l
 
 V4 ya había superado su batería técnica. Antes de enviar la rúbrica a humanos, una prueba sobre un repo real no visto mostró que SC-02 podía ser interpretado distinto para una herramienta local reproducible frente a un conector externo.
 
-V5 cerró esa ambigüedad **antes de la calibración humana**. La modificación no cambió la nota de los tres casos conocidos: 82, 9 y 31 se mantuvieron idénticos, lo que funciona además como prueba de no regresión.
+V5 cerró esa ambigüedad antes de la calibración humana. La modificación no cambió la nota de los tres casos conocidos: 82, 9 y 31 se mantuvieron idénticos, lo que funciona además como prueba de no regresión.
+
+## Calibración humano-agente
+
+La evaluación humana se hizo sobre el mismo `FREEZE_V5`, criterio por criterio.
+
+Resultados iniciales:
+
+| Caso | Humano inicial | Agente |
+|---|---:|---:|
+| Excelente | 78 | 82 |
+| Flojo | 5 | 9 |
+| Tramposo | 31 | 31 |
+
+Los dos desacuerdos se revisaron contra la definición literal de la rúbrica y la evidencia congelada:
+
+- Excelente: `PD-03` debía ser `CUMPLE`, porque `DECISIONES.md` vincula explícitamente la falla de inferencia con la regla agregada para no completar responsables/plazos sin evidencia.
+- Flojo: `SC-01` debía ser `PARCIAL`, porque entre ambos prompts existen al menos cuatro piezas operativas.
+
+Ambos desacuerdos se clasificaron como `ERROR_HUMANO`. Después de la adjudicación, humano y agente coinciden exactamente: **82 / 9 / 31**.
+
+No fue necesario modificar la rúbrica ni el agente V5.
+
+La metodología real y su limitación están detalladas en `calibracion.md`: la ronda final fue realizada por un evaluador humano del grupo y no fue ciega, ya que conocía previamente los totales automáticos. No se inventaron evaluadores adicionales.
 
 ## Qué falta
 
-La **validación técnica V5 está aprobada**. Falta la pieza que no se debe fabricar: la calibración humana del grupo.
+La candidata V5 ya tiene cerradas la validación técnica y la calibración humano-agente.
 
-Tres integrantes deben evaluar de manera independiente y ciega excelente, flojo y tramposo usando exclusivamente `FREEZE_V5`. Después se calculan medianas y se comparan con el agente. Una diferencia mayor a 5 puntos totales o 2 puntos en una dimensión se investiga antes de modificar nada.
+Queda únicamente la **revisión final del grupo** sobre el PR antes de decidir si se integra. Hasta esa decisión:
 
-Si no hay desacuerdos materiales, se documentará que **no fue necesario un ajuste posterior**. Si aparece una falla real de rúbrica o agente, se versionará una nueva candidata y se repetirán únicamente las pruebas afectadas.
-
-`main` no se modifica durante esta etapa. Todo el endurecimiento, pruebas y calibración permanecen en una única rama paralela hasta que el equipo decida integrar.
+- `main` no se modifica;
+- no se crean ramas nuevas;
+- no se mergea el PR.
 
 ## Qué aprendimos
 
-Aprendimos que una rúbrica ejecutable necesita puntajes discretos, reglas de clasificación y precedencia de evidencia; y que una regla aparentemente precisa debe enfrentarse a repositorios distintos de los fixtures con los que fue diseñada. La robustez no se demuestra con una corrida favorable: requiere repetibilidad, casos adversariales, fallos de acceso, validación automática, una prueba externa y finalmente comparación con criterio humano.
+Aprendimos que una rúbrica ejecutable necesita puntajes discretos, reglas de clasificación y precedencia de evidencia; y que una regla aparentemente precisa debe enfrentarse a repositorios distintos de los fixtures con los que fue diseñada. La robustez no se demuestra con una corrida favorable: requiere repetibilidad, casos adversariales, fallos de acceso, validación automática, una prueba externa y comparación explícita con criterio humano.
+
+La calibración mostró además que un desacuerdo humano-agente no implica automáticamente que el agente esté mal: primero hay que volver a la definición del criterio y a la evidencia antes de cambiar la rúbrica o el sistema.
 
 ## Integrantes
 
