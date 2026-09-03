@@ -34,12 +34,22 @@ POINTS = {
     "GR-04": {"CUMPLE": 4, "PARCIAL": 2, "NO_CUMPLE": 0, "NO_VERIFICABLE": 0},
 }
 
-EXPECTED_FILES = [
+FIXTURE_FILES = [
     "excelente_A.json", "excelente_B.json",
     "flojo_A.json", "flojo_B.json",
     "tramposo_A.json", "tramposo_B.json",
 ]
+EDGE_FILES = [
+    "borde_ref_inexistente.json",
+    "borde_ruta_inexistente.json",
+    "borde_repo_inexistente.json",
+]
 FREEZE = "3edf04e478c515698305ac534c5a7b1cf3ab01d5"
+REQUIRED_FLAGS = {
+    "sha_anclado", "inventario_verificado", "criterios_completos",
+    "puntajes_permitidos", "sumas_verificadas", "niveles_verificados",
+    "evidencia_verificada", "formato_valido",
+}
 
 
 def level_for(score, maximum, statuses):
@@ -53,10 +63,6 @@ def level_for(score, maximum, statuses):
     return "INSUFICIENTE"
 
 
-def fail(errors, message):
-    errors.append(message)
-
-
 def signature(doc):
     sig = []
     for dim, (_, ids) in DIMENSIONS.items():
@@ -67,27 +73,34 @@ def signature(doc):
     return tuple(sig), doc["puntaje_total"]
 
 
-def validate_file(path):
-    errors = []
+def load_json(path, errors):
     try:
-        doc = json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(path.read_text(encoding="utf-8"))
     except Exception as exc:
-        return None, [f"{path.name}: JSON inválido: {exc}"]
+        errors.append(f"{path.name}: JSON inválido: {exc}")
+        return None
+
+
+def validate_fixture(path):
+    errors = []
+    doc = load_json(path, errors)
+    if doc is None:
+        return None, errors
 
     if doc.get("estado_evaluacion") not in {"COMPLETA", "PARCIAL"}:
-        fail(errors, f"{path.name}: estado_evaluacion inesperado")
+        errors.append(f"{path.name}: estado_evaluacion inesperado")
     if doc.get("rubrica_version") != "v4":
-        fail(errors, f"{path.name}: rubrica_version debe ser v4")
+        errors.append(f"{path.name}: rubrica_version debe ser v4")
 
     repo = doc.get("repositorio", {})
     if repo.get("commit_sha") != FREEZE or repo.get("ref_evaluada") != FREEZE:
-        fail(errors, f"{path.name}: no está anclado a FREEZE_V4")
+        errors.append(f"{path.name}: no está anclado a FREEZE_V4")
     if repo.get("inventario_completo") is not True:
-        fail(errors, f"{path.name}: inventario_completo debe ser true para estos fixtures")
+        errors.append(f"{path.name}: inventario_completo debe ser true")
 
     evaluation = doc.get("evaluacion", {})
     if set(evaluation) != set(DIMENSIONS):
-        fail(errors, f"{path.name}: dimensiones faltantes o extra")
+        errors.append(f"{path.name}: dimensiones faltantes o extra")
 
     grand_total = 0
     for dim, (maximum, required_ids) in DIMENSIONS.items():
@@ -95,7 +108,7 @@ def validate_file(path):
         criteria = data.get("criterios", [])
         ids = [c.get("id") for c in criteria]
         if sorted(ids) != sorted(required_ids) or len(ids) != len(set(ids)):
-            fail(errors, f"{path.name}: IDs inválidos/duplicados en {dim}")
+            errors.append(f"{path.name}: IDs inválidos/duplicados en {dim}")
             continue
 
         subtotal = 0
@@ -107,47 +120,72 @@ def validate_file(path):
             statuses.append(state)
             expected = POINTS[cid].get(state)
             if expected is None or points != expected:
-                fail(errors, f"{path.name}: {cid} usa {state}/{points}, esperado {expected}")
+                errors.append(f"{path.name}: {cid} usa {state}/{points}, esperado {expected}")
             if state in {"CUMPLE", "PARCIAL"} and not c.get("evidencia"):
-                fail(errors, f"{path.name}: {cid} {state} sin evidencia")
+                errors.append(f"{path.name}: {cid} {state} sin evidencia")
             subtotal += points
 
         if data.get("maximo") != maximum:
-            fail(errors, f"{path.name}: máximo incorrecto en {dim}")
+            errors.append(f"{path.name}: máximo incorrecto en {dim}")
         if data.get("puntaje") != subtotal:
-            fail(errors, f"{path.name}: suma incorrecta en {dim}")
+            errors.append(f"{path.name}: suma incorrecta en {dim}")
         expected_level = level_for(subtotal, maximum, statuses)
         if data.get("nivel") != expected_level:
-            fail(errors, f"{path.name}: nivel {data.get('nivel')} != {expected_level} en {dim}")
+            errors.append(f"{path.name}: nivel incorrecto en {dim}: {data.get('nivel')} != {expected_level}")
         grand_total += subtotal
 
     if doc.get("puntaje_total") != grand_total:
-        fail(errors, f"{path.name}: puntaje_total incorrecto")
+        errors.append(f"{path.name}: puntaje_total incorrecto")
 
     validation = doc.get("validacion", {})
-    required_flags = {
-        "sha_anclado", "inventario_verificado", "criterios_completos",
-        "puntajes_permitidos", "sumas_verificadas", "niveles_verificados",
-        "evidencia_verificada", "formato_valido",
-    }
-    if set(validation) != required_flags or not all(validation.values()):
-        fail(errors, f"{path.name}: banderas de validación incompletas o falsas")
+    if set(validation) != REQUIRED_FLAGS or not all(validation.values()):
+        errors.append(f"{path.name}: banderas de validación incompletas o falsas")
 
+    return doc, errors
+
+
+def validate_edge(path):
+    errors = []
+    doc = load_json(path, errors)
+    if doc is None:
+        return None, errors
+    if doc.get("estado_evaluacion") != "NO_EVALUABLE":
+        errors.append(f"{path.name}: debe ser NO_EVALUABLE")
+    if "evaluacion" in doc:
+        errors.append(f"{path.name}: NO_EVALUABLE no debe incluir evaluacion")
+    if doc.get("puntaje_total") is not None:
+        errors.append(f"{path.name}: puntaje_total debe ser null")
+    if not doc.get("repositorio", {}).get("limitaciones"):
+        errors.append(f"{path.name}: debe declarar la causa en limitaciones")
+    validation = doc.get("validacion", {})
+    if set(validation) != REQUIRED_FLAGS:
+        errors.append(f"{path.name}: conjunto de banderas inválido")
+    if validation.get("formato_valido") is not True:
+        errors.append(f"{path.name}: formato_valido debe ser true")
     return doc, errors
 
 
 def main():
     errors = []
     docs = {}
-    for name in EXPECTED_FILES:
+
+    for name in FIXTURE_FILES:
         path = RESULTS / name
         if not path.exists():
             errors.append(f"Falta {name}")
             continue
-        doc, file_errors = validate_file(path)
+        doc, file_errors = validate_fixture(path)
         errors.extend(file_errors)
         if doc is not None:
             docs[name] = doc
+
+    for name in EDGE_FILES:
+        path = RESULTS / name
+        if not path.exists():
+            errors.append(f"Falta {name}")
+            continue
+        _, file_errors = validate_edge(path)
+        errors.extend(file_errors)
 
     for case in ("excelente", "flojo", "tramposo"):
         a = docs.get(f"{case}_A.json")
@@ -176,6 +214,7 @@ def main():
     for case in ("excelente", "flojo", "tramposo"):
         score = docs[f"{case}_A.json"]["puntaje_total"]
         print(f"- {case}: A/B idénticos por criterio — {score}/100")
+    print("- bordes NO_EVALUABLE: ref, ruta y repo inexistentes — OK")
     return 0
 
 
