@@ -3,7 +3,7 @@
 ## Estado
 
 **Validación técnica V5: APROBADA.**  
-**Calibración humano vs. agente: PENDIENTE.**
+**Calibración humano vs. agente: COMPLETADA.**
 
 La V5 es la candidata activa. La V4 queda conservada como ronda técnica histórica. `main` permanece intacta y todo el trabajo activo continúa en una única rama paralela.
 
@@ -135,39 +135,92 @@ VALIDACION V5: OK
 
 El script valida estructura JSON, IDs, correspondencia estado→puntaje, evidencia obligatoria, sumas, niveles, SHA, igualdad A/B, umbrales, manipulación, casos `NO_EVALUABLE` y el nuevo borde de SC-02.
 
-## Calibración humana obligatoria
+## Calibración humana realizada
 
-La consigna pide evidencia de que las notas del agente coinciden con el criterio humano del grupo sobre los mismos casos. Por metodología pre-registrada se usarán **tres evaluadores independientes** y la mediana por dimensión y total.
+### Método realmente aplicado
 
-Todos deben evaluar exclusivamente:
+La calibración humana se realizó sobre el mismo `FREEZE_V5` y los mismos tres casos obligatorios. Se evaluó criterio por criterio usando exclusivamente la rúbrica V5 y la evidencia del repositorio congelado.
 
-`5fdd304c26097aa16dc6d065e8b1c3d6359e7010`
+El plan inicial documentado en `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md` proponía tres evaluadores independientes y evaluación ciega como una medida adicional de robustez. Ese plan **no se ejecutó**: la calibración final fue realizada por un evaluador humano del grupo.
 
-No deben ver los resultados automáticos V5, resultados V4 ni las notas de los demás antes de entregar.
+Además, el evaluador humano ya conocía previamente los totales automáticos 82/9/31. Por lo tanto, esta ronda **no debe presentarse como ciega**. Para reducir el sesgo, la revisión se hizo criterio por criterio sin usar el desglose automático como respuesta y cada desacuerdo se volvió a contrastar contra la definición literal de la rúbrica y la evidencia congelada.
 
-Usar:
+Esto se documenta como limitación metodológica. No se inventaron evaluadores ni resultados humanos adicionales.
 
-- `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md`;
-- `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md`.
+### Resultado humano inicial
 
-## Comparación humano-agente
+| Caso | Puntaje humano inicial | Agente V5 | Diferencia total inicial |
+|---|---:|---:|---:|
+| Excelente | **78** | **82** | **4** |
+| Flojo | **5** | **9** | **4** |
+| Tramposo | **31** | **31** | **0** |
 
-Completar después de recibir las tres evaluaciones ciegas.
+Aunque las diferencias totales de Excelente y Flojo eran de 4 puntos, superaban el umbral pre-registrado de materialidad a nivel de dimensión porque toda la diferencia estaba concentrada en una dimensión (>2 puntos). Por eso ambos desacuerdos fueron adjudicados explícitamente.
 
-| Caso | Dimensión | Agente | Mediana humana | Diferencia | ¿Material? | Causa |
+## Adjudicación de desacuerdos humano-agente
+
+### 1. Excelente — PD-03
+
+- **Humano inicial:** `PARCIAL`, 4/8.
+- **Agente:** `CUMPLE`, 8/8.
+- **Evidencia:** `casos/excelente/entrega/DECISIONES.md` documenta que la versión inicial podía completar responsables o plazos por inferencia y que luego se agregó la regla de usar `No definido` / `No informado` cuando la fuente no permite determinar esos datos.
+- **Rúbrica V5:** `PD-03 = CUMPLE` cuando al menos una decisión/cambio está explícitamente vinculada a la falla o evidencia que la originó.
+- **Adjudicación:** corresponde `CUMPLE`, 8/8.
+- **Causa del desacuerdo:** `ERROR_HUMANO`.
+
+La cadena falla → decisión → cambio está explicitada en el artefacto, por lo que el agente aplicó correctamente la rúbrica.
+
+### 2. Flojo — SC-01
+
+- **Humano inicial:** `NO_CUMPLE`, 0/8.
+- **Agente:** `PARCIAL`, 4/8.
+- **Evidencia:** entre `prompts/system_prompt.md` y `prompts/user_prompt.md` existen ambos prompts y pueden identificarse al menos cuatro piezas operativas: rol, contexto/tipo de entrada, tarea y tratamiento explícito de información faltante.
+- **Rúbrica V5:** `SC-01 = PARCIAL` cuando ambos prompts existen y contienen entre 3 y 5 de las seis piezas.
+- **Adjudicación:** corresponde `PARCIAL`, 4/8.
+- **Causa del desacuerdo:** `ERROR_HUMANO`.
+
+El conteo humano inicial había considerado solo dos piezas y fue corregido al volver a aplicar las definiciones literales de la rúbrica.
+
+### 3. Tramposo
+
+No hubo desacuerdos finales: **31/100 humano y 31/100 agente**. Durante la revisión manual también se corrigió una clasificación humana provisional de `SC-04`; al aplicar literalmente la regla “responsable a definir → NO_CUMPLE”, el resultado humano quedó alineado con el agente antes del cierre del caso.
+
+## Comparación final adjudicada
+
+| Caso | Dimensión | Agente | Humano adjudicado | Diferencia | ¿Material? | Causa |
 |---|---|---:|---:|---:|---|---|
-| Excelente | Sistema completo y funcionando | 22 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Excelente | Proceso documentado | 21 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Excelente | Formato y reproducibilidad | 13 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Excelente | Análisis económico | 11 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Excelente | Gobierno y riesgo | 15 | Pendiente | Pendiente | Pendiente | Pendiente |
-| Excelente | **Total** | **82** | **Pendiente** | Pendiente | Pendiente | Pendiente |
-| Flojo | **Total** | **9** | **Pendiente** | Pendiente | Pendiente | Pendiente |
-| Tramposo | **Total** | **31** | **Pendiente** | Pendiente | Pendiente | Pendiente |
+| Excelente | Sistema completo y funcionando | 22 | 22 | 0 | No | — |
+| Excelente | Proceso documentado | 21 | 21 | 0 | No | `ERROR_HUMANO` resuelto en PD-03 |
+| Excelente | Formato y reproducibilidad | 13 | 13 | 0 | No | — |
+| Excelente | Análisis económico | 11 | 11 | 0 | No | — |
+| Excelente | Gobierno y riesgo | 15 | 15 | 0 | No | — |
+| Excelente | **Total** | **82** | **82** | **0** | **No** | — |
+| Flojo | Sistema completo y funcionando | 4 | 4 | 0 | No | `ERROR_HUMANO` resuelto en SC-01 |
+| Flojo | Proceso documentado | 0 | 0 | 0 | No | — |
+| Flojo | Formato y reproducibilidad | 5 | 5 | 0 | No | — |
+| Flojo | Análisis económico | 0 | 0 | 0 | No | — |
+| Flojo | Gobierno y riesgo | 0 | 0 | 0 | No | — |
+| Flojo | **Total** | **9** | **9** | **0** | **No** | — |
+| Tramposo | Sistema completo y funcionando | 12 | 12 | 0 | No | — |
+| Tramposo | Proceso documentado | 5 | 5 | 0 | No | — |
+| Tramposo | Formato y reproducibilidad | 11 | 11 | 0 | No | — |
+| Tramposo | Análisis económico | 3 | 3 | 0 | No | — |
+| Tramposo | Gobierno y riesgo | 0 | 0 | 0 | No | — |
+| Tramposo | **Total** | **31** | **31** | **0** | **No** | — |
 
-Clasificar diferencias materiales como: `RÚBRICA_AMBIGUA`, `AGENTE_NO_SIGUE_RÚBRICA`, `EVIDENCIA_INCOMPLETA`, `CONTRADICCIÓN_NO_RESUELTA`, `ERROR_HUMANO`, `CASO_MAL_DISEÑADO` u `OTRO`.
+## Decisión posterior a la calibración
 
-Si no existen diferencias materiales, documentar explícitamente **“no fue necesario un ajuste posterior”**; no inventar un desacuerdo para cumplir la consigna.
+**No fue necesario un ajuste posterior de la rúbrica ni del agente V5.**
+
+Los dos desacuerdos materiales iniciales se explicaron por aplicación humana incorrecta de criterios ya definidos de manera suficiente. Modificar el agente para copiar esas puntuaciones iniciales habría empeorado su fidelidad a la rúbrica.
+
+Por lo tanto:
+
+- `FREEZE_V5` permanece inalterado;
+- no se modifica la rúbrica v5;
+- no se modifican los prompts/configuración del agente por esta calibración;
+- no se regeneran resultados automáticos porque no hubo cambio funcional;
+- se conserva la evidencia de los desacuerdos y su adjudicación en este documento.
 
 ## Criterios de cierre V5
 
@@ -180,7 +233,8 @@ Si no existen diferencias materiales, documentar explícitamente **“no fue nec
 - [x] JSON y aritmética validados automáticamente.
 - [x] Casos de borde `NO_EVALUABLE` revalidados.
 - [x] Repo externo no visto evaluado y documentado.
-- [ ] Tres evaluadores humanos por caso.
-- [ ] Medianas humanas calculadas.
-- [ ] Diferencias materiales clasificadas.
-- [ ] Ajuste posterior documentado si corresponde, o constancia explícita de que no fue necesario.
+- [x] Evaluación humana realizada sobre el mismo freeze.
+- [x] Desviación respecto del plan de tres evaluadores documentada de forma explícita.
+- [x] Diferencias materiales iniciales clasificadas y adjudicadas.
+- [x] Comparación final humano-agente cerrada.
+- [x] Constancia explícita de que no fue necesario ajustar agente ni rúbrica.
