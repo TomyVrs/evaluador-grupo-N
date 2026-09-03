@@ -4,26 +4,28 @@
 
 Obtener una referencia humana independiente para comparar con el agente evaluador. La evaluación humana no debe intentar confirmar ni aproximarse a una nota automática previa.
 
-## Referencia congelada
+## Referencia congelada obligatoria
 
-Los evaluadores deben trabajar **únicamente sobre el SHA que se indique como `FREEZE_V4`** en `calibracion.md`.
+Evaluar únicamente este SHA:
 
-No deben evaluar la punta actual de la rama si existen commits posteriores al freeze.
+`3edf04e478c515698305ac534c5a7b1cf3ab01d5`
+
+No evaluar la punta actual de `work/final-hardening-v4`: los commits posteriores al SHA congelado contienen solamente registro de calibración y, eventualmente, resultados automáticos que no deben formar parte de la evidencia.
 
 ## Regla de ceguera
 
 Antes de entregar sus puntajes, cada evaluador debe evitar consultar:
 
-- cualquier salida automática creada después del `FREEZE_V4`;
+- cualquier salida automática creada después del SHA congelado;
 - conversaciones o mensajes donde se hayan compartido resultados automáticos;
 - puntuaciones de otros integrantes;
 - archivos `criterio_humano.md` completados por otros integrantes.
 
-El SHA congelado se elegirá **antes** de generar las salidas automáticas V4. Por diseño, esas salidas no existen dentro del árbol que debe evaluar el humano.
+Por diseño, las salidas automáticas V4 **no existen** dentro del árbol del SHA que se debe evaluar.
 
 ## Evidencia a evaluar
 
-Aplicar `rubrica.md` v4 del mismo SHA congelado y evaluar exclusivamente:
+Aplicar `rubrica.md` v4 del mismo SHA y evaluar exclusivamente:
 
 1. `casos/excelente/entrega/`
 2. `casos/flojo/entrega/`
@@ -74,4 +76,4 @@ Después de recibir las tres evaluaciones independientes:
 4. comparar agente vs. mediana humana;
 5. considerar diferencia material si supera **5 puntos en el total** o **2 puntos en cualquier dimensión**;
 6. explicar toda diferencia material antes de modificar rúbrica o agente;
-7. si hay una modificación, crear una nueva versión y repetir los casos afectados.
+7. si hay una modificación, versionar una nueva candidata y repetir los casos afectados.
