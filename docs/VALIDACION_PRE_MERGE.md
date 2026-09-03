@@ -7,7 +7,7 @@ Este documento controla la rama candidata antes de cualquier decisión de integr
 - [x] La rama candidata parte del `main` original vigente al iniciar la ronda (`9419bbeb...`).
 - [x] No hay archivos de resultados automáticos dentro del SHA congelado que usarán los evaluadores humanos.
 - [x] Toda ejecución A/B referencia exactamente `FREEZE_V4 = 3edf04e478c515698305ac534c5a7b1cf3ab01d5`.
-- [ ] Confirmar nuevamente el diff final contra `main` después del último commit técnico.
+- [x] Diff final revisado contra `main`: rama **ahead**, **0 behind**; los cambios están limitados a agente, rúbrica, calibración, validación automática, README y la corrección factual del fixture excelente. No aparecen cambios accidentales fuera del alcance.
 
 ## Contrato y rúbrica
 
@@ -91,5 +91,5 @@ Ver `calibracion/ROBUSTEZ_V4.md` para evidencia, limitaciones y detalle metodol�
 La **validación técnica principal está aprobada**. Quedan como pendientes reales:
 
 1. calibración humana ciega;
-2. opcionalmente, dos fixtures adicionales para truncamiento y contradicción de igual precedencia;
-3. control final del diff contra `main` y limpieza de ramas auxiliares antes de revisión del equipo.
+2. opcionalmente, forzar empíricamente los dos casos de borde que hoy están implementados como regla pero no tienen fixture dedicado;
+3. eliminar del fork las ramas auxiliares antiguas para que `work/final-hardening-v4` quede como única rama de trabajo además de `main`.
