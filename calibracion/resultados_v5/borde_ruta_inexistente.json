@@ -1,0 +1,8 @@
+{
+  "estado_evaluacion":"NO_EVALUABLE",
+  "repositorio":{"url":"https://github.com/TomyVrs/evaluador-grupo-N","ref_solicitada":"5fdd304c26097aa16dc6d065e8b1c3d6359e7010","ref_evaluada":"5fdd304c26097aa16dc6d065e8b1c3d6359e7010","commit_sha":"5fdd304c26097aa16dc6d065e8b1c3d6359e7010","ruta_raiz":"ruta/inexistente/v5/","fecha_evaluacion":"2026-09-03","inventario_completo":false,"archivos_revisados":[],"limitaciones":["GitHub devolvió 404 Not Found para la ruta solicitada sobre un SHA válido. La ruta no se sustituyó por /. "]},
+  "rubrica_version":"v5",
+  "inconsistencias":[],"alertas_manipulacion":[],"puntaje_total":null,
+  "validacion":{"sha_anclado":true,"inventario_verificado":false,"criterios_completos":false,"puntajes_permitidos":false,"sumas_verificadas":false,"niveles_verificados":false,"evidencia_verificada":false,"formato_valido":true},
+  "resumen_final":"NO_EVALUABLE: ruta raíz solicitada inexistente."
+}
