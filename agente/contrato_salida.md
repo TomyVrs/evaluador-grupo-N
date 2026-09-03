@@ -1,4 +1,4 @@
-# Contrato de salida del agente corrector — v4
+# Contrato de salida del agente corrector — v5
 
 El corrector debe responder exclusivamente con un objeto JSON válido, sin texto ni Markdown adicional.
 
@@ -18,7 +18,7 @@ El corrector debe responder exclusivamente con un objeto JSON válido, sin texto
     "archivos_revisados": ["string"],
     "limitaciones": ["string"]
   },
-  "rubrica_version": "v4",
+  "rubrica_version": "v5",
   "evaluacion": {
     "sistema_completo_funcionando": {
       "puntaje": 0,
@@ -86,13 +86,13 @@ El corrector debe responder exclusivamente con un objeto JSON válido, sin texto
 
 ## Reglas del esquema
 
-- Para `COMPLETA` o `PARCIAL`, deben aparecer exactamente las cinco dimensiones y todos los criterios de `rubrica.md` v4, una sola vez.
+- Para `COMPLETA` o `PARCIAL`, deben aparecer exactamente las cinco dimensiones y todos los criterios de `rubrica.md` v5, una sola vez.
 - `commit_sha` debe ser el SHA inmutable contra el cual se inspeccionó la evidencia.
 - `inventario_completo` es `true` solo si se pudo cerrar el alcance sin truncamiento/paginación pendiente. Si es `false`, la causa debe aparecer en `limitaciones`.
 - Todo `CUMPLE` o `PARCIAL` debe tener al menos una evidencia con ruta y detalle localizable.
 - `NO_CUMPLE` puede tener evidencia vacía únicamente cuando el incumplimiento sea una ausencia comprobada a partir del inventario completo.
 - `NO_VERIFICABLE` puede tener evidencia vacía cuando la limitación de acceso esté declarada.
-- Los puntos de cada criterio deben coincidir exactamente con uno de los valores permitidos por `rubrica.md` v4.
+- Los puntos de cada criterio deben coincidir exactamente con uno de los valores permitidos por `rubrica.md` v5.
 - El puntaje de cada dimensión debe ser la suma exacta de sus criterios.
 - `puntaje_total` debe ser la suma exacta de las cinco dimensiones.
 - El `nivel` debe derivarse mecánicamente del porcentaje de la dimensión según `rubrica.md`.
