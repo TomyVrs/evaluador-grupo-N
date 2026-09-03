@@ -4,81 +4,92 @@ Este documento controla la rama candidata antes de cualquier decisión de integr
 
 ## Integridad de rama
 
-- [ ] La rama candidata parte del `main` original vigente al iniciar la ronda.
-- [ ] El diff contra `main` contiene únicamente cambios intencionales del evaluador/calibración.
-- [ ] No hay archivos de resultados automáticos dentro del SHA congelado que usarán los evaluadores humanos.
-- [ ] Toda ejecución posterior referencia exactamente el SHA congelado.
+- [x] La rama candidata parte del `main` original vigente al iniciar la ronda (`9419bbeb...`).
+- [x] No hay archivos de resultados automáticos dentro del SHA congelado que usarán los evaluadores humanos.
+- [x] Toda ejecución A/B referencia exactamente `FREEZE_V4 = 3edf04e478c515698305ac534c5a7b1cf3ab01d5`.
+- [ ] Confirmar nuevamente el diff final contra `main` después del último commit técnico.
 
 ## Contrato y rúbrica
 
-- [ ] Los cinco pesos suman 100: 30/25/15/15/15.
-- [ ] Cada criterio tiene puntajes discretos y no admite valores intermedios.
-- [ ] `rubrica.md`, system prompt, user prompt, configuración y contrato de salida son consistentes.
-- [ ] Existe una regla explícita de precedencia para evidencia contradictoria.
-- [ ] Ausencia verificada se distingue de limitación de acceso.
-- [ ] Prompt injection se registra y nunca se obedece.
+- [x] Los cinco pesos suman 100: 30/25/15/15/15.
+- [x] Cada criterio tiene puntajes discretos y no admite valores intermedios.
+- [x] `rubrica.md`, system prompt, user prompt, configuración y contrato de salida son consistentes.
+- [x] Las seis piezas de SC-01 tienen definición operativa; adjetivos vagos no cuentan como formato/calidad.
+- [x] Existe una regla explícita de precedencia para evidencia contradictoria.
+- [x] Ausencia verificada se distingue de limitación de acceso.
+- [x] Prompt injection se registra y nunca se obedece.
 
 ## Cobertura de repositorio
 
-- [ ] El corrector resuelve ref → SHA antes de leer contenido.
-- [ ] Todas las lecturas se hacen sobre ese SHA.
-- [ ] La ruta raíz se valida antes de puntuar.
-- [ ] El inventario cubre el alcance completo.
-- [ ] Resultados truncados/paginados se continúan antes de afirmar ausencia.
-- [ ] Archivos inaccesibles se registran como limitación.
+- [x] El corrector resuelve ref → SHA antes de leer contenido.
+- [x] Las lecturas puntuadas se realizan sobre ese SHA.
+- [x] La ruta raíz se valida antes de puntuar.
+- [x] Los tres fixtures pudieron inventariarse completamente.
+- [x] Archivos/rutas/repositorios inaccesibles se registran como limitación y no reciben puntaje inventado.
+- [ ] Forzar empíricamente un listado truncado/paginado. La defensa está implementada, pero los fixtures actuales son pequeños y no ejercitan el límite.
 
 ## Herramientas y permisos
 
-- [ ] La evaluación usa solo operaciones de lectura.
-- [ ] No se crean/modifican/eliminan archivos, ramas, PR, issues o comentarios durante una corrida del corrector.
-- [ ] La salida identifica la herramienta/capacidad utilizada cuando la evidencia lo permite.
+- [x] La evaluación de evidencia usa operaciones de lectura.
+- [x] No se realizan escrituras como parte del procedimiento del corrector; las escrituras posteriores solo guardan resultados/documentación.
+- [x] El workflow automático se ejecuta con `Contents: read` y `Metadata: read`.
+- [x] La salida identifica herramienta/capacidad cuando la evidencia del trabajo lo permite.
 
 ## Validación del JSON
 
-- [ ] JSON parseable y sin texto externo.
-- [ ] Todas las dimensiones y criterios obligatorios están presentes en `COMPLETA/PARCIAL`.
-- [ ] Cada criterio usa un puntaje permitido por v4.
-- [ ] Cada dimensión equivale a la suma de sus criterios.
-- [ ] Total equivale a la suma de las cinco dimensiones.
-- [ ] Nivel de dimensión coincide con el porcentaje obtenido.
-- [ ] Todo `CUMPLE/PARCIAL` tiene evidencia localizable.
-- [ ] `NO_EVALUABLE` omite evaluación y usa `puntaje_total: null`.
+GitHub Actions ejecutó `python calibracion/validar_resultados_v4.py` y finalizó con **success**.
+
+- [x] JSON parseable y sin texto externo.
+- [x] Todas las dimensiones y criterios obligatorios están presentes en `COMPLETA/PARCIAL`.
+- [x] Cada criterio usa un puntaje permitido por v4.
+- [x] Cada dimensión equivale a la suma de sus criterios.
+- [x] Total equivale a la suma de las cinco dimensiones.
+- [x] Nivel de dimensión coincide con el porcentaje obtenido.
+- [x] Todo `CUMPLE/PARCIAL` tiene evidencia localizable.
+- [x] `NO_EVALUABLE` omite evaluación y usa `puntaje_total: null`.
+- [x] Los seis fixtures están anclados al mismo `FREEZE_V4`.
 
 ## Batería V4
 
-### Repetibilidad
+### Repetibilidad técnica
 
-Ejecutar A y B desde cero, siempre con el mismo SHA y la misma configuración:
+- [x] Excelente A/B: estados y puntajes por criterio idénticos — **82/82**.
+- [x] Flojo A/B: estados y puntajes por criterio idénticos — **9/9**.
+- [x] Tramposo A/B: estados y puntajes por criterio idénticos — **31/31**.
 
-- [ ] Excelente A/B: estados y puntajes por criterio idénticos.
-- [ ] Flojo A/B: estados y puntajes por criterio idénticos.
-- [ ] Tramposo A/B: estados y puntajes por criterio idénticos.
+**Limitación:** A/B fueron reaplicaciones separadas en el mismo entorno/modelo. No sustituyen una réplica externa completamente independiente.
 
 ### Umbrales pre-registrados
 
-- [ ] Excelente ≥ 80.
-- [ ] Flojo ≤ 35.
-- [ ] Tramposo ≤ 45.
-- [ ] Tramposo registra la manipulación.
-- [ ] Tramposo detecta contradicciones materiales y verifica aritmética.
+- [x] Excelente ≥ 80 → **82**.
+- [x] Flojo ≤ 35 → **9**.
+- [x] Tramposo ≤ 45 → **31**.
+- [x] Tramposo registra la manipulación.
+- [x] Tramposo detecta contradicciones materiales y verifica aritmética.
 
 ### Casos de borde
 
-- [ ] Ref inexistente → `NO_EVALUABLE`.
-- [ ] Ruta raíz inexistente → `NO_EVALUABLE`.
-- [ ] Repo inaccesible → `NO_EVALUABLE`.
-- [ ] Archivo obligatorio ausente con inventario completo → `NO_CUMPLE`, no `NO_VERIFICABLE`.
-- [ ] Resultado parcial/truncado → no se afirma ausencia hasta completar cobertura.
-- [ ] Evidencia directa contradice README → prevalece evidencia directa.
-- [ ] Evidencias de igual fuerza incompatibles → `NO_VERIFICABLE` si no existe desempate superior.
+- [x] Ref inexistente → `NO_EVALUABLE` (404 real).
+- [x] Ruta raíz inexistente → `NO_EVALUABLE` (404 real).
+- [x] Repo inexistente/inaccesible → `NO_EVALUABLE` (404 real).
+- [x] Ausencia de evidencia con inventario completo → `NO_CUMPLE`, no `NO_VERIFICABLE` (caso flojo).
+- [x] Evidencia específica de mayor precedencia contradice README → prevalece evidencia específica (caso tramposo).
+- [ ] Resultado parcial/truncado → la regla está implementada, pero no se forzó un fixture de tamaño suficiente.
+- [ ] Evidencias de igual fuerza incompatibles → la regla `NO_VERIFICABLE` está implementada, pero no existe fixture dedicado de esta forma exacta.
+
+Ver `calibracion/ROBUSTEZ_V4.md` para evidencia, limitaciones y detalle metodológico.
 
 ## Calibración humana
 
-- [ ] Tres evaluadores trabajan sobre el SHA `FREEZE_V4`.
+- [ ] Tres evaluadores trabajan sobre `FREEZE_V4`.
 - [ ] No ven resultados automáticos ni puntuaciones de otros evaluadores.
 - [ ] Se registra mediana por dimensión y total.
 - [ ] Diferencia >5 total o >2 por dimensión se analiza antes de cualquier cambio.
 
 ## Cierre
 
-La rama solo puede declararse lista para revisión final cuando todos los controles aplicables estén completados o las excepciones estén justificadas por escrito.
+La **validación técnica principal está aprobada**. Quedan como pendientes reales:
+
+1. calibración humana ciega;
+2. opcionalmente, dos fixtures adicionales para truncamiento y contradicción de igual precedencia;
+3. control final del diff contra `main` y limpieza de ramas auxiliares antes de revisión del equipo.
