@@ -2,7 +2,7 @@
 
 ## Estado
 
-**Protocolo pre-registrado y candidata v4 congelada. Resultados v4 todavía no incorporados al momento del freeze.**
+**Protocolo pre-registrado y candidata v4 congelada. Resultados v4 todavía no incorporados al momento del freeze definitivo.**
 
 No se considera cerrada la calibración hasta completar repetibilidad, evaluación humana ciega y análisis de diferencias.
 
@@ -14,19 +14,25 @@ Demostrar tres propiedades distintas:
 2. **Repetibilidad:** dos aplicaciones separadas sobre el mismo SHA, ruta, rúbrica y configuración producen el mismo estado y puntaje por criterio y total.
 3. **Alineación humana:** las notas del agente son razonablemente cercanas a la mediana de tres evaluadores humanos independientes.
 
-## FREEZE_V4
+## FREEZE_V4 definitivo
 
 - **Rúbrica:** v4.
 - **Agente:** v4.
-- **Commit congelado:** `8fec278f55a9264ced4f51935d71c4b8ad831e49`.
+- **Commit congelado:** `3edf04e478c515698305ac534c5a7b1cf3ab01d5`.
 - **Fecha de congelamiento:** `2026-09-03`.
 - **Rama de trabajo:** `work/final-hardening-v4`.
 
 El SHA congelado contiene rúbrica, agente, los tres casos, la corrección factual del caso excelente, README, protocolo humano y checklist técnico. **No contiene resultados automáticos V4.**
 
-Toda evaluación de esta ronda debe leer los casos y artefactos desde ese SHA exacto. Los commits posteriores pueden guardar resultados o documentación, pero no forman parte de la evidencia evaluada.
+### Freeze anterior invalidado antes de ejecutar
 
-Si se modifica cualquiera de estos artefactos después del freeze —`rubrica.md`, prompts/configuración/contrato o contenido de los tres casos— la candidata pasa a v5 y deben repetirse las pruebas afectadas.
+Se había registrado preliminarmente `8fec278f55a9264ced4f51935d71c4b8ad831e49`. Antes de generar cualquier salida V4 se detectó una ambigüedad en SC-01: frases vagas como “respuesta clara” o “que sea útil” podían ser contadas de forma distinta como formato o criterio de calidad. Se precisó qué cuenta como cada una de las seis piezas y se reemplazó el freeze por `3edf04e...`.
+
+**No existió ninguna corrida V4 entre ambos freezes**, por lo que el ajuste no fue realizado en respuesta a resultados observados y no contamina los umbrales pre-registrados.
+
+Toda evaluación de esta ronda debe leer los casos y artefactos desde el SHA definitivo. Los commits posteriores pueden guardar resultados o documentación, pero no forman parte de la evidencia evaluada.
+
+Si se modifica después del freeze definitivo cualquiera de estos artefactos —`rubrica.md`, prompts/configuración/contrato o contenido de los tres casos— debe versionarse una nueva candidata y repetirse las pruebas afectadas.
 
 ## Casos y alcance
 
@@ -87,7 +93,7 @@ Una diferencia material no implica automáticamente que el agente esté equivoca
 10. Comparar agente vs. mediana humana.
 11. Clasificar cada diferencia material.
 12. Ajustar solo cuando exista una causa documentada.
-13. Si se modifica rúbrica/agente/casos, versionar como v5 y repetir las pruebas afectadas.
+13. Si se modifica rúbrica/agente/casos, versionar nueva candidata y repetir las pruebas afectadas.
 
 ## Clasificación de desacuerdos
 
@@ -134,7 +140,7 @@ Todo desacuerdo material se asigna a una de estas causas:
 
 Cada integrante debe:
 
-1. usar exactamente `FREEZE_V4` (`8fec278f55a9264ced4f51935d71c4b8ad831e49`);
+1. usar exactamente `FREEZE_V4` (`3edf04e478c515698305ac534c5a7b1cf3ab01d5`);
 2. recibir únicamente la rúbrica v4 y la ruta `entrega/` del caso;
 3. no consultar commits posteriores al freeze, puntuaciones automáticas ni puntuaciones de otros humanos;
 4. asignar estado y puntaje por criterio según las tablas, no por impresión global;
@@ -158,7 +164,7 @@ Estas pruebas validan comportamiento del corrector y no agregan puntos a los cas
 
 ## Criterios de cierre
 
-- [x] SHA v4 congelado.
+- [x] SHA v4 definitivo congelado.
 - [ ] Dos aplicaciones por caso.
 - [ ] Repetibilidad exacta en estados/puntajes.
 - [ ] Excelente cumple umbral alto.
