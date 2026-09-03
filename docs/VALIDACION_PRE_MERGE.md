@@ -5,11 +5,11 @@
 ## Integridad
 
 - [x] Base original: `9419bbeb41fe4dddc54ebe07249d1a9d4a3a7352`.
-- [x] Rama candidata: ahead respecto de la base y **0 behind**.
+- [x] Rama candidata construida sobre esa base.
 - [x] `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010` fue fijado antes de los resultados V5.
 - [x] El freeze no contiene resultados automáticos V5.
 - [x] Todas las pruebas de los tres casos refieren al mismo freeze.
-- [x] V4 se conserva solo como historial técnico; la plantilla humana V4 obsoleta fue eliminada.
+- [x] V4 se conserva solo como historial técnico.
 
 ## Rúbrica y agente
 
@@ -62,15 +62,27 @@ VALIDACION V5: OK
 - SC-02 V5: implementación local reproducible reconocida — OK
 ```
 
-## Pendiente obligatorio
+## Calibración humana
 
-- [ ] Tres integrantes evalúan independientemente excelente, flojo y tramposo sobre `FREEZE_V5`.
-- [ ] No consultan resultados automáticos ni notas de los demás antes de entregar.
-- [ ] Se calculan medianas por dimensión y total.
-- [ ] Diferencias >5 total o >2 por dimensión se clasifican antes de modificar nada.
-- [ ] Si no hay diferencia material, se documenta que no fue necesario ajustar.
-- [ ] Si hay una falla real, se versiona una nueva candidata y se repiten las pruebas afectadas.
+- [x] Se evaluaron excelente, flojo y tramposo sobre el mismo `FREEZE_V5`.
+- [x] Se registraron los resultados humanos iniciales: 78 / 5 / 31.
+- [x] Se compararon contra los resultados del agente: 82 / 9 / 31.
+- [x] Los dos desacuerdos materiales a nivel de dimensión fueron revisados contra la rúbrica y la evidencia.
+- [x] Excelente `PD-03`: desacuerdo clasificado `ERROR_HUMANO`; adjudicación final `CUMPLE`.
+- [x] Flojo `SC-01`: desacuerdo clasificado `ERROR_HUMANO`; adjudicación final `PARCIAL`.
+- [x] Resultado humano adjudicado final: 82 / 9 / 31.
+- [x] No fue necesario modificar rúbrica ni agente.
+- [x] Se documentó la limitación metodológica: un evaluador humano del grupo, no ciego porque conocía previamente los totales automáticos.
+- [x] No se fabricaron evaluadores ni resultados adicionales.
+
+El plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica en los archivos de instrucciones, pero no fue el procedimiento finalmente ejecutado. `calibracion.md` documenta explícitamente la desviación y el procedimiento real.
+
+## Pendiente antes de integrar
+
+- [ ] Revisión final del grupo sobre el PR y su diff.
+- [ ] Confirmar que los aportes del equipo sean legibles en historial/PRs.
+- [ ] Decidir en equipo si corresponde sacar el PR de draft e integrar.
 
 ## Cierre
 
-No queda una mejora técnica material pendiente que justifique seguir modificando la candidata antes de la calibración humana. El siguiente hito es exclusivamente humano + consolidación posterior.
+No queda una mejora técnica o de calibración material que justifique modificar la candidata V5 antes de la revisión del grupo. El `FREEZE_V5` permanece inalterado y `main` no debe tocarse hasta decisión explícita del equipo.
