@@ -1,7 +1,8 @@
 # Plantilla de evaluación humana ciega — V5
 
-> Usar exclusivamente `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010`.
-> No consultar resultados automáticos V5, resultados V4, puntajes de otros integrantes ni `criterio_humano.md` antes de entregar.
+> **Plantilla histórica del protocolo previo.** Se conserva como evidencia de la metodología inicialmente prevista. La calibración finalmente ejecutada fue realizada por un evaluador humano y no fue ciega; el registro definitivo está en `calibracion.md`.
+>
+> En el protocolo previsto se debía usar exclusivamente `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010` y no consultar resultados automáticos V5, resultados V4, puntajes de otros integrantes ni `criterio_humano.md` antes de entregar.
 
 ## Evaluador
 
