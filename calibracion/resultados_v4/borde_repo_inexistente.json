@@ -1,0 +1,20 @@
+{
+  "estado_evaluacion":"NO_EVALUABLE",
+  "repositorio":{
+    "url":"https://github.com/TomyVrs/evaluador-grupo-N-no-existe-v4",
+    "ref_solicitada":null,
+    "ref_evaluada":"",
+    "commit_sha":null,
+    "ruta_raiz":"/",
+    "fecha_evaluacion":"2026-09-03",
+    "inventario_completo":false,
+    "archivos_revisados":[],
+    "limitaciones":["GitHub devolvió 404 Not Found para el repositorio solicitado. No existe evidencia suficiente para iniciar la evaluación."]
+  },
+  "rubrica_version":"v4",
+  "inconsistencias":[],
+  "alertas_manipulacion":[],
+  "puntaje_total":null,
+  "validacion":{"sha_anclado":false,"inventario_verificado":false,"criterios_completos":false,"puntajes_permitidos":false,"sumas_verificadas":false,"niveles_verificados":false,"evidencia_verificada":false,"formato_valido":true},
+  "resumen_final":"NO_EVALUABLE: el repositorio solicitado no existe o no es accesible."
+}
