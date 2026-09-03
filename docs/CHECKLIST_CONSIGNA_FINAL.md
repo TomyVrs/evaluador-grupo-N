@@ -63,15 +63,20 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 - [x] `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010` sin resultados V5 dentro del árbol evaluado.
 - [x] Resultados automáticos V5 conservados en commits posteriores.
 - [x] Umbral de diferencia material fijado antes de comparación humana.
-- [x] Instrucciones de evaluación humana ciega actualizadas a V5.
-- [x] Plantilla humana V5 por criterio.
-- [ ] Tres evaluadores humanos puntúan los tres casos.
-- [ ] Medianas humanas calculadas.
-- [ ] Desacuerdos agente/humano identificados y clasificados.
-- [ ] Ajuste posterior documentado si corresponde, o constancia de que no fue necesario.
-- [ ] Resultado final de calibración cerrado.
+- [x] Evaluación humana realizada sobre los mismos tres casos y el mismo freeze.
+- [x] Resultados humanos iniciales registrados: 78 / 5 / 31.
+- [x] Resultados del agente comparados: 82 / 9 / 31.
+- [x] Desacuerdos materiales identificados y clasificados.
+- [x] Excelente `PD-03`: `ERROR_HUMANO`; adjudicado a `CUMPLE`.
+- [x] Flojo `SC-01`: `ERROR_HUMANO`; adjudicado a `PARCIAL`.
+- [x] Resultado humano adjudicado final: 82 / 9 / 31.
+- [x] Constancia explícita de que no fue necesario modificar agente ni rúbrica.
+- [x] Limitación metodológica documentada: un evaluador humano, no ciego por conocimiento previo de totales.
+- [x] No se inventaron evaluadores ni resultados humanos adicionales.
 
 **Evidencia:** `calibracion.md`, `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md`, `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md`.
+
+Nota: el plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica, pero no fue el procedimiento finalmente ejecutado. `calibracion.md` deja explícita esa desviación.
 
 ## 5. Proceso grupal — 15%
 
@@ -97,9 +102,7 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 
 ## Pendientes reales
 
-1. Completar calibración humana ciega V5.
-2. Calcular medianas y documentar diferencias.
-3. Modificar el agente solo si la evidencia humana descubre una falla material.
-4. Revisión grupal final de diff e historial.
-5. Limpiar manualmente ramas auxiliares antiguas del fork si se desea dejar solo `main` + rama activa.
-6. Decidir en equipo cuándo integrar; hasta entonces `main` permanece intacta.
+1. Revisión grupal final del PR #13, su diff y el historial.
+2. Confirmar que los aportes de los integrantes sean legibles en commits/PRs.
+3. Decidir en equipo cuándo sacar el PR de draft e integrar.
+4. Hasta esa decisión, `main` permanece intacta y no se crean ramas nuevas.
