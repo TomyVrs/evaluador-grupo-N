@@ -33,7 +33,9 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 - [x] Defensa ante cobertura/truncamiento incompleto.
 - [x] JSON estructurado validado automáticamente.
 - [x] Bordes `NO_EVALUABLE` para ref, ruta y repo inexistentes.
-- [x] Workflow V5 con conclusión `success` y permisos de lectura.
+- [x] Workflow V5 con permisos de lectura.
+- [x] Workflow V5 preparado para validar cambios relevantes en la rama activa y en `main`.
+- [x] Alcance del workflow documentado sin exageración: valida artefactos guardados, no ejecuta de forma autónoma una nueva evaluación LLM.
 - [x] Ejecución sobre repo público real no usado en el diseño de fixtures.
 
 **Evidencia:** `agente/`, `.github/workflows/validate-v5.yml`, `calibracion/validar_resultados_v5.py`, `calibracion/resultados_v5/repo_externo_*.json`.
@@ -76,19 +78,20 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 
 **Evidencia:** `calibracion.md`, `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md`, `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md`.
 
-Nota: el plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica, pero no fue el procedimiento finalmente ejecutado. `calibracion.md` deja explícita esa desviación.
+Nota: el plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica, pero no fue el procedimiento finalmente ejecutado. Los archivos de instrucciones/plantilla quedan identificados como protocolo previo; `calibracion.md` documenta el método real.
 
 ## 5. Proceso grupal — 15%
 
 **Exigencia:** historia de commits que muestre aportes, evolución de la rúbrica, iteraciones y decisiones.
 
-- [x] Historial previo contiene trabajo distribuido e integración por PR.
+- [x] Historial previo contiene evolución e integración por PR.
 - [x] Evolución V1/V2 → V3 → V4 → V5 documentada.
 - [x] La causa de V5 está documentada: ambigüedad de SC-02 detectada en un repo externo.
 - [x] V5 fue congelada antes de generar resultados.
 - [x] Correcciones, pruebas y documentación son commits separados, no un único commit final.
-- [x] `main` permanece fuera de la ronda de endurecimiento/calibración.
-- [ ] Antes de entrega, el equipo revisa que los aportes de integrantes sean legibles en historial/PRs.
+- [x] Se documenta que el hardening V5 fue implementado desde `TomyVrs`; no se simula coautoría.
+- [ ] Antes de integrar, las revisiones y aportes reales de otros integrantes deben quedar visibles en el PR mediante comentarios, reviews, aprobaciones o cambios concretos.
+- [ ] Antes de entrega, el equipo revisa que la historia completa de commits/PRs permita entender quién hizo y revisó qué.
 
 ## Estructura obligatoria
 
@@ -103,6 +106,7 @@ Nota: el plan previo de tres evaluadores independientes se conserva como propues
 ## Pendientes reales
 
 1. Revisión grupal final del PR #13, su diff y el historial.
-2. Confirmar que los aportes de los integrantes sean legibles en commits/PRs.
+2. Dejar evidencia auténtica de esas revisiones/aportes en GitHub.
 3. Decidir en equipo cuándo sacar el PR de draft e integrar.
-4. Hasta esa decisión, `main` permanece intacta y no se crean ramas nuevas.
+4. Antes del cierre, confirmar que la candidata final quedó integrada en `main`.
+5. Hasta esa decisión, `main` permanece intacta y no se crean ramas nuevas.
