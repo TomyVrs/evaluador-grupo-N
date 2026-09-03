@@ -1,4 +1,4 @@
-# Rúbrica ejecutable del Trabajo Final — v4
+# Rúbrica ejecutable del Trabajo Final — v5
 
 ## Reglas generales
 
@@ -57,25 +57,35 @@ El nivel se calcula **después** de sumar los criterios:
 
 Una pieza cuenta únicamente si es **identificable y operativa**, no por una palabra aislada:
 
-1. **Rol:** identifica quién/es el agente o especialidad que asume y para qué tipo de responsabilidad. “Sos un asistente” sin especialidad puede contar como rol mínimo, pero no reemplaza ninguna otra pieza.
-2. **Contexto:** define al menos el entorno, usuario, tipo de entrada o situación operacional relevante. Mencionar simplemente “un texto” sin situarlo no alcanza; “correo de licitación recibido por un equipo comercial” sí.
-3. **Tarea:** especifica la transformación/acción principal esperada sobre la entrada.
+1. **Rol:** identifica quién es el agente o la especialidad que asume y para qué tipo de responsabilidad.
+2. **Contexto:** define al menos el entorno, usuario, tipo de entrada o situación operacional relevante.
+3. **Tarea:** especifica la transformación o acción principal esperada sobre la entrada.
 4. **Restricciones:** incluye al menos una regla, prohibición, límite de alcance o tratamiento explícito de incertidumbre/datos faltantes.
-5. **Formato:** define una forma de salida observable —por ejemplo JSON con campos, tabla con columnas o secciones obligatorias—. Adjetivos como “claro”, “profesional” o “ordenado” **no cuentan como formato**.
+5. **Formato:** define una forma de salida observable —por ejemplo JSON con campos, tabla con columnas o secciones obligatorias—. Adjetivos como “claro”, “profesional” u “ordenado” **no cuentan como formato**.
 6. **Ejemplos o criterios de calidad:** incluye al menos un ejemplo concreto o una regla observable para juzgar la calidad/corrección. Expresiones vagas como “que sea útil”, “que funcione bien” o “que sea profesional” **no cuentan**.
 
 La misma frase puede aportar a más de una pieza solo si contiene de forma explícita los elementos de cada una; no inferir piezas ausentes por intención probable.
 
+### Evidencia admisible para SC-02
+
+Una herramienta o conector puede demostrarse de distintas formas según su naturaleza. Para evitar favorecer código o conectores externos, cualquiera de estas vías puede acreditar **operabilidad**:
+
+1. **Traza o corrida:** llamada, registro o ejecución que muestra que la herramienta accedió realmente al dato o sistema requerido.
+2. **Implementación local reproducible:** código/configuración inspeccionable + dependencias e instrucciones suficientes para ejecutar una herramienta local o autocontenida, sin una capacidad externa faltante imprescindible.
+3. **Evidencia de integración reproducible:** configuración y artefactos suficientes para reconstruir el acceso de un conector/servicio, sin necesidad de publicar secretos.
+
+Código suelto, un nombre de producto, una captura aislada o la frase “usa X” no prueban por sí solos que la herramienta sea operable.
+
 **Clasificación operativa**
 
 - **SC-01 CUMPLE:** ambos prompts existen y, considerados en conjunto, contienen las **6 piezas** según las definiciones anteriores. **PARCIAL:** ambos prompts existen y contienen **3–5 piezas**. **NO_CUMPLE:** falta uno de los prompts o contienen **0–2 piezas**.
-- **SC-02 CUMPLE:** se identifica una herramienta/conector concreto, su uso, el alcance de acceso y existe al menos una configuración, traza o corrida que demuestra que esa herramienta es realmente utilizable en el sistema. **PARCIAL:** la herramienta concreta y su uso están identificados, pero falta evidencia de disponibilidad/ejecución o el alcance de permisos es incompleto. **NO_CUMPLE:** solo se menciona una clase genérica de herramienta, se afirma uso sin identificarla o no hay herramienta.
+- **SC-02 CUMPLE:** se identifica una herramienta/conector concreto, su uso y el alcance de acceso, y además existe al menos una de las tres vías de evidencia admisible anteriores que demuestra operabilidad. **PARCIAL:** la herramienta concreta y su uso están identificados, pero la evidencia de operabilidad o del alcance de permisos es incompleta/no reproducible. **NO_CUMPLE:** solo se menciona una clase genérica de herramienta, se afirma uso sin identificarla o no hay herramienta.
 - **SC-03 CUMPLE:** existe un esquema/contrato verificable con campos y restricciones estables. **PARCIAL:** se exige formato estructurado pero no existe esquema suficiente para validarlo. **NO_CUMPLE:** salida libre o variable sin contrato.
 - **SC-04 CUMPLE:** nivel L0–L4 + momento de revisión + rol responsable + quién aprueba/firma. **PARCIAL:** existe revisión humana y responsable, pero falta el nivel o la aprobación/firma. **NO_CUMPLE:** supervisión genérica, responsable a definir o ausencia de supervisión.
 
-**Ejemplo alto:** prompts completos, herramienta real con traza verificable, contrato JSON estable y supervisión L2 con revisión y aprobación definidas.
+**Ejemplo alto:** prompts completos, herramienta real demostrada por traza o implementación reproducible, contrato JSON estable y supervisión L2 con revisión y aprobación definidas.
 
-**Ejemplo bajo:** prompt genérico, claims de herramientas sin evidencia, salida libre y supervisión indefinida.
+**Ejemplo bajo:** prompt genérico, claims de herramientas sin evidencia de operabilidad, salida libre y supervisión indefinida.
 
 ## 2. Proceso documentado — 25 puntos
 
