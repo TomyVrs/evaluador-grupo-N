@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - work/final-hardening-v4
+      - main
     paths:
       - 'calibracion/resultados_v5/**'
       - 'calibracion/validar_resultados_v5.py'
