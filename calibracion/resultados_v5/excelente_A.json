@@ -1,0 +1,66 @@
+{
+  "estado_evaluacion": "COMPLETA",
+  "repositorio": {
+    "url": "https://github.com/TomyVrs/evaluador-grupo-N",
+    "ref_solicitada": "5fdd304c26097aa16dc6d065e8b1c3d6359e7010",
+    "ref_evaluada": "5fdd304c26097aa16dc6d065e8b1c3d6359e7010",
+    "commit_sha": "5fdd304c26097aa16dc6d065e8b1c3d6359e7010",
+    "ruta_raiz": "casos/excelente/entrega/",
+    "fecha_evaluacion": "2026-09-03",
+    "inventario_completo": true,
+    "archivos_revisados": ["README.md","DECISIONES.md","prompts/system_prompt.md","prompts/user_prompt.md","corridas/01_registro.md","corridas/01_salida.json","corridas/02_registro.md","corridas/02_salida.json","corridas/03_registro.md","corridas/03_salida.json","analisis_economico.md","gobierno_riesgo.md","datos/reunion_1.txt"],
+    "limitaciones": ["No se conserva una salida fallida original de la versión inicial.","Las corridas no fijan una ref/versión exacta del agente o modelo."]
+  },
+  "rubrica_version": "v5",
+  "evaluacion": {
+    "sistema_completo_funcionando": {
+      "puntaje": 22,"maximo":30,"nivel":"ADECUADO",
+      "criterios": [
+        {"id":"SC-01","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"System y user prompt permiten identificar las seis piezas operativas."}]},
+        {"id":"SC-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"README.md","detalle":"Describe una herramienta de lectura de archivos, pero el caso no identifica una herramienta concreta ni aporta traza, implementación local reproducible o integración reproducible."}]},
+        {"id":"SC-03","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Define una salida JSON con campos y reglas estables."}]},
+        {"id":"SC-04","estado":"CUMPLE","puntos":7,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Define L2, revisión humana, líder responsable y aprobación previa a distribución."}]}
+      ],
+      "justificacion":"Contrato, formato y supervisión sólidos; no demuestra una herramienta concreta operable según SC-02 V5.",
+      "mejora_concreta":"Identificar la herramienta real y conservar una de las vías de evidencia de operabilidad admitidas por SC-02."
+    },
+    "proceso_documentado": {
+      "puntaje":21,"maximo":25,"nivel":"ADECUADO",
+      "criterios":[
+        {"id":"PD-01","estado":"CUMPLE","puntos":9,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Reconstruye versión inicial y al menos dos cambios posteriores en orden."}]},
+        {"id":"PD-02","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Describe una falla específica de inferencia, pero no conserva la salida fallida original."}]},
+        {"id":"PD-03","estado":"CUMPLE","puntos":8,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Vincula explícitamente la falla con reglas de no inferencia y validación."}]}
+      ],"justificacion":"Proceso reconstruible con falla concreta descrita, aunque falta el artefacto fallido original.","mejora_concreta":"Conservar una salida fallida original y referenciarla desde DECISIONES.md."
+    },
+    "formato_reproducibilidad": {
+      "puntaje":13,"maximo":15,"nivel":"EXCELENTE",
+      "criterios":[
+        {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"Están presentes README, prompts y DECISIONES.md."}]},
+        {"id":"FR-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"corridas/","detalle":"Existen tres corridas fechadas con entrada y salida original asociadas."}]},
+        {"id":"FR-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"corridas/01_registro.md","detalle":"La corrida asocia entrada, prompt y salida, pero no fija ref/versión exacta de ejecución."}]}
+      ],"justificacion":"Tres corridas reconstruibles; falta versionado exacto del agente/configuración.","mejora_concreta":"Registrar en cada corrida la versión/ref exacta del agente y configuración."
+    },
+    "analisis_economico": {
+      "puntaje":11,"maximo":15,"nivel":"ADECUADO",
+      "criterios":[
+        {"id":"AE-01","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"analisis_economico.md","detalle":"Declara USD 0,03 por corrida como estimación, pero no conserva base de tokens/precio o fuente suficiente para reconstruir ese costo unitario."}]},
+        {"id":"AE-02","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"analisis_economico.md","detalle":"3 corridas/semana × 52 = 156; 156 × USD 0,03 = USD 4,68/año."}]},
+        {"id":"AE-03","estado":"PARCIAL","puntos":3,"evidencia":[{"ruta":"analisis_economico.md","detalle":"Propone usar el modelo más pequeño suficiente, pero no conserva una prueba/comparación verificable."}]}
+      ],"justificacion":"Proyección correcta; el costo unitario y la selección de modelo tienen evidencia parcial.","mejora_concreta":"Documentar base del costo por corrida y una prueba mínima de suficiencia/costo entre modelos."
+    },
+    "gobierno_riesgo": {
+      "puntaje":15,"maximo":15,"nivel":"EXCELENTE",
+      "criterios":[
+        {"id":"GR-01","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Define acceso limitado a lectura y prohíbe escritura/envío."}]},
+        {"id":"GR-02","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Documenta múltiples riesgos específicos con controles asociados."}]},
+        {"id":"GR-03","estado":"CUMPLE","puntos":3,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"Define acciones concretas de detener, escalar, no publicar o corregir."}]},
+        {"id":"GR-04","estado":"CUMPLE","puntos":4,"evidencia":[{"ruta":"gobierno_riesgo.md","detalle":"L2, responsable, revisión y aprobación/firma definidos."}]}
+      ],"justificacion":"Gobierno específico, operable y de mínimo privilegio.","mejora_concreta":"Mantener la misma trazabilidad al pasar de fixture a entorno real."
+    }
+  },
+  "inconsistencias": [],
+  "alertas_manipulacion": [],
+  "puntaje_total": 82,
+  "validacion": {"sha_anclado":true,"inventario_verificado":true,"criterios_completos":true,"puntajes_permitidos":true,"sumas_verificadas":true,"niveles_verificados":true,"evidencia_verificada":true,"formato_valido":true},
+  "resumen_final":"Caso excelente: 82/100. Supera el umbral alto con brechas acotadas en herramienta real, evidencia de fallas, versionado de corridas y economía."
+}
