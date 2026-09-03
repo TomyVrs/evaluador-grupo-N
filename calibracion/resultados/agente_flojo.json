@@ -1,0 +1,82 @@
+{
+  "estado_evaluacion": "COMPLETA",
+  "repositorio": {
+    "url": "https://github.com/TomyVrs/evaluador-grupo-N",
+    "ref_evaluada": "e8e0f5cf65d16fc39e1aa80d5c4c7d9dd42dec9c",
+    "commit_sha": "e8e0f5cf65d16fc39e1aa80d5c4c7d9dd42dec9c",
+    "ruta_raiz": "casos/flojo/entrega/",
+    "fecha_evaluacion": "2026-09-03",
+    "archivos_revisados": ["README.md","prompts/system_prompt.md","prompts/user_prompt.md","DECISIONES.md","corridas/01_salida.txt"],
+    "limitaciones": []
+  },
+  "rubrica_version": "v3",
+  "evaluacion": {
+    "sistema_completo_funcionando": {
+      "puntaje": 0,
+      "maximo": 30,
+      "nivel": "INSUFICIENTE",
+      "criterios": [
+        {"id":"SC-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Los prompts no alcanzan tres de las seis piezas operativas exigidas."}]},
+        {"id":"SC-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Declara explícitamente que no se identificó herramienta o conector real."}]},
+        {"id":"SC-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La única salida preservada es libre y no existe contrato de salida validable."}]},
+        {"id":"SC-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se definieron nivel de supervisión, contingencias ni firmante."}]}
+      ],
+      "justificacion": "No existe contrato completo, herramienta real, salida estable ni supervisión operable.",
+      "mejora_concreta": "Definir primero el contrato de seis piezas, herramienta, esquema de salida y supervisión antes de sumar funcionalidades."
+    },
+    "proceso_documentado": {
+      "puntaje": 0,
+      "maximo": 25,
+      "nivel": "INSUFICIENTE",
+      "criterios": [
+        {"id":"PD-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Indica que no se documentaron iteraciones completas."}]},
+        {"id":"PD-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Indica que no se conservaron errores textuales ni fallas concretas."}]},
+        {"id":"PD-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No hay decisiones de iteración vinculadas a evidencia de fallas."}]}
+      ],
+      "justificacion": "El caso declara explícitamente la ausencia de proceso reconstruible.",
+      "mejora_concreta": "Registrar V1, una falla concreta, el cambio resultante y una nueva corrida."
+    },
+    "formato_reproducibilidad": {
+      "puntaje": 5,
+      "maximo": 15,
+      "nivel": "INSUFICIENTE",
+      "criterios": [
+        {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"Existen README, prompts/system_prompt.md, prompts/user_prompt.md y DECISIONES.md."}]},
+        {"id":"FR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La única prueba no conserva entrada original ni fecha, por lo que no cuenta como corrida completa."}]},
+        {"id":"FR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"No puede asociarse la salida a una entrada original ni a una versión/configuración."}]}
+      ],
+      "justificacion": "La estructura mínima existe, pero no hay corridas completas ni reconstrucción.",
+      "mejora_concreta": "Conservar tres corridas con entrada, salida, fecha y versión/configuración."
+    },
+    "analisis_economico": {
+      "puntaje": 0,
+      "maximo": 15,
+      "nivel": "INSUFICIENTE",
+      "criterios": [
+        {"id":"AE-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},
+        {"id":"AE-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},
+        {"id":"AE-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[]}
+      ],
+      "justificacion": "No existe análisis económico verificable dentro del alcance.",
+      "mejora_concreta": "Agregar costo por corrida, proyección reproducible y criterio de selección del modelo."
+    },
+    "gobierno_riesgo": {
+      "puntaje": 0,
+      "maximo": 15,
+      "nivel": "INSUFICIENTE",
+      "criterios": [
+        {"id":"GR-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se definieron permisos."}]},
+        {"id":"GR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},
+        {"id":"GR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se definieron contingencias."}]},
+        {"id":"GR-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se definieron nivel de supervisión ni firmante."}]}
+      ],
+      "justificacion": "No hay gobierno ni controles operables.",
+      "mejora_concreta": "Definir mínimo privilegio, riesgos, contingencias, nivel de supervisión y aprobador."
+    }
+  },
+  "inconsistencias": [],
+  "alertas_manipulacion": [],
+  "puntaje_total": 5,
+  "validacion": {"suma_verificada": true, "formato_valido": true},
+  "resumen_final": "Caso bajo: 5/100. Solo cumple la estructura mínima de archivos; no demuestra funcionamiento, proceso, reproducibilidad, economía ni gobierno."
+}
