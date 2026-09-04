@@ -8,6 +8,7 @@ on:
     paths:
       - 'calibracion/resultados_v5/**'
       - 'calibracion/validar_resultados_v5.py'
+      - 'evaluador-web/**'
       - '.github/workflows/validate-v5.yml'
   workflow_dispatch:
 
@@ -26,3 +27,13 @@ jobs:
           python-version: '3.12'
       - name: Validate V5 JSON, scoring and repeatability
         run: python calibracion/validar_resultados_v5.py
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install local runner
+        working-directory: evaluador-web
+        run: npm install
+      - name: Test executable runner against V5 fixtures
+        working-directory: evaluador-web
+        run: npm test
