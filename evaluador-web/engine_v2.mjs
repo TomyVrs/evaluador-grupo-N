@@ -107,7 +107,7 @@ function detectSharedInputRuns(files, readme, iterationDoc) {
   const sharedClaim = /(mismo caso|misma entrada|mismo material|volver a ejecutar el mismo|se ejecuto el mismo caso|se ejecut[oó] el mismo caso)/.test(context);
   const completeOutputs = outputs.filter(f => {
     const c = norm(f.content || '');
-    const dated = /20\d{2}[-\/]\d{1,2}[-\/]\d{1,2}|fecha\s*:\s*\d{1,2}\/\d{1,2}\/20\d{2}/.test(c);
+    const dated = /\b\d{1,2}\/\d{1,2}\/20\d{2}\b|\b20\d{2}[-\/]\d{1,2}[-\/]\d{1,2}\b/.test(c);
     const runVersion = /corrida\s*\d+.*v\d+|\bversion\s*v?\d+|\bv\d+\b/.test(c);
     return dated && runVersion;
   });
