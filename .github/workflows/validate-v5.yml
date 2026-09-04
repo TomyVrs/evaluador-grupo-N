@@ -33,7 +33,9 @@ jobs:
           node-version: '20'
       - name: Validate browser app syntax
         working-directory: evaluador-web
-        run: node --check public/app.js
+        run: |
+          node --check public/app.js
+          node --check public/feedback.js
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
