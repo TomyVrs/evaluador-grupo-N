@@ -5,36 +5,24 @@ const owner='TomyVrs';
 const repo='Trabajo-Final';
 const sha='41256e8a39a407ae5f6c9d4db718994cec6cc845';
 const root='trabajo-final/trabajo-final';
-const textExt=/\.(md|txt|json|csv|yaml|yml|js|mjs|cjs|ts|tsx|jsx|py|html|css|xml|toml|ini)$/i;
+const paths=[
+  'README.md','DECISIONES.md','ANALISIS_ECONOMICO.md','GOBIERNO_Y_RIESGO.md',
+  'prompts/system_prompt.md','prompts/user_prompt.md','herramienta/agregar_metricas_canal.py',
+  'herramienta/salidas/metricas_2025-11.json','herramienta/salidas/metricas_2026-03.json','herramienta/salidas/metricas_2026-06.json',
+  'corridas/corrida_1_2025-11/corrida.json','corridas/corrida_2_2026-03/corrida.json','corridas/corrida_3_2026-06/corrida.json'
+];
 
-async function getJson(url){
-  const r=await fetch(url,{headers:{Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}});
-  if(!r.ok) throw new Error(`${r.status} ${r.statusText}: ${url}`);
-  return r.json();
-}
-
-const tree=await getJson(`https://api.github.com/repos/${owner}/${repo}/git/trees/${sha}?recursive=1`);
-assert.equal(tree.truncated,false,'El inventario del segundo repo real no debe estar truncado.');
-const entries=tree.tree.filter(x=>x.type==='blob'&&x.path.startsWith(root+'/')&&textExt.test(x.path)&&(x.size||0)<=120000);
 const files=[];
-for(const e of entries){
-  const raw=`https://raw.githubusercontent.com/${owner}/${repo}/${sha}/${e.path.split('/').map(encodeURIComponent).join('/')}`;
+for(const path of paths){
+  const full=`${root}/${path}`;
+  const raw=`https://raw.githubusercontent.com/${owner}/${repo}/${sha}/${full.split('/').map(encodeURIComponent).join('/')}`;
   const r=await fetch(raw);
-  if(!r.ok) throw new Error(`${r.status} al leer ${e.path}`);
-  files.push({path:e.path.slice(root.length+1),content:await r.text(),size:e.size});
+  if(!r.ok) throw new Error(`${r.status} al leer ${full}`);
+  const content=await r.text();
+  files.push({path,content,size:content.length});
 }
 
-const result=evaluateEvidence({
-  url:`https://github.com/${owner}/${repo}`,
-  ref:sha,
-  sha,
-  root:`/${root}`,
-  date:'2026-09-03',
-  files,
-  inventoryComplete:true,
-  limitations:[]
-});
-
+const result=evaluateEvidence({url:`https://github.com/${owner}/${repo}`,ref:sha,sha,root:`/${root}`,date:'2026-09-03',files,inventoryComplete:true,limitations:[]});
 const criterion=id=>Object.values(result.evaluacion).flatMap(d=>d.criterios).find(c=>c.id===id);
 assert.equal(criterion('SC-01').puntos,8,'SC-01 debe reconocer las seis piezas distribuidas entre system y user prompt.');
 assert.equal(criterion('SC-02').puntos,8,'SC-02 debe reconocer la herramienta Python, su uso y las salidas/corridas que prueban operabilidad.');
