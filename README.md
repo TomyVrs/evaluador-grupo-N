@@ -66,7 +66,7 @@ El repo externo permitió comprobar que V5 reconoce una herramienta XLSX local r
 
 Los tres casos de borde `NO_EVALUABLE` —referencia inexistente, ruta inexistente y repo inexistente— fueron ejecutados nuevamente en V5.
 
-GitHub Actions ejecuta `calibracion/validar_resultados_v5.py` con permisos de lectura para validar los resultados guardados y, cuando cambia `evaluador-web/`, ejecuta además `npm test` sobre el runner local. El validador de calibración confirma JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5. **No lanza por sí solo una nueva evaluación LLM sobre un repositorio nuevo.** El workflow V5 corre sobre la rama activa y queda preparado para volver a validar al integrarse en `main`.
+GitHub Actions ejecuta `calibracion/validar_resultados_v5.py` con permisos de lectura para validar los resultados guardados y, cuando cambia `evaluador-web/`, ejecuta además `npm test` sobre el runner local. El run #3 (`33822794904`) concluyó **success**: pasaron tanto el validador V5 como la instalación y el test del runner contra los tres fixtures. **El workflow no lanza por sí solo una nueva evaluación LLM sobre un repositorio nuevo.**
 
 ## Evolución de V4 a V5
 
@@ -97,21 +97,30 @@ No fue necesario modificar la rúbrica ni el agente V5.
 
 La metodología real y su limitación están detalladas en `calibracion.md`: la ronda final fue realizada por un evaluador humano del grupo y no fue ciega, ya que conocía previamente los totales automáticos. No se inventaron evaluadores adicionales.
 
+### Revisión independiente posterior
+
+Después de cerrar esa calibración, Guillermo Rojas Yenni agregó en el repositorio grupal una **revisión humana independiente posterior** del caso excelente, con **85/100**, en el commit `40f88a8007af6c7929b2be532575b0091652b1fa` de `main`.
+
+Esa revisión es evidencia auténtica de participación del grupo, pero **no reemplaza ni modifica retroactivamente la calibración congelada V5**: fue realizada después del cierre y no forma parte de la ronda 78/5/31 → 82/9/31. Debe conservarse como revisión adicional/post-calibración y evaluarse por separado al consolidar el PR.
+
 ## Proceso grupal y revisión final
 
-El historial previo de `main` conserva la evolución mediante commits y PRs ya integrados. El endurecimiento V5 del PR #13 fue implementado desde la cuenta `TomyVrs`; por eso no se presenta ese tramo como si hubiera sido escrito por seis autores distintos. La participación adicional del grupo debe quedar reflejada de forma auténtica en la revisión del PR —comentarios, observaciones, aprobaciones o cambios concretos— antes de decidir el merge.
+El historial previo de `main` conserva la evolución mediante commits y PRs ya integrados. El endurecimiento V5 del PR #13 fue implementado desde la cuenta `TomyVrs`; por eso no se presenta ese tramo como si hubiera sido escrito por seis autores distintos.
+
+Durante la revisión final, Guillermo incorporó directamente en `main` la evaluación humana independiente mencionada arriba. Esto hace visible una contribución real del equipo, aunque también significa que `main` ya no está en el baseline `9419bb...`: su commit actual es `40f88a8...`. La rama del PR no modifica ese commit y el `FREEZE_V5` sigue intacto.
 
 ## Qué falta
 
-La candidata V5 ya tiene cerradas la calibración humano-agente y la implementación del runner local ejecutable. Antes de integrar queda la **revisión final del grupo** sobre el PR y la confirmación de que la validación automática del runner finaliza correctamente.
+La candidata V5 ya tiene cerradas la calibración humano-agente, la implementación del runner local ejecutable y la validación automática del runner con conclusión **success**.
 
-Hasta esa decisión:
+Queda:
 
-- `main` no se modifica;
-- no se crean ramas nuevas;
-- no se mergea el PR.
+- revisión final del grupo sobre el PR #13 y sobre la revisión independiente agregada posteriormente a `main`;
+- consolidar cualquier hallazgo válido sin reescribir la calibración histórica;
+- decidir en equipo cuándo sacar el PR de draft e integrar;
+- antes del cierre, confirmar que la versión final integrada en `main` conserva las contribuciones grupales y pasa nuevamente las validaciones.
 
-Antes de la entrega, la versión elegida debe quedar efectivamente integrada en `main` para que el repositorio público por defecto exponga la candidata final.
+No se crean ramas nuevas ni se mergea el PR sin decisión explícita del equipo.
 
 ## Qué aprendimos
 
