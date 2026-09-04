@@ -1,4 +1,4 @@
-import { evaluateEvidence, FREEZE_V5 } from '/engine_v2.mjs';
+import { evaluateEvidence, FREEZE_V5 } from '/engine_v3.mjs';
 
 const KEY='evaluador-v5-local-state';
 let items=load();let selected=null;
@@ -6,7 +6,7 @@ const $=id=>document.getElementById(id);
 function load(){try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}}
 function save(){localStorage.setItem(KEY,JSON.stringify(items));render();}
 function uid(){return Math.random().toString(36).slice(2)+Date.now().toString(36)}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]))}
 function decode(s){try{return decodeURIComponent(s)}catch{return s}}
 function parseTarget(raw,defRef='main',defRoot='/'){
   const u=new URL(raw.trim());if(u.hostname!=='github.com')throw Error('La URL debe ser de github.com');
