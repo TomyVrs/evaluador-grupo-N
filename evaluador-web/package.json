@@ -8,7 +8,8 @@
     "start": "node server.mjs",
     "test": "node test.mjs",
     "test:generalizacion": "node test-generalizacion.mjs",
-    "test:generalizacion2": "node test-generalizacion-2.mjs"
+    "test:generalizacion2": "node test-generalizacion-2.mjs",
+    "test:integrity": "node test-integrity.mjs"
   },
   "engines": {
     "node": ">=18"
