@@ -129,6 +129,22 @@ function upgradeJsonRuns(result, files) {
   }
 }
 
+function upgradeExplicitGovernance(result, files) {
+  const gov = byPath(files, /(?:gobierno|riesgo|governance)/);
+  if (!gov) return;
+  const t = norm(gov.content || '');
+  const level = /\bl[0-4]\b/.test(t);
+  const review = /(revision|revisa|revisar|valida|validacion).{0,80}(?:humana|humano|manager|jefe|director|supervisor)|(?:humana|humano|manager|jefe|director|supervisor).{0,80}(?:revision|revisa|revisar|valida|validacion)/.test(t);
+  const role = /(channel manager|product manager|manager|jefe|director|supervisor|aprobador|responsable|owner)/.test(t);
+  const approval = /(firma final|quien firma|firma el|aprueba|aprobacion|autoriza|sign.?off)/.test(t);
+  if (level && review && role && approval) {
+    const sc04 = getCriterion(result, 'SC-04');
+    const gr04 = getCriterion(result, 'GR-04');
+    if (sc04 && sc04.puntos < 7) setCriterion(result, 'SC-04', 'CUMPLE', 7, gov.path, 'Gobierno explícito: nivel L0–L4, momento de revisión humana, rol responsable y firma/aprobación definidos.');
+    if (gr04 && gr04.puntos < 4) setCriterion(result, 'GR-04', 'CUMPLE', 4, gov.path, 'Nivel, revisión humana, rol responsable y firma/aprobación definidos de forma operable.');
+  }
+}
+
 function correctUntestedModelChoice(result, files) {
   const econ = byPath(files, /(?:analisis.*econom|econom.*\.md|costos.*\.md)/);
   if (!econ) return;
@@ -147,6 +163,7 @@ export function evaluateEvidence(input) {
   upgradeConcreteTool(result, files);
   upgradeNumberedProcess(result, files);
   upgradeJsonRuns(result, files);
+  upgradeExplicitGovernance(result, files);
   correctUntestedModelChoice(result, files);
   recalc(result);
   return result;
