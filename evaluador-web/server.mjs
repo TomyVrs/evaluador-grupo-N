@@ -11,6 +11,7 @@ function safePath(urlPath){
   const decoded = decodeURIComponent(urlPath.split('?')[0]);
   if (decoded === '/engine.mjs') return join(root, 'engine.mjs');
   if (decoded === '/engine_v2.mjs') return join(root, 'engine_v2.mjs');
+  if (decoded === '/engine_v3.mjs') return join(root, 'engine_v3.mjs');
   const rel = decoded === '/' ? 'index.html' : decoded.replace(/^\/+/, '');
   const p = normalize(join(root, 'public', rel));
   const base = normalize(join(root, 'public'));
