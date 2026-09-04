@@ -1,15 +1,18 @@
 # Validación técnica pre-merge — candidata V5
 
-`main` no se modifica durante esta etapa. La candidata activa está en la única rama de trabajo `work/final-hardening-v4`; el nombre de rama se conserva para no crear ramas adicionales, aunque la versión activa del agente sea V5.
+La candidata activa está en la única rama de trabajo `work/final-hardening-v4`; el nombre de rama se conserva para no crear ramas adicionales, aunque la versión activa del agente sea V5.
+
+Durante la revisión final del grupo, `main` avanzó desde el baseline `9419bbeb41fe4dddc54ebe07249d1a9d4a3a7352` al commit `40f88a8007af6c7929b2be532575b0091652b1fa`, agregado por Guillermo Rojas Yenni con una evaluación humana independiente posterior del caso excelente. Ese cambio no pertenece al hardening V5, no modifica el `FREEZE_V5` y debe conservarse como evidencia grupal/post-calibración, no como reemplazo de la calibración congelada.
 
 ## Integridad
 
-- [x] Base original: `9419bbeb41fe4dddc54ebe07249d1a9d4a3a7352`.
+- [x] Base original del hardening V5: `9419bbeb41fe4dddc54ebe07249d1a9d4a3a7352`.
 - [x] Rama candidata construida sobre esa base.
 - [x] `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010` fue fijado antes de los resultados V5.
 - [x] El freeze no contiene resultados automáticos V5.
 - [x] Todas las pruebas de los tres casos refieren al mismo freeze.
 - [x] V4 se conserva solo como historial técnico.
+- [x] El cambio posterior de `main` no altera el freeze ni los resultados V5.
 
 ## Rúbrica y agente
 
@@ -48,25 +51,41 @@
 - [x] Claims contradictorios detectados.
 - [x] Herramienta local reproducible reconocida correctamente en repo externo.
 
-## Validación automática
+## Runner ejecutable local
 
-GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con conclusión **success**.
+Se agregó `evaluador-web/` para que un tercero pueda ejecutar la evaluación desde el repositorio sin depender de una API paga, tarjeta o credenciales privadas del equipo.
 
 ```text
-VALIDACION V5: OK
-- excelente: A/B idénticos por criterio — 82/100
-- flojo: A/B idénticos por criterio — 9/100
-- tramposo: A/B idénticos por criterio — 31/100
-- repo_externo: A/B idénticos por criterio — 98/100
-- bordes NO_EVALUABLE: ref, ruta y repo inexistentes — OK
-- SC-02 V5: implementación local reproducible reconocida — OK
+cd evaluador-web
+npm install
+npm test
+npm start
+# abrir http://localhost:5173
 ```
 
-El workflow V5 está configurado para validar cambios relevantes tanto en `work/final-hardening-v4` como en `main`. De este modo, al integrarse la candidata, los artefactos guardados vuelven a validarse en la rama pública por defecto.
+- [x] Node.js 18+; sin dependencias npm de terceros.
+- [x] Procesamiento por lote de repositorios públicos.
+- [x] Acepta repos completos o rutas `/tree/<ref>/<ruta>`.
+- [x] Resuelve cada ref a SHA antes de puntuar.
+- [x] Operaciones GitHub de solo lectura.
+- [x] Token GitHub opcional solo para rate limit; queda en `sessionStorage`.
+- [x] Exportación CSV y JSON.
+- [x] Motor identificado transparentemente como `deterministico-local`; no se presenta como una nueva corrida del LLM calibrado.
+- [x] `npm test` exige 82 / 9 / 31 sobre los tres fixtures incluidos.
 
-Después de incorporar este ajuste, GitHub Actions volvió a ejecutarse automáticamente sobre el commit `819eb2b6d4c65c9910cddd778322a70c11bd1295` (run #2) y concluyó nuevamente **success**.
+## Validación automática
 
-**Alcance exacto de esta automatización:** valida los JSON/resultados ya guardados, sus puntajes, estructura, SHA, repetibilidad y casos de borde. No lanza autónomamente un modelo de IA para volver a evaluar un repositorio nuevo.
+GitHub Actions ejecuta `calibracion/validar_resultados_v5.py` y también prueba el runner local cuando cambia `evaluador-web/`.
+
+El run #3 `33822794904`, sobre el commit `3dd3085f7792b82d91cadfe3580c53c527b64efc`, concluyó **success**. Pasaron:
+
+- `Validate V5 JSON, scoring and repeatability`;
+- `Install local runner`;
+- `Test executable runner against V5 fixtures`.
+
+El workflow V5 está configurado para cambios relevantes tanto en `work/final-hardening-v4` como en `main` y mantiene `contents: read`.
+
+**Alcance exacto:** el validador de calibración controla los artefactos JSON guardados y `npm test` controla la mecanización local contra los fixtures. El workflow no lanza autónomamente un LLM sobre un repositorio nuevo.
 
 ## Calibración humana
 
@@ -81,22 +100,24 @@ Después de incorporar este ajuste, GitHub Actions volvió a ejecutarse automát
 - [x] Se documentó la limitación metodológica: un evaluador humano del grupo, no ciego porque conocía previamente los totales automáticos.
 - [x] No se fabricaron evaluadores ni resultados adicionales.
 
-El plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica en los archivos de instrucciones, pero no fue el procedimiento finalmente ejecutado. `calibracion.md` documenta explícitamente la desviación y el procedimiento real.
+El plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica. La evaluación de Guillermo (85/100 para excelente) fue agregada **después** del cierre y se trata como revisión independiente posterior, no como parte de la ronda congelada.
 
 ## Proceso grupal
 
 - [x] El historial de `main` conserva commits e integraciones por PR previas a V5.
-- [x] El PR #13 mantiene el hardening V5 como una secuencia de cambios trazables, no como un único commit final.
-- [x] Se documenta de forma explícita que el tramo V5 fue implementado desde la cuenta `TomyVrs`; no se atribuye falsamente autoría técnica a otros integrantes.
-- [ ] Antes de integrar, los integrantes deben dejar evidencia auténtica de revisión del PR #13 mediante comentarios, observaciones, aprobaciones o cambios concretos según corresponda.
+- [x] El PR #13 mantiene el hardening V5 como una secuencia de cambios trazables.
+- [x] Se documenta de forma explícita que el tramo V5 fue implementado desde la cuenta `TomyVrs`.
+- [x] Guillermo Rojas Yenni dejó una contribución auténtica y verificable en GitHub mediante la evaluación humana independiente del commit `40f88a8...`.
+- [ ] Los demás integrantes deben dejar evidencia auténtica de revisión del PR #13 mediante comentarios, reviews, aprobaciones u observaciones concretas según corresponda.
 
 ## Pendiente antes de integrar
 
-- [ ] Revisión final del grupo sobre el PR y su diff.
-- [ ] Evidencia auténtica de las revisiones/aportes del equipo visible en GitHub.
+- [ ] Revisión final del grupo sobre el PR, su diff y el runner ejecutable.
+- [ ] Consolidar la revisión independiente de Guillermo sin reescribir la calibración histórica.
+- [ ] Evidencia auténtica de las restantes revisiones/aportes del equipo visible en GitHub.
 - [ ] Decidir en equipo si corresponde sacar el PR de draft e integrar.
-- [ ] Antes del cierre de la entrega, confirmar que la candidata elegida quedó efectivamente integrada en `main`.
+- [ ] Antes del cierre, confirmar que la versión integrada en `main` conserva las contribuciones y vuelve a pasar las validaciones.
 
 ## Cierre
 
-No queda una corrección funcional material identificada en la V5. El `FREEZE_V5` permanece inalterado y `main` no debe tocarse hasta decisión explícita del equipo. Las acciones pendientes son de revisión grupal e integración final, no de rediseño del agente.
+No queda una corrección funcional material identificada en el núcleo V5. El `FREEZE_V5` permanece inalterado. El runner local gratuito ya fue incorporado y validado por CI; las acciones pendientes son de revisión grupal, consolidación del cambio posterior de `main` e integración final.
