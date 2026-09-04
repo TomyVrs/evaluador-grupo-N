@@ -93,6 +93,17 @@ function integrityHtml(report){
   </div><div class="integrity-note"><b>Importante:</b> estos controles son auxiliares y heurísticos. No declaran plagio ni cambian automáticamente el puntaje. Una coincidencia relevante requiere revisión humana del profesor.</div></div></details>`;
 }
 
+function reportSignature(report){
+  const sim=report?.similarity||{};
+  return JSON.stringify({
+    injection:report?.promptInjection?.count||0,
+    manipulation:report?.manipulation?.count||0,
+    contradictions:report?.contradictions?.count||0,
+    comparedWith:sim.comparedWith||0,
+    highest:sim.highest?{itemId:sim.highest.itemId,level:sim.highest.level,maxSimilarity:sim.highest.maxSimilarity,matches:sim.highest.matches}:null
+  });
+}
+
 function enhance(){
   const detail=document.getElementById('detail');if(!detail||!detail.querySelector('.score-row'))return;
   const items=loadItems();if(!items.length)return;
@@ -100,9 +111,14 @@ function enhance(){
   if(!item){const name=detail.querySelector('.score-row h2')?.textContent?.trim();item=items.find(x=>x.target?.name===name)||items[0];if(item)selectedId=item.id}
   if(!item)return;
   const enriched=items.map(x=>({...x,integrityProfile:profileFor(x)}));const current=enriched.find(x=>x.id===item.id);const report=buildIntegrityReport(current,enriched);
-  const old=detail.querySelector('.integrity-section');if(old)old.remove();
+  const signature=reportSignature(report);
+  const old=detail.querySelector('.integrity-section');
+  if(old?.dataset.signature===signature)return;
+  if(old)old.remove();
   const anchor=detail.querySelector('.work-feedback')||detail.querySelector('.result-section.summary')||detail.querySelector('.score-row');if(!anchor)return;
   anchor.insertAdjacentHTML('afterend',integrityHtml(report));
+  const inserted=anchor.nextElementSibling;
+  if(inserted?.classList.contains('integrity-section'))inserted.dataset.signature=signature;
 }
 
 const detail=document.getElementById('detail');if(detail)new MutationObserver(schedule).observe(detail,{childList:true,subtree:false});
