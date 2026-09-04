@@ -1,0 +1,14 @@
+{
+  "name": "agente-evaluador-v5-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runner web local y gratuito para la rubrica V5 del Agente Evaluador.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node test.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
