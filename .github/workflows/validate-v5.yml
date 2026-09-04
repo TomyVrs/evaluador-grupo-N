@@ -31,6 +31,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Validate browser app syntax
+        working-directory: evaluador-web
+        run: node --check public/app.js
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
