@@ -1,6 +1,6 @@
 {
   "name": "agente-evaluador-v5-web",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "type": "module",
   "description": "Runner web local y gratuito para la rubrica V5 del Agente Evaluador.",
