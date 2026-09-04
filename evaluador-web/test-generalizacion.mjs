@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { evaluateEvidence } from './engine_v2.mjs';
+import { evaluateEvidence } from './engine_v3.mjs';
 
 const owner='TomyVrs';
 const repo='Creaci-n-de-Agentes-con-IA---MBA-UCEMA';
@@ -44,6 +44,5 @@ assert.equal(criterion('FR-02').puntos,5,'FR-02 debe reconocer cuatro salidas fe
 assert.equal(criterion('FR-03').puntos,5,'FR-03 debe reconocer salida versionada + entrada común + prompts versionados.');
 assert.equal(criterion('SC-04').puntos,0,'SC-04 no debe confundir verbos operativos “revisar” con supervisión humana formal.');
 assert.equal(criterion('GR-04').puntos,0,'GR-04 no debe inferir gobierno por menciones genéricas a responsables.');
-assert.ok(result.puntaje_total>=50,'La prueba real no debe quedar artificialmente penalizada por nombres de archivo distintos a los fixtures.');
+assert.equal(result.puntaje_total,53,'Minutas debe permanecer estable en 53/100 tras generalizar a otros formatos.');
 console.log(`OK: generalización real sobre Agente de Minutas = ${result.puntaje_total}/100.`);
-console.log('Criterios corregidos: SC-03=7, PD-01=9, PD-02=8, PD-03=8, FR-02=5, FR-03=5, SC-04=0, GR-04=0.');
