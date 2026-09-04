@@ -36,6 +36,7 @@ jobs:
         run: |
           node --check public/app.js
           node --check public/feedback.js
+          node --check public/results-ui.js
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
