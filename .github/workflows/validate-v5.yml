@@ -37,3 +37,6 @@ jobs:
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
+      - name: Test runner against real alternate repository structure
+        working-directory: evaluador-web
+        run: npm run test:generalizacion
