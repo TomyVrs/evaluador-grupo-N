@@ -1,10 +1,124 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agente Evaluador V5 · Runner local</title><link rel="stylesheet" href="/styles.css"></head><body>
-<div class="shell"><aside><h2>Agente Evaluador</h2><p>Creación de Agentes con IA · V5</p><nav><button class="active">Panel de corrección</button><button id="focus-load">Cargar trabajos</button><button id="export-csv">Exportar CSV</button><button id="export-json">Exportar JSON</button></nav><div class="side-note"><b>Gratis y local.</b><br>No usa API de IA paga ni requiere tarjeta. Lee únicamente repositorios públicos de GitHub.</div></aside>
-<main><header><div><h1>Panel de corrección</h1><p>Procesamiento por lote · motor local ejecutable · V5</p></div><div class="actions"><button id="clear" class="light danger">Limpiar</button><button id="run" class="primary">Ejecutar lote</button></div></header>
-<section class="statusbar"><span id="engine-status" class="pill ok">Motor local listo</span><span class="pill">FREEZE_V5 <code>5fdd304c…</code></span><span id="rate" class="pill">GitHub: sin consultar</span></section>
-<section class="kpis"><article><label>Trabajos</label><strong id="k-total">0</strong></article><article><label>Completados</label><strong id="k-done">0</strong></article><article><label>Procesando</label><strong id="k-running">0</strong></article><article><label>Error / no evaluable</label><strong id="k-error">0</strong></article><article><label>Promedio</label><strong id="k-avg">—</strong></article></section>
-<div class="layout"><div><section class="card" id="loader"><h2>Cargar trabajos</h2><p class="hint">Pegá una URL por línea. Acepta repos completos o carpetas <code>/tree/ref/ruta</code>. Para lotes grandes podés ingresar opcionalmente un token personal de GitHub: queda solo en esta pestaña.</p><textarea id="urls" placeholder="https://github.com/grupo1/trabajo-final\nhttps://github.com/grupo2/trabajo-final/tree/main/entrega"></textarea><div class="formrow"><input id="default-ref" value="main" placeholder="Ref"><input id="default-root" value="/" placeholder="Ruta raíz"><input id="gh-token" type="password" placeholder="Token GitHub opcional"><button id="add" class="primary">Agregar a la cola</button></div></section>
-<section class="card queue"><div class="queue-head"><div><h2>Cola de evaluación</h2><p class="hint">Cada trabajo se procesa de forma independiente.</p></div><input id="search" placeholder="Buscar trabajo o repo"></div><div class="tablewrap"><table><thead><tr><th>Trabajo</th><th>Repositorio</th><th>Estado</th><th>Nota</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div></section></div>
-<aside class="card detail" id="detail"><div class="empty"><b>Seleccioná una evaluación</b><p>Acá vas a ver nota, dimensiones, criterios, evidencia, feedback e inconsistencias.</p></div></aside></div>
-<footer>Runner ejecutable V5 · no modifica repositorios · operaciones GitHub de solo lectura.</footer></main></div>
-<script type="module" src="/app.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agente Evaluador V5</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">V5</div>
+      <div><h2>Agente Evaluador</h2><p>Creación de Agentes con IA</p></div>
+    </div>
+    <nav>
+      <button class="active" data-scroll="top">Panel de evaluación</button>
+      <button data-scroll="rubric">Qué se puntúa</button>
+      <button data-scroll="loader">Cargar trabajos</button>
+      <button data-scroll="queue">Resultados</button>
+      <button id="export-csv">Exportar CSV</button>
+      <button id="export-json">Exportar JSON</button>
+    </nav>
+    <div class="side-note"><b>Evaluación reproducible.</b><br>La misma rúbrica V5 se aplica a todos los trabajos. El motor no modifica repositorios ni archivos locales.</div>
+  </aside>
+
+  <main id="top">
+    <header class="page-header">
+      <div>
+        <div class="eyebrow">MBA UCEMA · Programación de y con Agentes de IA</div>
+        <h1>Panel de evaluación</h1>
+        <p>Evaluá uno o muchos trabajos desde GitHub, una carpeta local o archivos ZIP.</p>
+      </div>
+      <div class="actions"><button id="clear" class="light danger">Limpiar</button><button id="run" class="primary">Ejecutar evaluaciones</button></div>
+    </header>
+
+    <section class="statusbar">
+      <span id="engine-status" class="pill ok">Motor V5 listo</span>
+      <span class="pill">100 puntos · 5 dimensiones · 17 criterios</span>
+      <span id="rate" class="pill">GitHub: sin consultar</span>
+    </section>
+
+    <section class="kpis">
+      <article><label>Trabajos cargados</label><strong id="k-total">0</strong></article>
+      <article><label>Completados</label><strong id="k-done">0</strong></article>
+      <article><label>Procesando</label><strong id="k-running">0</strong></article>
+      <article><label>Error / no evaluable</label><strong id="k-error">0</strong></article>
+      <article><label>Promedio</label><strong id="k-avg">—</strong></article>
+    </section>
+
+    <section class="card rubric-card" id="rubric">
+      <div class="section-head">
+        <div><span class="section-kicker">Rúbrica V5</span><h2>Qué se puntúa</h2><p class="hint">Resumen visible de la consigna. Cada criterio usa únicamente los puntajes CUMPLE, PARCIAL o 0 definidos por la rúbrica.</p></div>
+        <div class="total-badge"><strong>100</strong><span>puntos</span></div>
+      </div>
+      <div class="rubric-summary tablewrap">
+        <table>
+          <thead><tr><th>Dimensión</th><th>Qué revisa</th><th class="num">Máx.</th></tr></thead>
+          <tbody>
+            <tr><td><b>Sistema completo y funcionando</b></td><td>Prompts y seis piezas, herramienta operable, salida estable y supervisión.</td><td class="num"><b>30</b></td></tr>
+            <tr><td><b>Proceso documentado</b></td><td>Iteraciones, fallas concretas y decisiones vinculadas a evidencia.</td><td class="num"><b>25</b></td></tr>
+            <tr><td><b>Formato y reproducibilidad</b></td><td>Estructura mínima, tres ejecuciones y posibilidad de reconstruirlas.</td><td class="num"><b>15</b></td></tr>
+            <tr><td><b>Análisis económico</b></td><td>Costo por corrida, proyección y elección costo-eficiente del modelo.</td><td class="num"><b>15</b></td></tr>
+            <tr><td><b>Gobierno y riesgo</b></td><td>Permisos, riesgos y controles, contingencias y supervisión.</td><td class="num"><b>15</b></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <details class="criteria-details">
+        <summary>Ver los 17 criterios y sus puntajes máximos</summary>
+        <div class="criteria-grid">
+          <div><h3>Sistema · 30</h3><p><b>SC-01 · 8</b> System + user prompt con seis piezas</p><p><b>SC-02 · 8</b> Herramienta/conector real y operable</p><p><b>SC-03 · 7</b> Salida estructurada, estable y definida</p><p><b>SC-04 · 7</b> Supervisión L0–L4, revisión, responsable y aprobación</p></div>
+          <div><h3>Proceso · 25</h3><p><b>PD-01 · 9</b> Iteraciones cronológicas y trazables</p><p><b>PD-02 · 8</b> Fallas/resultados fallidos concretos</p><p><b>PD-03 · 8</b> Decisiones vinculadas con fallas/evidencia</p></div>
+          <div><h3>Formato · 15</h3><p><b>FR-01 · 5</b> Estructura mínima de entrega</p><p><b>FR-02 · 5</b> Tres ejecuciones con entrada, salida y fecha</p><p><b>FR-03 · 5</b> Reconstrucción de versión/ref, ruta, configuración y salida</p></div>
+          <div><h3>Economía · 15</h3><p><b>AE-01 · 5</b> Costo por corrida con unidad, supuestos y fuente</p><p><b>AE-02 · 5</b> Proyección con frecuencia, horizonte y cálculo reproducible</p><p><b>AE-03 · 5</b> Elección justificada del modelo costo-eficiente</p></div>
+          <div><h3>Gobierno · 15</h3><p><b>GR-01 · 4</b> Sistemas y permisos con mínimo privilegio</p><p><b>GR-02 · 4</b> Riesgos específicos y controles</p><p><b>GR-03 · 3</b> Contingencias operables</p><p><b>GR-04 · 4</b> Supervisión, responsable y aprobación</p></div>
+        </div>
+      </details>
+    </section>
+
+    <section class="card" id="loader">
+      <div class="section-head compact"><div><span class="section-kicker">Paso 1</span><h2>Cargar trabajos</h2><p class="hint">Podés mezclar fuentes en el mismo lote. Los archivos locales se procesan en el navegador y no se suben a ningún servidor.</p></div></div>
+      <div class="source-grid">
+        <article class="source-card github-source">
+          <div class="source-icon">GH</div>
+          <h3>Repositorios GitHub</h3>
+          <p>Una URL por línea. Acepta repos completos o carpetas <code>/tree/ref/ruta</code>.</p>
+          <textarea id="urls" placeholder="https://github.com/grupo1/trabajo-final&#10;https://github.com/grupo2/trabajo/tree/main/entrega"></textarea>
+          <div class="github-options"><input id="default-ref" value="main" placeholder="Ref"><input id="default-root" value="/" placeholder="Ruta raíz"><input id="gh-token" type="password" placeholder="Token GitHub opcional"></div>
+          <button id="add" class="primary wide">Agregar URLs</button>
+        </article>
+        <article class="source-card local-source">
+          <div class="source-icon">DIR</div>
+          <h3>Carpeta local</h3>
+          <p>Elegí una entrega o una carpeta que contenga varias entregas en subcarpetas.</p>
+          <label class="upload-button" for="folder-input"><span>Seleccionar carpeta</span><small>Chrome / Edge</small></label>
+          <input id="folder-input" type="file" webkitdirectory directory multiple hidden>
+          <div class="privacy-note">Se conserva una huella local para identificar la corrida. Los archivos no salen del navegador.</div>
+        </article>
+        <article class="source-card local-source">
+          <div class="source-icon">ZIP</div>
+          <h3>Archivos ZIP</h3>
+          <p>Podés seleccionar uno o varios ZIP. Cada ZIP puede contener una entrega o varias carpetas de trabajos.</p>
+          <label class="upload-button" for="zip-input"><span>Seleccionar ZIP</span><small>Uno o varios archivos</small></label>
+          <input id="zip-input" type="file" accept=".zip,application/zip" multiple hidden>
+          <div class="privacy-note">ZIP soportado en navegadores modernos para archivos estándar sin contraseña.</div>
+        </article>
+      </div>
+      <div id="load-message" class="load-message" aria-live="polite"></div>
+    </section>
+
+    <section class="workspace" id="queue">
+      <section class="card queue-card">
+        <div class="queue-head"><div><span class="section-kicker">Paso 2</span><h2>Cola y resultados</h2><p class="hint">Cada trabajo se evalúa de forma independiente con la misma rúbrica.</p></div><input id="search" placeholder="Buscar trabajo"></div>
+        <div class="tablewrap"><table><thead><tr><th>Trabajo</th><th>Fuente</th><th>Estado</th><th class="num">Nota</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
+      </section>
+      <aside class="card detail" id="detail"><div class="empty"><div><b>Seleccioná una evaluación</b><p>Acá vas a ver la nota, el desglose por dimensión, cada criterio, evidencia, feedback e inconsistencias.</p></div></div></aside>
+    </section>
+
+    <footer>Runner ejecutable V5 · misma rúbrica para todas las fuentes · GitHub solo lectura · archivos locales procesados en el navegador.</footer>
+  </main>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>
