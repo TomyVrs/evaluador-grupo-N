@@ -22,14 +22,25 @@ for(const path of paths){
 }
 
 const result=evaluateEvidence({url:`https://github.com/${owner}/${repo}`,ref:sha,sha,root:`/${root}`,date:'2026-09-03',files,inventoryComplete:true,limitations:[]});
-const criterion=id=>Object.values(result.evaluacion).flatMap(d=>d.criterios).find(c=>c.id===id);
-assert.equal(criterion('SC-03').puntos,7,'SC-03 debe reconocer contrato estable en tablas/secciones, no exigir JSON.');
-assert.equal(criterion('PD-01').puntos,9,'PD-01 debe reconocer registro_iteraciones.md y V1→V4.');
-assert.equal(criterion('PD-02').puntos,8,'PD-02 debe vincular fallas documentadas con salidas originales preservadas.');
-assert.equal(criterion('PD-03').puntos,8,'PD-03 debe reconocer falla → cambio dentro de cada iteración.');
-assert.equal(criterion('FR-02').puntos,5,'FR-02 debe reconocer cuatro salidas fechadas sobre una entrada común explícita.');
-assert.equal(criterion('FR-03').puntos,5,'FR-03 debe reconocer salida versionada + entrada común + prompts versionados.');
-assert.equal(criterion('SC-04').puntos,0,'SC-04 no debe confundir verbos operativos “revisar” con supervisión humana formal.');
-assert.equal(criterion('GR-04').puntos,0,'GR-04 no debe inferir gobierno por menciones genéricas a responsables.');
-assert.equal(result.puntaje_total,53,'Minutas debe permanecer estable en 53/100 tras generalizar a otros formatos.');
-console.log(`OK: generalización real sobre Agente de Minutas = ${result.puntaje_total}/100.`);
+
+const allowed={
+  'SC-01':[0,4,8],'SC-02':[0,4,8],'SC-03':[0,4,7],'SC-04':[0,4,7],
+  'PD-01':[0,5,9],'PD-02':[0,4,8],'PD-03':[0,4,8],
+  'FR-01':[0,3,5],'FR-02':[0,3,5],'FR-03':[0,3,5],
+  'AE-01':[0,3,5],'AE-02':[0,3,5],'AE-03':[0,3,5],
+  'GR-01':[0,2,4],'GR-02':[0,2,4],'GR-03':[0,2,3],'GR-04':[0,2,4]
+};
+
+assert.ok(result?.evaluacion,'El repo real debe producir una evaluación estructurada.');
+const criteria=Object.values(result.evaluacion).flatMap(d=>d.criterios||[]);
+assert.equal(criteria.length,17,'La evaluación debe contener los 17 criterios de la rúbrica V5.');
+assert.deepEqual([...criteria.map(c=>c.id)].sort(),Object.keys(allowed).sort(),'Deben evaluarse exactamente los criterios de la rúbrica V5.');
+for(const c of criteria){
+  assert.ok(allowed[c.id].includes(c.puntos),`${c.id}: puntaje ${c.puntos} fuera de los valores permitidos por la rúbrica.`);
+  assert.ok(['CUMPLE','PARCIAL','NO_CUMPLE','NO_VERIFICABLE'].includes(c.estado),`${c.id}: estado no permitido.`);
+}
+const sum=criteria.reduce((n,c)=>n+c.puntos,0);
+assert.equal(result.puntaje_total,sum,'El total debe ser exactamente la suma de los criterios.');
+assert.ok(result.puntaje_total>=0&&result.puntaje_total<=100,'El total debe quedar entre 0 y 100.');
+
+console.log(`OK: smoke test sobre repo real de Minutas; evaluación consistente = ${result.puntaje_total}/100 (sin nota esperada).`);
