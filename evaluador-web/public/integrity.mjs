@@ -29,7 +29,7 @@ function hash32(str){
   return h>>>0;
 }
 
-function shingles(words,n=5,limit=700){
+function shingles(words,n=4,limit=700){
   const set=new Set();
   if(words.length<n)return[];
   const stride=Math.max(1,Math.floor((words.length-n+1)/limit));
