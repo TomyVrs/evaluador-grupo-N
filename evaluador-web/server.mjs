@@ -8,10 +8,13 @@ const port = Number(process.env.PORT || 5173);
 const types = {'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.md':'text/markdown; charset=utf-8'};
 
 function safePath(urlPath){
-  const decoded = decodeURIComponent(urlPath.split('?')[0]);
+  const [pathname,query=''] = String(urlPath||'/').split('?');
+  const decoded = decodeURIComponent(pathname);
   if (decoded === '/engine.mjs') return join(root, 'engine.mjs');
   if (decoded === '/engine_v2.mjs') return join(root, 'engine_v2.mjs');
-  if (decoded === '/engine_v3.mjs') return join(root, 'engine_v3.mjs');
+  if (decoded === '/engine_v3.mjs' && query === 'core=1') return join(root, 'engine_v3.mjs');
+  if (decoded === '/engine_v3.mjs') return join(root, 'engine_v4.mjs');
+  if (decoded === '/engine_v4.mjs') return join(root, 'engine_v4.mjs');
   const rel = decoded === '/' ? 'index.html' : decoded.replace(/^\/+/, '');
   const p = normalize(join(root, 'public', rel));
   const base = normalize(join(root, 'public'));
