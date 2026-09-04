@@ -6,6 +6,7 @@
   "description": "Runner web local y gratuito para la rubrica V5 del Agente Evaluador.",
   "scripts": {
     "start": "node server.mjs",
+    "build": "node build-static.mjs",
     "test": "node test.mjs",
     "test:generalizacion": "node test-generalizacion.mjs",
     "test:generalizacion2": "node test-generalizacion-2.mjs",
