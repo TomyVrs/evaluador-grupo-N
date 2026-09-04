@@ -35,10 +35,12 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 - [x] Bordes `NO_EVALUABLE` para ref, ruta y repo inexistentes.
 - [x] Workflow V5 con permisos de lectura.
 - [x] Workflow V5 preparado para validar cambios relevantes en la rama activa y en `main`.
-- [x] Alcance del workflow documentado sin exageración: valida artefactos guardados, no ejecuta de forma autónoma una nueva evaluación LLM.
+- [x] Alcance del workflow documentado sin exageración: valida artefactos guardados y el runner local; no ejecuta autónomamente una nueva evaluación LLM.
 - [x] Ejecución sobre repo público real no usado en el diseño de fixtures.
+- [x] Runner ejecutable local en `evaluador-web/` para que un tercero pueda evaluar repositorios sin API paga ni credenciales del equipo.
+- [x] Procesamiento por lote, SHA exacto, evidencia, feedback, inconsistencias, alertas y exportación CSV/JSON.
 
-**Evidencia:** `agente/`, `.github/workflows/validate-v5.yml`, `calibracion/validar_resultados_v5.py`, `calibracion/resultados_v5/repo_externo_*.json`.
+**Evidencia:** `agente/`, `evaluador-web/`, `.github/workflows/validate-v5.yml`, `calibracion/validar_resultados_v5.py`, `calibracion/resultados_v5/repo_externo_*.json`.
 
 ## 3. Tres casos de prueba — 20%
 
@@ -54,8 +56,10 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 - [x] Tramposo detecta claims contradictorios.
 - [x] Tramposo recalcula el error económico.
 - [x] Los tres conservan los mismos resultados V4→V5, sin regresión al cerrar SC-02.
+- [x] `evaluador-web/test.mjs` reproduce **82 / 9 / 31** con el motor local contra los casos incluidos.
+- [x] GitHub Actions run #3 `33822794904` ejecutó ese test con conclusión **success**.
 
-**Evidencia:** `calibracion/resultados_v5/`, `calibracion.md`.
+**Evidencia:** `calibracion/resultados_v5/`, `calibracion.md`, `evaluador-web/test.mjs`.
 
 ## 4. Calibración — 15%
 
@@ -74,11 +78,12 @@ Este documento mapea la candidata **V5** contra las cuatro piezas y cinco criter
 - [x] Resultado humano adjudicado final: 82 / 9 / 31.
 - [x] Constancia explícita de que no fue necesario modificar agente ni rúbrica.
 - [x] Limitación metodológica documentada: un evaluador humano, no ciego por conocimiento previo de totales.
-- [x] No se inventaron evaluadores ni resultados humanos adicionales.
+- [x] No se inventaron evaluadores ni resultados humanos adicionales dentro de la calibración cerrada.
+- [x] La evaluación posterior de Guillermo (Excelente 85/100) se identifica como revisión independiente post-calibración y no reemplaza la ronda congelada.
 
-**Evidencia:** `calibracion.md`, `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md`, `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md`.
+**Evidencia:** `calibracion.md`, `calibracion/INSTRUCCIONES_EVALUACION_HUMANA.md`, `calibracion/PLANTILLA_EVALUACION_HUMANA_V5.md`, commit grupal `40f88a8...`.
 
-Nota: el plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica, pero no fue el procedimiento finalmente ejecutado. Los archivos de instrucciones/plantilla quedan identificados como protocolo previo; `calibracion.md` documenta el método real.
+Nota: el plan previo de tres evaluadores independientes se conserva como propuesta metodológica histórica, pero no fue el procedimiento finalmente ejecutado. La revisión posterior de Guillermo constituye evidencia adicional de proceso grupal, no una reescritura de esa calibración.
 
 ## 5. Proceso grupal — 15%
 
@@ -90,7 +95,9 @@ Nota: el plan previo de tres evaluadores independientes se conserva como propues
 - [x] V5 fue congelada antes de generar resultados.
 - [x] Correcciones, pruebas y documentación son commits separados, no un único commit final.
 - [x] Se documenta que el hardening V5 fue implementado desde `TomyVrs`; no se simula coautoría.
-- [ ] Antes de integrar, las revisiones y aportes reales de otros integrantes deben quedar visibles en el PR mediante comentarios, reviews, aprobaciones o cambios concretos.
+- [x] Guillermo Rojas Yenni agregó una revisión humana independiente verificable en `main` (`40f88a8...`).
+- [x] El PR #13 tiene reviewers solicitados de varios integrantes del grupo.
+- [ ] Las revisiones/aportes reales restantes deben quedar visibles mediante comentarios, reviews, aprobaciones u observaciones concretas.
 - [ ] Antes de entrega, el equipo revisa que la historia completa de commits/PRs permita entender quién hizo y revisó qué.
 
 ## Estructura obligatoria
@@ -102,11 +109,24 @@ Nota: el plan previo de tres evaluadores independientes se conserva como propues
 - [x] `casos/flojo/`.
 - [x] `casos/tramposo/`.
 - [x] `calibracion.md`.
+- [x] `evaluador-web/` como runner adicional ejecutable desde el repositorio.
+
+## Ejecución para el profesor
+
+```text
+cd evaluador-web
+npm install
+npm test
+npm start
+```
+
+Abrir `http://localhost:5173` y pegar los repositorios públicos a evaluar. No requiere tarjeta, Vercel ni API de IA paga.
 
 ## Pendientes reales
 
-1. Revisión grupal final del PR #13, su diff y el historial.
-2. Dejar evidencia auténtica de esas revisiones/aportes en GitHub.
-3. Decidir en equipo cuándo sacar el PR de draft e integrar.
-4. Antes del cierre, confirmar que la candidata final quedó integrada en `main`.
-5. Hasta esa decisión, `main` permanece intacta y no se crean ramas nuevas.
+1. Revisión grupal final del PR #13, su diff, el historial y el runner local.
+2. Consolidar la revisión post-calibración de Guillermo sin mezclarla con la calibración congelada.
+3. Dejar evidencia auténtica de las revisiones/aportes restantes en GitHub.
+4. Decidir en equipo cuándo sacar el PR de draft e integrar.
+5. Antes del cierre, confirmar que la versión final integrada en `main` conserva las contribuciones y vuelve a pasar las validaciones.
+6. No crear ramas nuevas ni mergear sin decisión explícita del equipo.
