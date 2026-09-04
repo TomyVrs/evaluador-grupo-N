@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { evaluateEvidence, FREEZE_V5 } from './engine_v3.mjs';
+import { evaluateEvidence, FREEZE_V5 } from './engine_v4.mjs';
 
 const here=fileURLToPath(new URL('.',import.meta.url));
 const repoRoot=join(here,'..');
@@ -35,4 +35,4 @@ assert.ok(tramposo.alertas_manipulacion.length>=1,'tramposo debe disparar alerta
 assert.ok(tramposo.inconsistencias.length>=3,'tramposo debe registrar contradicciones/arimética');
 assert.equal(flojo.evaluacion.sistema_completo_funcionando.criterios.find(c=>c.id==='SC-01').puntos,4);
 assert.equal(excelente.evaluacion.proceso_documentado.criterios.find(c=>c.id==='PD-03').puntos,8);
-console.log('OK: runner V3 conserva Excelente 82, Flojo 9 y Tramposo 31.');
+console.log('OK: runner 1.2.1 conserva Excelente 82, Flojo 9 y Tramposo 31.');
