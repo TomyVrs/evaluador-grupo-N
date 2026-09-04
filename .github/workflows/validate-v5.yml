@@ -40,3 +40,6 @@ jobs:
       - name: Test runner against real alternate repository structure
         working-directory: evaluador-web
         run: npm run test:generalizacion
+      - name: Test runner against second real repository structure
+        working-directory: evaluador-web
+        run: npm run test:generalizacion2
