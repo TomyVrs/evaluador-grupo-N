@@ -1,4 +1,4 @@
-import { evaluateEvidence as evaluateV3, FREEZE_V5, RUBRIC_VERSION } from './engine_v3.mjs';
+import { evaluateEvidence as evaluateV3, FREEZE_V5, RUBRIC_VERSION } from './engine_v3.mjs?core=1';
 
 export { FREEZE_V5, RUBRIC_VERSION };
 
