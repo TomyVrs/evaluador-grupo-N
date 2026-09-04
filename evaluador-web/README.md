@@ -54,6 +54,14 @@ La fuente normativa de la evaluación sigue siendo:
 
 El runner existe para que un tercero pueda ejecutar una evaluación desde el repositorio sin depender de credenciales privadas del equipo.
 
+## Pruebas e imparcialidad
+
+Los casos `Excelente`, `Flojo` y `Tramposo` son fixtures de calibración construidos específicamente para verificar que la rúbrica y el motor conservan los resultados acordados durante la calibración V5.
+
+Los repositorios reales usados como pruebas de generalización **no fijan ni esperan una nota concreta**. Esas pruebas solo verifican que el evaluador pueda leer estructuras distintas y producir una evaluación válida, completa y consistente con los estados y puntajes permitidos por la rúbrica. La nota obtenida por un repo real es siempre una salida del evaluador, no una condición del test.
+
+Ninguna regla del motor depende del nombre, propietario o identidad de un repositorio evaluado. Los ajustes del motor deben corresponder a evidencia o reglas generales de la rúbrica, no a alcanzar una nota deseada para un trabajo particular.
+
 ## Alcance y transparencia
 
 Los criterios mecánicos (archivos, corridas, estructura, cálculos, sumas, contradicciones objetivas y patrones operativos) se resuelven directamente. Los criterios semánticos se aproximan mediante reglas explícitas y auditables. Por eso el JSON incluye `motor_ejecutable.tipo = deterministico-local`; no se presenta como una corrida del LLM usado durante la calibración V5.
