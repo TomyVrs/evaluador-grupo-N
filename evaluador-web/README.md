@@ -1,6 +1,17 @@
 # Evaluador Web local — V5
 
-Interfaz ejecutable y gratuita para aplicar la rúbrica V5 sobre uno o muchos repositorios públicos de GitHub.
+Interfaz ejecutable y gratuita para aplicar la rúbrica V5 sobre uno o muchos trabajos.
+
+## Fuentes aceptadas
+
+La misma rúbrica se aplica independientemente de la fuente:
+
+- repositorios públicos de GitHub;
+- una carpeta local con una entrega;
+- una carpeta local que contenga varias entregas en subcarpetas;
+- uno o varios archivos `.zip` estándar sin contraseña.
+
+Los archivos locales se procesan directamente en el navegador y no se suben a ningún servidor. Para identificar una evaluación local se calcula una huella SHA-256 sobre los archivos de texto leídos.
 
 ## Ejecutar
 
@@ -22,24 +33,30 @@ http://localhost:5173
 
 ## Uso
 
-1. Pegar una URL de GitHub por línea. Puede ser la raíz del repositorio o una carpeta (`/tree/<ref>/<ruta>`).
-2. Opcionalmente indicar otra ref/ruta por defecto.
-3. Presionar **Agregar a la cola** y luego **Ejecutar lote**.
-4. Revisar nota, dimensiones, criterios, evidencia, feedback, inconsistencias y alertas.
-5. Exportar CSV o JSON desde el panel lateral.
+1. Cargar uno o varios trabajos desde GitHub, carpeta local o ZIP.
+2. Revisar la tabla visible con las 5 dimensiones y los 17 criterios de la rúbrica.
+3. Presionar **Ejecutar evaluaciones**.
+4. Revisar nota total, dimensiones, criterios, evidencia, feedback, inconsistencias y alertas.
+5. Exportar CSV o JSON.
 
-Cada trabajo se resuelve a un SHA exacto antes de puntuar. La app solo realiza lecturas de repositorios públicos.
+### GitHub
 
-## GitHub y lotes grandes
+Se puede pegar una URL por línea. La app acepta la raíz de un repositorio o una carpeta (`/tree/<ref>/<ruta>`). Cada trabajo se resuelve a un SHA exacto antes de puntuar.
 
-Sin autenticación, GitHub aplica un límite bajo a su REST API. Para clases grandes se puede ingresar un token personal **opcional** de GitHub en la interfaz. El token:
+Sin autenticación, GitHub aplica un límite bajo a su REST API. Para clases grandes se puede ingresar un token personal opcional. El token:
 
 - no se escribe en el repositorio;
 - no se envía a ningún servidor de esta app;
 - queda únicamente en `sessionStorage` de la pestaña;
 - solo se usa para aumentar el límite de lectura de GitHub.
 
-No hace falta token para una prueba chica con repositorios públicos.
+### Carpetas locales
+
+La selección de carpetas está pensada para Chrome/Edge. Si la carpeta elegida contiene varias subcarpetas que parecen entregas independientes, la app las agrega como trabajos separados.
+
+### ZIP
+
+Admite ZIP estándar sin contraseña. Puede cargarse uno o varios archivos. Si un ZIP contiene varias carpetas de entregas reconocibles, se agregan por separado. ZIP64 o métodos de compresión no soportados deben cargarse como carpeta local.
 
 ## Motor
 
