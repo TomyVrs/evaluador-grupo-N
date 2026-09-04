@@ -37,12 +37,17 @@ jobs:
           node --check public/app.js
           node --check public/feedback.js
           node --check public/results-ui.js
+          node --check public/integrity.mjs
+          node --check public/integrity-runtime.js
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
+      - name: Test integrity controls
+        working-directory: evaluador-web
+        run: npm run test:integrity
       - name: Test runner against real alternate repository structure
         working-directory: evaluador-web
         run: npm run test:generalizacion
