@@ -1,4 +1,4 @@
-import { evaluateEvidence, FREEZE_V5 } from '/engine.mjs';
+import { evaluateEvidence, FREEZE_V5 } from '/engine_v2.mjs';
 
 const KEY='evaluador-v5-local-state';
 let items=load();let selected=null;
