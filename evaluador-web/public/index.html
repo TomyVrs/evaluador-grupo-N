@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Agente Evaluador V5</title>
   <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/feedback.css">
 </head>
 <body>
 <div class="shell">
@@ -113,12 +114,13 @@
         <div class="queue-head"><div><span class="section-kicker">Paso 2</span><h2>Cola y resultados</h2><p class="hint">Cada trabajo se evalúa de forma independiente con la misma rúbrica.</p></div><input id="search" placeholder="Buscar trabajo"></div>
         <div class="tablewrap"><table><thead><tr><th>Trabajo</th><th>Fuente</th><th>Estado</th><th class="num">Nota</th><th></th></tr></thead><tbody id="tbody"></tbody></table></div>
       </section>
-      <aside class="card detail" id="detail"><div class="empty"><div><b>Seleccioná una evaluación</b><p>Acá vas a ver la nota, el desglose por dimensión, cada criterio, evidencia, feedback e inconsistencias.</p></div></div></aside>
+      <aside class="card detail" id="detail"><div class="empty"><div><b>Seleccioná una evaluación</b><p>Acá vas a ver la nota, una devolución ejecutiva, el desglose por dimensión, cada criterio, evidencia e inconsistencias.</p></div></div></aside>
     </section>
 
     <footer>Runner ejecutable V5 · misma rúbrica para todas las fuentes · GitHub solo lectura · archivos locales procesados en el navegador.</footer>
   </main>
 </div>
 <script type="module" src="/app.js"></script>
+<script type="module" src="/feedback.js"></script>
 </body>
 </html>
