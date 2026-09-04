@@ -24,6 +24,28 @@ Definimos una rúbrica ejecutable, system prompt, user prompt, configuración op
 - Casos de borde para referencia, ruta y repositorio inexistentes.
 - Prueba adicional sobre un repositorio público real no usado durante el diseño de los fixtures.
 - Calibración humano-agente documentada con desacuerdos iniciales, adjudicación y resultado final.
+- Runner web local y gratuito en `evaluador-web/`, capaz de procesar repositorios públicos por lote sin API de IA paga ni credenciales privadas del equipo.
+
+## Ejecución local gratuita
+
+Para que un tercero pueda ejecutar el evaluador directamente desde el repositorio se incluye `evaluador-web/`.
+
+Requisito: Node.js 18 o superior.
+
+```bash
+cd evaluador-web
+npm install
+npm test
+npm start
+```
+
+Después abrir `http://localhost:5173`.
+
+El runner acepta uno o muchos repositorios públicos de GitHub, incluida una ruta interna `/tree/<ref>/<ruta>`, resuelve cada trabajo a un SHA exacto, aplica la rúbrica V5 y permite exportar resultados a CSV o JSON. No requiere Vercel, OpenAI, tarjeta ni API paga. Para lotes grandes se puede ingresar opcionalmente un token personal de GitHub; queda solo en `sessionStorage` de la pestaña y se usa exclusivamente para aumentar el límite de lecturas.
+
+El motor ejecutable es una mecanización local y auditable de la rúbrica V5. No se presenta como una nueva corrida del LLM usado en la calibración. La fuente normativa sigue siendo `rubrica.md` y los archivos de `agente/`; el `FREEZE_V5` y sus resultados históricos permanecen inalterados.
+
+`npm test` ejecuta el runner contra los tres casos incluidos y exige los resultados V5 adjudicados: **Excelente 82, Flojo 9 y Tramposo 31**, además de controles específicos de manipulación e inconsistencias.
 
 ## Validación técnica V5
 
@@ -44,7 +66,7 @@ El repo externo permitió comprobar que V5 reconoce una herramienta XLSX local r
 
 Los tres casos de borde `NO_EVALUABLE` —referencia inexistente, ruta inexistente y repo inexistente— fueron ejecutados nuevamente en V5.
 
-GitHub Actions ejecutó `calibracion/validar_resultados_v5.py` con permisos de lectura y conclusión **success**. El validador confirma la consistencia de los resultados guardados: JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5. **No ejecuta por sí solo una nueva evaluación LLM sobre un repositorio nuevo.** El workflow V5 corre sobre la rama activa y queda preparado para volver a validar al integrarse en `main`.
+GitHub Actions ejecuta `calibracion/validar_resultados_v5.py` con permisos de lectura para validar los resultados guardados y, cuando cambia `evaluador-web/`, ejecuta además `npm test` sobre el runner local. El validador de calibración confirma JSON, criterios, puntajes permitidos, sumas, niveles, evidencia, SHA, repetibilidad, umbrales, bordes y SC-02 V5. **No lanza por sí solo una nueva evaluación LLM sobre un repositorio nuevo.** El workflow V5 corre sobre la rama activa y queda preparado para volver a validar al integrarse en `main`.
 
 ## Evolución de V4 a V5
 
@@ -81,9 +103,9 @@ El historial previo de `main` conserva la evolución mediante commits y PRs ya i
 
 ## Qué falta
 
-La candidata V5 ya tiene cerradas la validación técnica y la calibración humano-agente.
+La candidata V5 ya tiene cerradas la calibración humano-agente y la implementación del runner local ejecutable. Antes de integrar queda la **revisión final del grupo** sobre el PR y la confirmación de que la validación automática del runner finaliza correctamente.
 
-Queda únicamente la **revisión final del grupo** sobre el PR antes de decidir si se integra. Hasta esa decisión:
+Hasta esa decisión:
 
 - `main` no se modifica;
 - no se crean ramas nuevas;
