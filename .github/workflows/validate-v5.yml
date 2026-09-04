@@ -42,6 +42,14 @@ jobs:
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
+      - name: Build static Vercel package
+        working-directory: evaluador-web
+        run: |
+          npm run build
+          test -f dist/index.html
+          test -f dist/app.js
+          test -f dist/engine_v4.mjs
+          grep -q "from '/engine_v4.mjs'" dist/app.js
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
