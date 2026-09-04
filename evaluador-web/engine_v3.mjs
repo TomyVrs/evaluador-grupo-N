@@ -70,9 +70,10 @@ function upgradeNumberedProcess(result, files) {
   const raw = String(doc.content || '');
   const headings = [...raw.matchAll(/^#{1,4}\s+iteraci[oó]n\s+\d+\b/gmi)].length;
   const sections = raw.split(/(?=^#{1,4}\s+iteraci[oó]n\s+\d+\b)/gmi).filter(Boolean);
-  const failureSections = sections.filter(s => /(qu[eé] fall[oó]|falla|bug|error|se cort[oó]|truncad|salida.*(?:inv[aá]lid|incomplet|incorrect)|race condition)/i.test(s));
+  const concreteFailure = /(qu[eé] fall[oó]\s*:|falla observada|bug\s+(?:en|de)|se cort[oó]|truncad|salida.*(?:inv[aá]lid|incomplet|incorrect)|race condition)/i;
+  const failureSections = sections.filter(s => concreteFailure.test(s));
   const changeSections = sections.filter(s => /(fix|cambio|se corrigi[oó]|se cambi[oó]|se agreg[oó]|se modific[oó]|se reemplaz[oó]|decisi[oó]n)/i.test(s));
-  const linked = sections.filter(s => /(qu[eé] fall[oó]|falla|bug|error|se cort[oó]|truncad|race condition)/i.test(s) && /(fix|cambio|se corrigi[oó]|se cambi[oó]|se agreg[oó]|se modific[oó]|causa)/i.test(s));
+  const linked = sections.filter(s => concreteFailure.test(s) && /(fix|cambio|se corrigi[oó]|se cambi[oó]|se agreg[oó]|se modific[oó]|causa)/i.test(s));
 
   const pd01 = getCriterion(result, 'PD-01');
   if (pd01 && pd01.puntos < 9 && headings >= 3 && changeSections.length >= 2) {
