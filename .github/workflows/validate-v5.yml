@@ -62,3 +62,6 @@ jobs:
       - name: Test runner against second real repository structure
         working-directory: evaluador-web
         run: npm run test:generalizacion2
+      - name: Compare deterministic runner with V5 contract on external repository
+        working-directory: evaluador-web
+        run: node verificar-motor-vs-contrato.mjs
