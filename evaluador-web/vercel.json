@@ -6,6 +6,9 @@
   "functions": {
     "api/evaluate.mjs": {
       "maxDuration": 300
+    },
+    "api/evaluate-with-usage.mjs": {
+      "maxDuration": 300
     }
   },
   "headers": [
