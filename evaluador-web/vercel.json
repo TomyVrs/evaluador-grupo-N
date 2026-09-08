@@ -9,8 +9,17 @@
     },
     "api/evaluate-with-usage.mjs": {
       "maxDuration": 300
+    },
+    "api/evaluate-router.mjs": {
+      "maxDuration": 300
     }
   },
+  "rewrites": [
+    {
+      "source": "/api/evaluate-with-usage",
+      "destination": "/api/evaluate-router"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
