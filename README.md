@@ -1,5 +1,13 @@
 # Agente Evaluador de Trabajos Finales
 
+## Entrega final
+
+- **Repositorio oficial:** https://github.com/grojas-jpg/evaluador-grupo-N
+- **App pública:** https://evaluador-v5-web.vercel.app
+- **Rama de entrega:** `main`
+
+La app pública expone el **runner determinístico complementario V5**. La fuente normativa de evaluación sigue siendo el agente V5 definido por `agente/system_prompt.md`, `rubrica.md`, `agente/configuracion.md` y `agente/contrato_salida.md`.
+
 ## Qué construimos
 
 Construimos un agente evaluador para corregir repositorios de Trabajos Finales de la materia **Creación de Agentes con IA**. Inspecciona evidencia verificable, aplica una rúbrica ejecutable de 100 puntos y devuelve una evaluación estructurada con puntaje, justificación, evidencia, inconsistencias y mejoras concretas.
@@ -103,16 +111,16 @@ No se incorporaron reglas que podían sesgar o degradar el evaluador:
 - garantías de “determinismo 100%” entre LLMs;
 - un contrato JSON V6 incompatible con la V5 congelada.
 
-El detalle comentario por comentario está en `docs/AUDITORIA_FINAL_PR13_PR14.md`. Cuando el hardening final quede integrado, el PR #14 puede cerrarse como **superseded** sin perder su historial ni la autoría de sus aportes.
+El detalle comentario por comentario está en `docs/AUDITORIA_FINAL_PR13_PR14.md`. El hardening final ya fue integrado y el PR #14 fue cerrado sin mergear como propuesta superseded, conservando su historial y autoría.
 
-## Qué falta
+## Estado de entrega
 
-Para cerrar el repositorio no falta modificar la rúbrica ni el agente V5. El hardening final debe:
-
-- pasar CI completo;
-- integrarse en `main` mediante un único PR;
-- luego cerrar el PR #14 como superseded;
-- actualizar el deployment público para que el link de Vercel apunte al `main` final.
+- PR #13: **mergeado**.
+- PR #15: **mergeado**.
+- PR #14: **cerrado sin mergear**.
+- `main`: **versión final de entrega**.
+- CI post-merge: **success**.
+- App pública Vercel: **READY** y accesible en `https://evaluador-v5-web.vercel.app`.
 
 Como mejora posterior no bloqueante puede ampliarse la calibración con más trabajos reales de banda media y, si se quisiera convertir la web en evaluador normativo, implementar un modo LLM del lado servidor. Ninguna de esas dos mejoras es necesaria para conservar la entrega V5 actual.
 
