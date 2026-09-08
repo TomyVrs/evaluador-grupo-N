@@ -11,7 +11,7 @@ let usageRefreshQueued = false;
 const PROFILE_LABELS = {
   sol: 'Sol · referencia de máxima calidad',
   luna: 'Luna · económico',
-  free: 'gpt-oss-120b · gratis experimental',
+  free: 'Dots3-Note · gratis experimental',
 };
 
 function fmtInt(value){return Number(value||0).toLocaleString('es-AR')}
@@ -81,7 +81,7 @@ function ensureProfileSelector(){
   if(!source)return;
   const box=document.createElement('div');
   box.style.cssText='margin:12px 0;padding:12px;border:1px solid #dbe3ee;border-radius:10px;background:#f8fafc';
-  box.innerHTML='<label for="ai-profile" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Perfil de modelo para esta tanda</label><select id="ai-profile" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:white"><option value="sol">Sol — referencia / máxima calidad</option><option value="luna">Luna — económico</option><option value="free">gpt-oss-120b — gratis experimental</option></select><small id="ai-profile-note" style="display:block;margin-top:6px;color:#64748b;line-height:1.35"></small>';
+  box.innerHTML='<label for="ai-profile" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Perfil de modelo para esta tanda</label><select id="ai-profile" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:white"><option value="sol">Sol — referencia / máxima calidad</option><option value="luna">Luna — económico</option><option value="free">Dots3-Note — gratis experimental</option></select><small id="ai-profile-note" style="display:block;margin-top:6px;color:#64748b;line-height:1.35"></small>';
   const button=source.querySelector('#add');
   source.insertBefore(box,button);
   const select=box.querySelector('#ai-profile');
