@@ -11,7 +11,7 @@ let usageRefreshQueued = false;
 const PROFILE_LABELS = {
   sol: 'Sol · referencia de máxima calidad',
   luna: 'Luna · económico',
-  free: 'Dots3-Note · gratis experimental',
+  free: 'Gemini 3.7 Flash · gratis',
 };
 
 function fmtInt(value){return Number(value||0).toLocaleString('es-AR')}
@@ -81,7 +81,7 @@ function ensureProfileSelector(){
   if(!source)return;
   const box=document.createElement('div');
   box.style.cssText='margin:12px 0;padding:12px;border:1px solid #dbe3ee;border-radius:10px;background:#f8fafc';
-  box.innerHTML='<label for="ai-profile" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Perfil de modelo para esta tanda</label><select id="ai-profile" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:white"><option value="sol">Sol — referencia / máxima calidad</option><option value="luna">Luna — económico</option><option value="free">Dots3-Note — gratis experimental</option></select><small id="ai-profile-note" style="display:block;margin-top:6px;color:#64748b;line-height:1.35"></small>';
+  box.innerHTML='<label for="ai-profile" style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Perfil de modelo para esta tanda</label><select id="ai-profile" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:white"><option value="sol">Sol — referencia / máxima calidad</option><option value="luna">Luna — económico</option><option value="free">Gemini 3.7 Flash — gratis</option></select><small id="ai-profile-note" style="display:block;margin-top:6px;color:#64748b;line-height:1.35"></small>';
   const button=source.querySelector('#add');
   source.insertBefore(box,button);
   const select=box.querySelector('#ai-profile');
@@ -90,7 +90,7 @@ function ensureProfileSelector(){
   const refresh=()=>{
     const value=select.value;
     localStorage.setItem(PROFILE_KEY,value);
-    note.textContent=value==='sol'?'Perfil de referencia para validar la nota final.':value==='luna'?'Misma norma V5 con un modelo mucho más económico; se calibra contra Sol.':'Costo de inferencia USD 0 en el modelo free de OpenRouter; experimental hasta completar la calibración contra Sol.';
+    note.textContent=value==='sol'?'Perfil de referencia para validar la nota final.':value==='luna'?'Misma norma V5 con un modelo mucho más económico; se calibra contra Sol.':'Gemini 3.7 Flash en Free Tier: costo de inferencia USD 0 dentro de los límites gratuitos; se calibra contra la referencia V5 antes de usarlo como corrector final.';
     updateProfileStatus();
   };
   select.addEventListener('change',refresh);
@@ -108,7 +108,7 @@ function enhanceOfficialUi(){
   if(footer)footer.textContent='Agente IA V5 oficial · evidencia GitHub anclada a SHA · herramientas de solo lectura · consumo API visible · salida validada contra la rúbrica V5.';
   document.querySelectorAll('.local-source').forEach(el=>el.style.display='none');
   const loaderHint=document.querySelector('#loader .section-head .hint');
-  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. Podés comparar Sol, Luna y un perfil gratuito manteniendo exactamente la misma rúbrica V5.';
+  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. Podés comparar Sol, Luna y Gemini gratuito manteniendo exactamente la misma rúbrica V5.';
   const token=document.getElementById('gh-token');
   if(token)token.style.display='none';
   ensureUsageKpi();
