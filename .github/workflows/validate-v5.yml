@@ -47,7 +47,7 @@ jobs:
           node --check public/integrity-runtime.js
           node --check api/evaluate.mjs
           node --check api/evaluate-with-usage.mjs
-      - name: Validate official AI safeguards and usage metering
+      - name: Validate official AI safeguards, profiles and usage metering
         working-directory: evaluador-web
         run: |
           grep -q "OPENAI_API_KEY" api/evaluate.mjs
@@ -55,10 +55,13 @@ jobs:
           grep -q "gpt-5.6-sol" api/evaluate.mjs
           grep -q "read_file" api/evaluate.mjs
           grep -q "get_commit_history" api/evaluate.mjs
+          grep -q "OPENROUTER_API_KEY" api/evaluate-with-usage.mjs
+          grep -q "gpt-5.6-luna" api/evaluate-with-usage.mjs
+          grep -q "openai/gpt-oss-120b:free" api/evaluate-with-usage.mjs
           grep -q "costo_estimado_usd" api/evaluate-with-usage.mjs
           grep -q "cached_input_tokens" api/evaluate-with-usage.mjs
           grep -q "reasoning_tokens" api/evaluate-with-usage.mjs
-          grep -q "evaluate-with-usage" public/official-ai-adapter.mjs
+          grep -q "ai_profile" public/official-ai-adapter.mjs
           grep -q "Costo API acumulado" public/official-ai-adapter.mjs
       - name: Install local runner
         working-directory: evaluador-web
@@ -73,6 +76,7 @@ jobs:
           test -f dist/engine_v4.mjs
           grep -q "from '/official-ai-adapter.mjs'" dist/app.js
           grep -q "kind:'github'" dist/app.js
+          grep -q "gpt-oss-120b" dist/official-ai-adapter.mjs
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
