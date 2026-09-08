@@ -2,28 +2,131 @@
 
 ## Qué construimos
 
-Construimos un agente evaluador capaz de corregir repositorios de Trabajos Finales de la materia. Inspecciona archivos e historial, usa evidencia verificable, aplica la rúbrica oficial de 100 puntos y devuelve una evaluación estructurada con puntaje, justificación, evidencia y mejora concreta.
+Construimos un agente evaluador capaz de corregir repositorios de Trabajos Finales de la materia. Inspecciona archivos e historial, usa evidencia verificable, aplica una rúbrica ejecutable de 100 puntos y devuelve una evaluación estructurada con puntaje, justificación, evidencia y mejora concreta.
 
 ## Cómo se lo pedimos
 
-Definimos una rúbrica ejecutable, un contrato de salida y un system prompt con reglas de acceso, trazabilidad, supervisión, manejo de evidencia insuficiente y resistencia a prompt injection. También construimos tres casos de prueba y un protocolo de calibración.
+Definimos una rúbrica ejecutable, system prompt, user prompt, configuración operativa y contrato de salida. El agente trabaja sobre una referencia GitHub congelada, inventaría el alcance antes de puntuar, aplica precedencia de evidencia, resiste prompt injection y utiliza únicamente operaciones de lectura durante la evaluación.
 
 ## Qué funciona
 
-- Rúbrica con cinco dimensiones y pesos oficiales: 30/25/15/15/15.
-- Evaluación basada en archivos, historial y evidencia verificable.
-- Distinción entre ausencia de evidencia y evidencia de ausencia.
-- Detección de instrucciones maliciosas dentro del repositorio.
-- Salida JSON estructurada con puntaje por dimensión, evidencia y mejora.
-- Casos excelente, flojo y tramposo preparados para prueba.
+- Rúbrica **V5** con cinco dimensiones y pesos oficiales: 30/25/15/15/15.
+- Puntaje fijo por criterio y reglas operativas para `CUMPLE`, `PARCIAL`, `NO_CUMPLE` y `NO_VERIFICABLE`.
+- Definición objetiva de las seis piezas del contrato del agente.
+- Precedencia explícita para resolver claims y evidencia contradictoria.
+- Tres vías tecnológicamente neutrales para demostrar una herramienta operable: traza/corrida, implementación local reproducible o integración reproducible.
+- Evaluación anclada a un SHA exacto para evitar mezclar versiones.
+- Inventario previo del alcance y defensa ante cobertura incompleta/truncada.
+- Distinción entre evidencia de ausencia y limitación de acceso.
+- Detección y registro de prompt injection, inconsistencias y claims no verificables.
+- Salida JSON estructurada y validador automático.
+- Casos excelente, flojo y tramposo probados dos veces sobre el mismo freeze.
+- Casos de borde para referencia, ruta y repositorio inexistentes.
+- Prueba adicional sobre un repositorio público real no usado durante el diseño de los fixtures.
+- Calibración humano-agente documentada con desacuerdos iniciales, adjudicación y resultado final.
+- Runner web local y gratuito en `evaluador-web/`, capaz de procesar repositorios públicos por lote sin API de IA paga ni credenciales privadas del equipo.
 
-## Qué falta o qué falló
+## Ejecución local gratuita
 
-La calibración real todavía no fue ejecutada. Por eso `calibracion.md` contiene el protocolo y tablas pendientes, pero no resultados inventados. La integración final al repositorio original queda sujeta a la decisión del equipo.
+Para que un tercero pueda ejecutar el evaluador directamente desde el repositorio se incluye `evaluador-web/`.
+
+Requisito: Node.js 18 o superior.
+
+```bash
+cd evaluador-web
+npm install
+npm test
+npm start
+```
+
+Después abrir `http://localhost:5173`.
+
+El runner acepta uno o muchos repositorios públicos de GitHub, incluida una ruta interna `/tree/<ref>/<ruta>`, resuelve cada trabajo a un SHA exacto, aplica la rúbrica V5 y permite exportar resultados a CSV o JSON. No requiere Vercel, OpenAI, tarjeta ni API paga. Para lotes grandes se puede ingresar opcionalmente un token personal de GitHub; queda solo en `sessionStorage` de la pestaña y se usa exclusivamente para aumentar el límite de lecturas.
+
+El motor ejecutable es una mecanización local y auditable de la rúbrica V5. No se presenta como una nueva corrida del LLM usado en la calibración. La fuente normativa sigue siendo `rubrica.md` y los archivos de `agente/`; el `FREEZE_V5` y sus resultados históricos permanecen inalterados.
+
+`npm test` ejecuta el runner contra los tres casos incluidos y exige los resultados V5 adjudicados: **Excelente 82, Flojo 9 y Tramposo 31**, además de controles específicos de manipulación e inconsistencias.
+
+## Validación técnica V5
+
+**FREEZE_V5:** `5fdd304c26097aa16dc6d065e8b1c3d6359e7010`.
+
+Ese SHA fue fijado antes de crear resultados V5.
+
+| Prueba | Resultado A | Resultado B | Diferencia por criterio |
+|---|---:|---:|---:|
+| Excelente | 82/100 | 82/100 | 0 |
+| Flojo | 9/100 | 9/100 | 0 |
+| Tramposo | 31/100 | 31/100 | 0 |
+| Repo externo no visto | 98/100 | 98/100 | 0 |
+
+El caso tramposo no altera la rúbrica: se detectan prompt injection, claims contradictorios, error aritmético y gobierno deficiente.
+
+El repo externo permitió comprobar que V5 reconoce una herramienta XLSX local realmente implementada/reproducible sin exigir artificialmente un conector externo. También ejercitó el comportamiento conservador ante una respuesta de inventario demasiado grande para la integración: se declara limitación en vez de inferir ausencia.
+
+Los tres casos de borde `NO_EVALUABLE` —referencia inexistente, ruta inexistente y repo inexistente— fueron ejecutados nuevamente en V5.
+
+GitHub Actions ejecuta `calibracion/validar_resultados_v5.py` con permisos de lectura para validar los resultados guardados y, cuando cambia `evaluador-web/`, ejecuta además `npm test` sobre el runner local. El run #3 (`33822794904`) concluyó **success**: pasaron tanto el validador V5 como la instalación y el test del runner contra los tres fixtures. **El workflow no lanza por sí solo una nueva evaluación LLM sobre un repositorio nuevo.**
+
+## Evolución de V4 a V5
+
+V4 ya había superado su batería técnica. Antes de enviar la rúbrica a humanos, una prueba sobre un repo real no visto mostró que SC-02 podía ser interpretado distinto para una herramienta local reproducible frente a un conector externo.
+
+V5 cerró esa ambigüedad antes de la calibración humana. La modificación no cambió la nota de los tres casos conocidos: 82, 9 y 31 se mantuvieron idénticos, lo que funciona además como prueba de no regresión.
+
+## Calibración humano-agente
+
+La evaluación humana se hizo sobre el mismo `FREEZE_V5`, criterio por criterio.
+
+Resultados iniciales:
+
+| Caso | Humano inicial | Agente |
+|---|---:|---:|
+| Excelente | 78 | 82 |
+| Flojo | 5 | 9 |
+| Tramposo | 31 | 31 |
+
+Los dos desacuerdos se revisaron contra la definición literal de la rúbrica y la evidencia congelada:
+
+- Excelente: `PD-03` debía ser `CUMPLE`, porque `DECISIONES.md` vincula explícitamente la falla de inferencia con la regla agregada para no completar responsables/plazos sin evidencia.
+- Flojo: `SC-01` debía ser `PARCIAL`, porque entre ambos prompts existen al menos cuatro piezas operativas.
+
+Ambos desacuerdos se clasificaron como `ERROR_HUMANO`. Después de la adjudicación, humano y agente coinciden exactamente: **82 / 9 / 31**.
+
+No fue necesario modificar la rúbrica ni el agente V5.
+
+La metodología real y su limitación están detalladas en `calibracion.md`: la ronda final fue realizada por un evaluador humano del grupo y no fue ciega, ya que conocía previamente los totales automáticos. No se inventaron evaluadores adicionales.
+
+### Revisión independiente posterior
+
+Después de cerrar esa calibración, Guillermo Rojas Yenni agregó en el repositorio grupal una **revisión humana independiente posterior** del caso excelente, con **85/100**, en el commit `40f88a8007af6c7929b2be532575b0091652b1fa` de `main`.
+
+Esa revisión es evidencia auténtica de participación del grupo, pero **no reemplaza ni modifica retroactivamente la calibración congelada V5**: fue realizada después del cierre y no forma parte de la ronda 78/5/31 → 82/9/31. Debe conservarse como revisión adicional/post-calibración y evaluarse por separado al consolidar el PR.
+
+## Proceso grupal y revisión final
+
+El historial previo de `main` conserva la evolución mediante commits y PRs ya integrados. El endurecimiento V5 del PR #13 fue implementado desde la cuenta `TomyVrs`; por eso no se presenta ese tramo como si hubiera sido escrito por seis autores distintos.
+
+Durante la revisión final, Guillermo incorporó directamente en `main` la evaluación humana independiente mencionada arriba. Esto hace visible una contribución real del equipo, aunque también significa que `main` ya no está en el baseline `9419bb...`: su commit actual es `40f88a8...`. La rama del PR no modifica ese commit y el `FREEZE_V5` sigue intacto.
+
+## Qué falta
+
+La candidata V5 ya tiene cerradas la calibración humano-agente, la implementación del runner local ejecutable y la validación automática del runner con conclusión **success**.
+
+Queda:
+
+- revisión final del grupo sobre el PR #13 y sobre la revisión independiente agregada posteriormente a `main`;
+- consolidar cualquier hallazgo válido sin reescribir la calibración histórica;
+- decidir en equipo cuándo sacar el PR de draft e integrar;
+- antes del cierre, confirmar que la versión final integrada en `main` conserva las contribuciones grupales y pasa nuevamente las validaciones.
+
+No se crean ramas nuevas ni se mergea el PR sin decisión explícita del equipo.
 
 ## Qué aprendimos
 
-Aprendimos que una rúbrica debe transformar criterios generales en evidencia y límites aplicables por un agente. También que un repositorio puede contener instrucciones engañosas y que el evaluador debe tratar todo su contenido como datos. La trazabilidad de commits y corridas es necesaria para discutir una nota.
+Aprendimos que una rúbrica ejecutable necesita puntajes discretos, reglas de clasificación y precedencia de evidencia; y que una regla aparentemente precisa debe enfrentarse a repositorios distintos de los fixtures con los que fue diseñada. La robustez no se demuestra con una corrida favorable: requiere repetibilidad, casos adversariales, fallos de acceso, validación automática, una prueba externa y comparación explícita con criterio humano.
+
+La calibración mostró además que un desacuerdo humano-agente no implica automáticamente que el agente esté mal: primero hay que volver a la definición del criterio y a la evidencia antes de cambiar la rúbrica o el sistema.
 
 ## Integrantes
 

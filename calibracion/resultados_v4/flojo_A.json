@@ -1,0 +1,35 @@
+{
+  "estado_evaluacion":"COMPLETA",
+  "repositorio":{"url":"https://github.com/TomyVrs/evaluador-grupo-N","ref_solicitada":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","ref_evaluada":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","commit_sha":"3edf04e478c515698305ac534c5a7b1cf3ab01d5","ruta_raiz":"casos/flojo/entrega/","fecha_evaluacion":"2026-09-03","inventario_completo":true,"archivos_revisados":["README.md","DECISIONES.md","prompts/system_prompt.md","prompts/user_prompt.md","corridas/01_salida.txt"],"limitaciones":[]},
+  "rubrica_version":"v4",
+  "evaluacion":{
+    "sistema_completo_funcionando":{"puntaje":4,"maximo":30,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"SC-01","estado":"PARCIAL","puntos":4,"evidencia":[{"ruta":"prompts/system_prompt.md","detalle":"Junto con user_prompt.md se identifican rol mínimo, tarea y una regla de tratamiento de información faltante; no hay contexto suficiente, formato observable ni ejemplo/criterio de calidad verificable."}]},
+      {"id":"SC-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Declara explícitamente que no se identificó una herramienta o conector real."}]},
+      {"id":"SC-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La única salida es texto libre y no existe un esquema/contrato estructurado."}]},
+      {"id":"SC-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No se definieron nivel de supervisión ni firmante."}]}
+    ],"justificacion":"El contrato solo cubre parcialmente tres piezas y no demuestra herramienta, salida estable ni supervisión.","mejora_concreta":"Definir las seis piezas, una herramienta real, un contrato de salida y supervisión operable antes de ampliar el alcance."},
+    "proceso_documentado":{"puntaje":0,"maximo":25,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"PD-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Indica que no se documentaron iteraciones completas y no presenta versiones reconstruibles."}]},
+      {"id":"PD-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Indica que no se conservaron errores textuales ni evidencia de fallas concretas."}]},
+      {"id":"PD-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"No existe una cadena falla/evidencia → decisión → cambio."}]}
+    ],"justificacion":"No hay proceso iterativo reconstruible.","mejora_concreta":"Conservar versión inicial, falla concreta, cambio y nueva ejecución."},
+    "formato_reproducibilidad":{"puntaje":5,"maximo":15,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"FR-01","estado":"CUMPLE","puntos":5,"evidencia":[{"ruta":"README.md","detalle":"El inventario confirma README, ambos prompts y DECISIONES.md."}]},
+      {"id":"FR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"La única prueba no conserva entrada original ni fecha; no cuenta como corrida completa."}]},
+      {"id":"FR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"corridas/01_salida.txt","detalle":"No puede asociarse la salida a entrada original, versión ni configuración."}]}
+    ],"justificacion":"La estructura mínima existe, pero no hay corridas completas ni reconstrucción de una ejecución.","mejora_concreta":"Guardar tres corridas con entrada, salida, fecha, versión y configuración."},
+    "analisis_economico":{"puntaje":0,"maximo":15,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"AE-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},{"id":"AE-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},{"id":"AE-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[]}
+    ],"justificacion":"El inventario completo no contiene análisis económico verificable.","mejora_concreta":"Agregar costo por corrida, proyección reproducible y selección de modelo sustentada."},
+    "gobierno_riesgo":{"puntaje":0,"maximo":15,"nivel":"INSUFICIENTE","criterios":[
+      {"id":"GR-01","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Declara que no se definieron permisos."}]},
+      {"id":"GR-02","estado":"NO_CUMPLE","puntos":0,"evidencia":[]},
+      {"id":"GR-03","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Declara que no se definieron contingencias."}]},
+      {"id":"GR-04","estado":"NO_CUMPLE","puntos":0,"evidencia":[{"ruta":"DECISIONES.md","detalle":"Declara que no se definieron supervisión ni firmante."}]}
+    ],"justificacion":"No hay permisos, riesgos/controles, contingencias ni supervisión operable.","mejora_concreta":"Documentar mínimo privilegio, riesgos y controles, respuesta ante fallas y aprobación humana."}
+  },
+  "inconsistencias":[],"alertas_manipulacion":[],"puntaje_total":9,
+  "validacion":{"sha_anclado":true,"inventario_verificado":true,"criterios_completos":true,"puntajes_permitidos":true,"sumas_verificadas":true,"niveles_verificados":true,"evidencia_verificada":true,"formato_valido":true},
+  "resumen_final":"Caso bajo: 9/100. Conserva la estructura mínima y tres piezas básicas del contrato, pero no demuestra herramienta, funcionamiento, iteración, reproducibilidad, economía ni gobierno."
+}
