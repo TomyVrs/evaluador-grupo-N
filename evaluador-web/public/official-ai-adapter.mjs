@@ -3,7 +3,63 @@ import { evaluateEvidence as evaluateLocal, FREEZE_V5 } from '/engine_v4.mjs';
 export { FREEZE_V5 };
 
 const CODE_KEY = 'evaluador-v5-access-code';
+const STATE_KEY = 'evaluador-v5-local-state-v2';
 let askingCode = null;
+let usageRefreshQueued = false;
+
+function fmtInt(value){return Number(value||0).toLocaleString('es-AR')}
+function fmtUsd(value){return value==null?'—':`USD ${Number(value).toFixed(4)}`}
+function storedItems(){try{return JSON.parse(localStorage.getItem(STATE_KEY)||'[]')}catch{return[]}}
+
+function ensureUsageKpi(){
+  const kpis=document.querySelector('.kpis');
+  if(!kpis||document.getElementById('k-api-cost'))return;
+  const card=document.createElement('article');
+  card.innerHTML='<label>Costo API acumulado</label><strong id="k-api-cost">—</strong><small id="k-api-tokens" style="display:block;margin-top:4px;color:#64748b;font-size:11px">Sin corridas IA</small>';
+  kpis.appendChild(card);
+}
+
+function updateAggregateUsage(){
+  ensureUsageKpi();
+  const usages=storedItems().map(x=>x.result?.uso_api).filter(Boolean);
+  const cost=usages.reduce((s,u)=>s+(Number(u.costo_estimado_usd)||0),0);
+  const total=usages.reduce((s,u)=>s+(Number(u.total_tokens)||0),0);
+  const costEl=document.getElementById('k-api-cost');
+  const tokenEl=document.getElementById('k-api-tokens');
+  if(costEl)costEl.textContent=usages.length?`USD ${cost.toFixed(4)}`:'—';
+  if(tokenEl)tokenEl.textContent=usages.length?`${fmtInt(total)} tokens · ${usages.length} corrida(s)`:'Sin corridas IA';
+}
+
+function visibleUsage(){
+  const detail=document.getElementById('detail');
+  if(!detail)return null;
+  const text=detail.textContent||'';
+  const sha=text.match(/SHA evaluado:\s*([0-9a-f]{7,40})/i)?.[1];
+  if(!sha)return null;
+  return storedItems().find(x=>String(x.result?.repositorio?.commit_sha||'').startsWith(sha))?.result?.uso_api||null;
+}
+
+function updateDetailUsage(){
+  const detail=document.getElementById('detail');
+  if(!detail)return;
+  const usage=visibleUsage();
+  const old=document.getElementById('usage-api-card');
+  if(!usage){if(old)old.remove();return}
+  const cachedPct=usage.input_tokens?Math.round((Number(usage.cached_input_tokens||0)/Number(usage.input_tokens))*100):0;
+  const html=`<h3>Consumo de IA</h3><div class="feedback" id="usage-api-card"><b>${usage.modelo||'Modelo IA'}</b> · ${usage.llamadas_modelo||0} llamada(s) al modelo<br><b>Entrada:</b> ${fmtInt(usage.input_tokens)} tokens · <b>cacheados:</b> ${fmtInt(usage.cached_input_tokens)} (${cachedPct}%)<br><b>Salida:</b> ${fmtInt(usage.output_tokens)} tokens · <b>razonamiento:</b> ${fmtInt(usage.reasoning_tokens)}<br><b>Total facturado informado:</b> ${fmtInt(usage.total_tokens)} tokens<br><b>Costo estimado:</b> ${fmtUsd(usage.costo_estimado_usd)}<br><span class="hint">Estimación calculada con la tarifa API registrada para el modelo. Los tokens de razonamiento ya forman parte de los tokens de salida.</span></div>`;
+  if(old){
+    const heading=old.previousElementSibling;
+    if(heading?.textContent==='Consumo de IA')heading.remove();
+    old.remove();
+  }
+  detail.insertAdjacentHTML('beforeend',html);
+}
+
+function queueUsageRefresh(){
+  if(usageRefreshQueued)return;
+  usageRefreshQueued=true;
+  setTimeout(()=>{usageRefreshQueued=false;updateAggregateUsage();updateDetailUsage()},0);
+}
 
 function enhanceOfficialUi(){
   const status=document.getElementById('engine-status');
@@ -13,14 +69,18 @@ function enhanceOfficialUi(){
   const side=document.querySelector('.side-note');
   if(side)side.innerHTML='<b>Evaluador oficial V5.</b><br>Las evaluaciones de repositorios GitHub ejecutan el agente IA normativo, anclado a SHA y con herramientas de solo lectura.';
   const scope=document.querySelector('#engine-scope .hint');
-  if(scope)scope.innerHTML='<b>La nota mostrada para repositorios GitHub la calcula el agente IA V5 real.</b> El backend resuelve la referencia a un SHA exacto, inventaría el alcance y permite al modelo leer archivos e historial mediante herramientas GitHub de solo lectura. La rúbrica, configuración y contrato se cargan desde el freeze normativo V5.';
+  if(scope)scope.innerHTML='<b>La nota mostrada para repositorios GitHub la calcula el agente IA V5 real.</b> El backend resuelve la referencia a un SHA exacto, inventaría el alcance y permite al modelo leer archivos e historial mediante herramientas GitHub de solo lectura. La rúbrica, configuración y contrato se cargan desde el freeze normativo V5. La interfaz registra además tokens y costo estimado de cada corrida.';
   const footer=document.querySelector('footer');
-  if(footer)footer.textContent='Agente IA V5 oficial · evidencia GitHub anclada a SHA · herramientas de solo lectura · salida validada contra la rúbrica V5.';
+  if(footer)footer.textContent='Agente IA V5 oficial · evidencia GitHub anclada a SHA · herramientas de solo lectura · consumo API visible · salida validada contra la rúbrica V5.';
   document.querySelectorAll('.local-source').forEach(el=>el.style.display='none');
   const loaderHint=document.querySelector('#loader .section-head .hint');
-  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. Cada evaluación oficial se ejecuta en el servidor con el agente IA V5.';
+  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. Cada evaluación oficial se ejecuta en el servidor con el agente IA V5 y registra su consumo de tokens.';
   const token=document.getElementById('gh-token');
   if(token)token.style.display='none';
+  ensureUsageKpi();
+  updateAggregateUsage();
+  const detail=document.getElementById('detail');
+  if(detail)new MutationObserver(queueUsageRefresh).observe(detail,{childList:true,subtree:true});
 }
 
 function accessCodeModal(){
@@ -46,7 +106,7 @@ function accessCodeModal(){
 
 async function callOfficialAgent(payload,retry=true){
   const code=await accessCodeModal();
-  const response=await fetch('/api/evaluate',{
+  const response=await fetch('/api/evaluate-with-usage',{
     method:'POST',
     headers:{'Content-Type':'application/json','X-Evaluator-Code':code},
     body:JSON.stringify({url:payload.url,ref:payload.ref||'main',root:payload.root||'/'}),
@@ -54,6 +114,7 @@ async function callOfficialAgent(payload,retry=true){
   let data={};try{data=await response.json()}catch{}
   if(response.status===401&&retry){sessionStorage.removeItem(CODE_KEY);return callOfficialAgent(payload,false)}
   if(!response.ok)throw new Error(data.error||`La evaluación oficial falló (HTTP ${response.status}).`);
+  setTimeout(queueUsageRefresh,0);
   return data;
 }
 
