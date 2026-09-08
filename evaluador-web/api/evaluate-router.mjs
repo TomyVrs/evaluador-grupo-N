@@ -6,48 +6,23 @@ globalThis.__evaluadorV5RouterStorage = usageStorage;
 
 const realOpenAIKey = process.env.OPENAI_API_KEY || '';
 const openRouterKey = process.env.OPENROUTER_API_KEY || '';
-
-// evaluate.mjs valida la existencia de OPENAI_API_KEY antes de iniciar.
-// Para OpenRouter usamos un placeholder que nunca sale de este proceso: la
-// llamada real se reescribe server-side con OPENROUTER_API_KEY.
 if (!process.env.OPENAI_API_KEY && openRouterKey) process.env.OPENAI_API_KEY = '__profile_router__';
 
 const PROFILES = {
   sol: {
-    id: 'sol',
-    label: 'OpenAI GPT-5.6 Sol',
-    provider: 'OpenAI',
-    endpoint: 'https://api.openai.com/v1/responses',
-    model: 'gpt-5.6-sol',
-    key: () => realOpenAIKey,
-    rates: { input: 4.00, cached: 0.40, output: 20.00 },
-    longContextThreshold: 272000,
-    longInputMultiplier: 2,
-    longOutputMultiplier: 1.5,
+    id: 'sol', label: 'OpenAI GPT-5.6 Sol', provider: 'OpenAI',
+    endpoint: 'https://api.openai.com/v1/responses', model: 'gpt-5.6-sol', key: () => realOpenAIKey,
+    rates: { input: 4.00, cached: 0.40, output: 20.00 }, longContextThreshold: 272000, longInputMultiplier: 2, longOutputMultiplier: 1.5,
   },
   luna: {
-    id: 'luna',
-    label: 'OpenAI GPT-5.6 Luna',
-    provider: 'OpenAI',
-    endpoint: 'https://api.openai.com/v1/responses',
-    model: 'gpt-5.6-luna',
-    key: () => realOpenAIKey,
-    rates: { input: 0.20, cached: 0.02, output: 1.20 },
-    longContextThreshold: 272000,
-    longInputMultiplier: 2,
-    longOutputMultiplier: 1.5,
+    id: 'luna', label: 'OpenAI GPT-5.6 Luna', provider: 'OpenAI',
+    endpoint: 'https://api.openai.com/v1/responses', model: 'gpt-5.6-luna', key: () => realOpenAIKey,
+    rates: { input: 0.20, cached: 0.02, output: 1.20 }, longContextThreshold: 272000, longInputMultiplier: 2, longOutputMultiplier: 1.5,
   },
   free: {
-    id: 'free',
-    label: 'OpenRouter gpt-oss-120b free',
-    provider: 'OpenRouter',
-    endpoint: 'https://openrouter.ai/api/v1/responses',
-    model: 'openai/gpt-oss-120b:free',
-    key: () => openRouterKey,
-    rates: { input: 0, cached: 0, output: 0 },
-    longContextThreshold: null,
-    longInputMultiplier: 1,
-    longOutputMultiplier: 1,
+    id: 'free', label: 'OpenRouter Dots3-Note Preview free', provider: 'OpenRouter',
+    endpoint: 'https://openrouter.ai/api/v1/responses', model: 'dots-studio/dots-3-note-preview:free', key: () => openRouterKey,
+    rates: { input: 0, cached: 0, output: 0 }, longContextThreshold: null, longInputMultiplier: 1, longOutputMultiplier: 1,
   },
 };
 
@@ -60,9 +35,7 @@ function readRequestedProfile(req) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     return getProfile(body.ai_profile);
-  } catch {
-    return PROFILES.sol;
-  }
+  } catch { return PROFILES.sol; }
 }
 
 function priceUsage(profile, usage) {
@@ -102,7 +75,6 @@ function rewriteModelRequest(url, init, store) {
   let body;
   try { body = JSON.parse(String(init?.body || '{}')); }
   catch { throw new Error('No se pudo interpretar el request al modelo.'); }
-
   body.model = profile.model;
 
   const headers = new Headers(init?.headers || {});
@@ -110,20 +82,19 @@ function rewriteModelRequest(url, init, store) {
   headers.set('Content-Type', 'application/json');
 
   if (profile.provider === 'OpenRouter') {
-    // OpenRouter OpenResponses acepta tools, reasoning, text.format y
-    // previous_response_id, pero no acepta store:true. Omitimos ese flag y
-    // exigimos un proveedor que soporte los parámetros solicitados.
+    // Compatibilidad conservadora con OpenResponses: mantenemos tools y text.format,
+    // pero retiramos flags específicos de OpenAI que el endpoint free puede no aceptar.
     delete body.store;
-    body.provider = { ...(body.provider || {}), require_parameters: true };
+    delete body.reasoning;
+    delete body.provider;
     headers.set('HTTP-Referer', 'https://evaluador-v5-web.vercel.app');
     headers.set('X-Title', 'Agente Evaluador V5 UCEMA');
-    headers.set('X-OpenRouter-Metadata', 'enabled');
   }
 
   return { url: profile.endpoint, init: { ...init, headers, body: JSON.stringify(body) } };
 }
 
-if (!globalThis.__evaluadorV5RouterFetchPatched) {
+if (!globalThis.__evaluadorV5RouterFetchPatchedV2) {
   const baseFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = async (...args) => {
     const originalUrl = typeof args[0] === 'string' ? args[0] : String(args[0]?.url || '');
@@ -136,47 +107,26 @@ if (!globalThis.__evaluadorV5RouterFetchPatched) {
     }
 
     const response = await baseFetch(...fetchArgs);
-
     if (store && originalUrl === 'https://api.openai.com/v1/responses') {
       try {
         const data = await response.clone().json();
         recordUsage(store, data);
-        if (!response.ok) {
-          console.error('model-provider-error', {
-            provider: store.profile.provider,
-            model: store.profile.model,
-            status: response.status,
-            error: data?.error || data,
-          });
-        }
+        if (!response.ok) console.error('model-provider-error', JSON.stringify({provider:store.profile.provider,model:store.profile.model,status:response.status,error:data?.error||data}));
       } catch {}
     }
-
     return response;
   };
-  globalThis.__evaluadorV5RouterFetchPatched = true;
+  globalThis.__evaluadorV5RouterFetchPatchedV2 = true;
 }
 
 function usagePayload(store) {
   const p = store.profile;
   return {
-    perfil: p.id,
-    proveedor: p.provider,
-    modelo: p.model,
-    modelo_resuelto: store.response_model || p.model,
-    llamadas_modelo: store.calls,
-    input_tokens: store.input_tokens,
-    cached_input_tokens: store.cached_input_tokens,
-    cache_write_tokens: store.cache_write_tokens,
-    output_tokens: store.output_tokens,
-    reasoning_tokens: store.reasoning_tokens,
-    total_tokens: store.total_tokens,
-    costo_estimado_usd: store.cost_known ? Number(store.estimated_cost_usd.toFixed(6)) : null,
-    tarifa_usd_por_millon: {
-      entrada: p.rates.input,
-      entrada_cacheada: p.rates.cached,
-      salida: p.rates.output,
-    },
+    perfil: p.id, proveedor: p.provider, modelo: p.model, modelo_resuelto: store.response_model || p.model,
+    llamadas_modelo: store.calls, input_tokens: store.input_tokens, cached_input_tokens: store.cached_input_tokens,
+    cache_write_tokens: store.cache_write_tokens, output_tokens: store.output_tokens, reasoning_tokens: store.reasoning_tokens,
+    total_tokens: store.total_tokens, costo_estimado_usd: store.cost_known ? Number(store.estimated_cost_usd.toFixed(6)) : null,
+    tarifa_usd_por_millon: { entrada: p.rates.input, entrada_cacheada: p.rates.cached, salida: p.rates.output },
     pricing_referencia: p.provider === 'OpenAI' ? 'OpenAI API pricing, 2026-09-08' : 'OpenRouter free model, 2026-09-08',
     nota: p.id === 'free'
       ? 'Perfil experimental de costo USD 0 sujeto a disponibilidad y límites del proveedor. Debe calibrarse contra Sol antes de usarse como corrector final.'
@@ -199,22 +149,12 @@ export default async function handler(req, res) {
   }
 
   const store = {
-    profile,
-    response_model: null,
-    calls: 0,
-    input_tokens: 0,
-    cached_input_tokens: 0,
-    cache_write_tokens: 0,
-    output_tokens: 0,
-    reasoning_tokens: 0,
-    total_tokens: 0,
-    estimated_cost_usd: 0,
-    cost_known: true,
+    profile, response_model: null, calls: 0, input_tokens: 0, cached_input_tokens: 0,
+    cache_write_tokens: 0, output_tokens: 0, reasoning_tokens: 0, total_tokens: 0,
+    estimated_cost_usd: 0, cost_known: true,
   };
 
   return usageStorage.run(store, async () => {
-    // Proxy explícito: conserva statusCode/headers reales. El wrapper anterior
-    // heredaba res y podía convertir un 502 del backend en HTTP 200 visual.
     const wrappedRes = {
       get statusCode() { return res.statusCode; },
       set statusCode(value) { res.statusCode = value; },
