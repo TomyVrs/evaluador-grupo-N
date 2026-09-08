@@ -36,30 +36,38 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Validate browser app syntax
+      - name: Validate browser and API syntax
         working-directory: evaluador-web
         run: |
           node --check public/app.js
+          node --check public/official-ai-adapter.mjs
           node --check public/feedback.js
           node --check public/results-ui.js
           node --check public/integrity.mjs
           node --check public/integrity-runtime.js
-      - name: Validate public runner transparency
+          node --check api/evaluate.mjs
+      - name: Validate official AI safeguards
         working-directory: evaluador-web
         run: |
-          grep -qi "runner determinístico local" public/index.html
-          grep -qi "no reemplaza al agente" public/index.html
+          grep -q "OPENAI_API_KEY" api/evaluate.mjs
+          grep -q "EVALUATOR_ACCESS_CODE" api/evaluate.mjs
+          grep -q "gpt-5.6-sol" api/evaluate.mjs
+          grep -q "read_file" api/evaluate.mjs
+          grep -q "get_commit_history" api/evaluate.mjs
+          grep -q "Agente IA V5 oficial" public/official-ai-adapter.mjs
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
-      - name: Build static Vercel package
+      - name: Build Vercel package
         working-directory: evaluador-web
         run: |
           npm run build
           test -f dist/index.html
           test -f dist/app.js
+          test -f dist/official-ai-adapter.mjs
           test -f dist/engine_v4.mjs
-          grep -q "from '/engine_v4.mjs'" dist/app.js
+          grep -q "from '/official-ai-adapter.mjs'" dist/app.js
+          grep -q "kind:'github'" dist/app.js
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
