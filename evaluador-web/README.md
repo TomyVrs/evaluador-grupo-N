@@ -2,6 +2,8 @@
 
 Interfaz ejecutable y gratuita para aplicar la rúbrica V5 sobre uno o muchos trabajos.
 
+> **Importante:** esta web es un runner determinístico complementario. La fuente normativa de la evaluación sigue siendo el agente de IA V5 definido en `../agente/` + `../rubrica.md`. Si una evaluación del runner difiere de una corrida del agente V5 sobre la misma evidencia anclada a SHA, prevalece la evaluación del agente V5 y la diferencia debe quedar documentada.
+
 ## Fuentes aceptadas
 
 La misma rúbrica se aplica independientemente de la fuente:
@@ -58,30 +60,35 @@ La selección de carpetas está pensada para Chrome/Edge. Si la carpeta elegida 
 
 Admite ZIP estándar sin contraseña. Puede cargarse uno o varios archivos. Si un ZIP contiene varias carpetas de entregas reconocibles, se agregan por separado. ZIP64 o métodos de compresión no soportados deben cargarse como carpeta local.
 
-## Motor
+## Motor y fuente normativa
 
 Esta app usa un **motor local determinístico** que implementa los estados y puntajes discretos de `rubrica.md` V5 y genera el mismo tipo de salida estructurada del agente. No requiere Vercel, OpenAI, tarjeta ni API paga.
 
-La fuente normativa de la evaluación sigue siendo:
+La fuente normativa única sigue siendo:
 
-- `../rubrica.md`;
 - `../agente/system_prompt.md`;
+- `../rubrica.md`;
 - `../agente/configuracion.md`;
 - `../agente/contrato_salida.md`.
 
-El runner existe para que un tercero pueda ejecutar una evaluación desde el repositorio sin depender de credenciales privadas del equipo.
+El runner existe para que un tercero pueda ejecutar una evaluación desde el repositorio sin depender de credenciales privadas del equipo. **No se afirma paridad semántica completa con un LLM.** Los criterios mecánicos se implementan de forma directa; los criterios semánticos se aproximan mediante reglas explícitas y auditables.
+
+Por transparencia, la comparación reproducible de ambos mecanismos se conserva en:
+
+- `../calibracion/verificacion_motor_vs_contrato.md`;
+- `verificar-motor-vs-contrato.mjs`.
 
 ## Pruebas e imparcialidad
 
 Los casos `Excelente`, `Flojo` y `Tramposo` son fixtures de calibración construidos específicamente para verificar que la rúbrica y el motor conservan los resultados acordados durante la calibración V5.
 
-Los repositorios reales usados como pruebas de generalización **no fijan ni esperan una nota concreta**. Esas pruebas solo verifican que el evaluador pueda leer estructuras distintas y producir una evaluación válida, completa y consistente con los estados y puntajes permitidos por la rúbrica. La nota obtenida por un repo real es siempre una salida del evaluador, no una condición del test.
+Los repositorios reales usados como pruebas de generalización **no fijan ni esperan una nota concreta**. Esas pruebas verifican que el runner pueda leer estructuras distintas y producir una evaluación válida, completa y consistente con los estados y puntajes permitidos por la rúbrica. La nota obtenida por un repo real es siempre una salida del runner, no una condición del test.
 
 Ninguna regla del motor depende del nombre, propietario o identidad de un repositorio evaluado. Los ajustes del motor deben corresponder a evidencia o reglas generales de la rúbrica, no a alcanzar una nota deseada para un trabajo particular.
 
 ## Alcance y transparencia
 
-Los criterios mecánicos (archivos, corridas, estructura, cálculos, sumas, contradicciones objetivas y patrones operativos) se resuelven directamente. Los criterios semánticos se aproximan mediante reglas explícitas y auditables. Por eso el JSON incluye `motor_ejecutable.tipo = deterministico-local`; no se presenta como una corrida del LLM usado durante la calibración V5.
+El JSON incluye `motor_ejecutable.tipo = deterministico-local`; nunca debe presentarse como una corrida del LLM usado durante la calibración V5. La interfaz también muestra esta distinción en pantalla.
 
 El `FREEZE_V5` de referencia permanece inmutable:
 
