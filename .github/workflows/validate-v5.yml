@@ -46,7 +46,8 @@ jobs:
           node --check public/integrity.mjs
           node --check public/integrity-runtime.js
           node --check api/evaluate.mjs
-      - name: Validate official AI safeguards
+          node --check api/evaluate-with-usage.mjs
+      - name: Validate official AI safeguards and usage metering
         working-directory: evaluador-web
         run: |
           grep -q "OPENAI_API_KEY" api/evaluate.mjs
@@ -54,7 +55,11 @@ jobs:
           grep -q "gpt-5.6-sol" api/evaluate.mjs
           grep -q "read_file" api/evaluate.mjs
           grep -q "get_commit_history" api/evaluate.mjs
-          grep -q "Agente IA V5 oficial" public/official-ai-adapter.mjs
+          grep -q "costo_estimado_usd" api/evaluate-with-usage.mjs
+          grep -q "cached_input_tokens" api/evaluate-with-usage.mjs
+          grep -q "reasoning_tokens" api/evaluate-with-usage.mjs
+          grep -q "evaluate-with-usage" public/official-ai-adapter.mjs
+          grep -q "Costo API acumulado" public/official-ai-adapter.mjs
       - name: Install local runner
         working-directory: evaluador-web
         run: npm install
