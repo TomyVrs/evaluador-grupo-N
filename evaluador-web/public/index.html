@@ -24,7 +24,7 @@
       <button id="export-csv">Exportar CSV</button>
       <button id="export-json">Exportar JSON</button>
     </nav>
-    <div class="side-note"><b>Evaluación reproducible.</b><br>La misma rúbrica V5 se aplica a todos los trabajos. El motor no modifica repositorios ni archivos locales.</div>
+    <div class="side-note"><b>Runner complementario.</b><br>Esta web aplica la rúbrica V5 con un motor local determinístico. El agente de IA definido en <code>agente/</code> sigue siendo la referencia normativa.</div>
   </aside>
 
   <main id="top">
@@ -38,9 +38,19 @@
     </header>
 
     <section class="statusbar">
-      <span id="engine-status" class="pill ok">Motor V5 listo</span>
+      <span id="engine-status" class="pill ok">Runner V5 listo</span>
       <span class="pill">100 puntos · 5 dimensiones · 17 criterios</span>
       <span id="rate" class="pill">GitHub: sin consultar</span>
+    </section>
+
+    <section class="card" id="engine-scope">
+      <div class="section-head compact">
+        <div>
+          <span class="section-kicker">Transparencia</span>
+          <h2>Qué calcula esta web</h2>
+          <p class="hint"><b>La nota mostrada en esta interfaz la calcula un runner determinístico local y auditable.</b> Es una capa complementaria para ejecutar la rúbrica sin credenciales ni API paga. No reemplaza al agente de IA V5 definido por <code>agente/system_prompt.md</code>, <code>rubrica.md</code>, <code>agente/configuracion.md</code> y <code>agente/contrato_salida.md</code>. Ante una diferencia entre ambos, la evaluación normativa es la del agente V5 ejecutado sobre evidencia anclada a un SHA.</p>
+        </div>
+      </div>
     </section>
 
     <section class="kpis">
@@ -119,7 +129,7 @@
       <section class="card detail" id="detail"><div class="empty"><div><b>Seleccioná una evaluación</b><p>El resultado completo se muestra acá, en ancho completo: nota, devolución ejecutiva, dimensiones, criterios, evidencia e inconsistencias.</p></div></div></section>
     </section>
 
-    <footer>Runner ejecutable V5 · misma rúbrica para todas las fuentes · GitHub solo lectura · archivos locales procesados en el navegador.</footer>
+    <footer>Runner determinístico complementario V5 · la fuente normativa es el agente IA V5 · GitHub solo lectura · archivos locales procesados en el navegador.</footer>
   </main>
 </div>
 <script type="module" src="/integrity-runtime.js"></script>

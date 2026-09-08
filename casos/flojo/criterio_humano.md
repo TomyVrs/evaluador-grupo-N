@@ -1,8 +1,10 @@
-# Criterio humano previo — Caso flojo
+# Plantilla histórica de evaluación humana — Caso flojo
 
 **No incluir este archivo en el alcance del corrector.**
 
-Completar después de que tres integrantes puntúen independientemente la carpeta `entrega/`. No fijar notas anticipadamente.
+Esta plantilla corresponde al plan inicial de realizar tres evaluaciones humanas independientes y ciegas. Ese plan **no se ejecutó** y no debe presentarse como evidencia completada. La calibración humana realmente realizada, sus limitaciones y la adjudicación humano–agente están documentadas en `../../calibracion.md`.
+
+Se conserva la plantilla únicamente por trazabilidad del proceso.
 
 | Dimensión | Integrante 1 | Integrante 2 | Integrante 3 | Mediana |
 |---|---:|---:|---:|---:|

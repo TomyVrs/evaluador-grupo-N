@@ -3,8 +3,9 @@ import { evaluateEvidence } from './engine_v4.mjs';
 
 const owner='TomyVrs';
 const repo='Trabajo-Final';
-const sha='41256e8a39a407ae5f6c9d4db718994cec6cc845';
-const root='trabajo-final/trabajo-final';
+// Repo real externo al evaluador, fijado a un SHA existente y estable para evitar depender de una rama móvil.
+const sha='970865535e4c37ef6f3553f434b5ae623d24841c';
+const root='';
 const paths=[
   'README.md','DECISIONES.md','ANALISIS_ECONOMICO.md','GOBIERNO_Y_RIESGO.md',
   'prompts/system_prompt.md','prompts/user_prompt.md','herramienta/agregar_metricas_canal.py',
@@ -14,7 +15,7 @@ const paths=[
 
 const files=[];
 for(const path of paths){
-  const full=`${root}/${path}`;
+  const full=root ? `${root}/${path}` : path;
   const raw=`https://raw.githubusercontent.com/${owner}/${repo}/${sha}/${full.split('/').map(encodeURIComponent).join('/')}`;
   const r=await fetch(raw);
   if(!r.ok) throw new Error(`${r.status} al leer ${full}`);
@@ -22,8 +23,7 @@ for(const path of paths){
   files.push({path,content,size:content.length});
 }
 
-const result=evaluateEvidence({url:`https://github.com/${owner}/${repo}`,ref:sha,sha,root:`/${root}`,date:'2026-09-03',files,inventoryComplete:true,limitations:[]});
-
+const result=evaluateEvidence({url:`https://github.com/${owner}/${repo}`,ref:sha,sha,root:'/',date:'2026-09-08',files,inventoryComplete:true,limitations:[]});
 const allowed={
   'SC-01':[0,4,8],'SC-02':[0,4,8],'SC-03':[0,4,7],'SC-04':[0,4,7],
   'PD-01':[0,5,9],'PD-02':[0,4,8],'PD-03':[0,4,8],
