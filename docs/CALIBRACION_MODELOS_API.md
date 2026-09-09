@@ -2,72 +2,110 @@
 
 ## Objetivo
 
-Elegir el modelo operativo del evaluador público sin modificar la norma V5. Se compara calidad de corrección, estabilidad, consumo y costo manteniendo constantes:
+Mantener fija la norma V5 y permitir que la app corrija trabajos públicos de GitHub sin que el profesor elija modelo, cargue API keys ni complete parámetros técnicos.
+
+La evaluación mantiene constantes:
 
 - `agente/system_prompt.md` V5;
 - `rubrica.md` V5;
 - `agente/configuracion.md` V5;
 - `agente/contrato_salida.md` V5;
 - acceso a GitHub solo lectura;
-- anclaje a SHA;
-- validación mecánica de puntajes.
-
-## Perfiles a comparar
-
-| Perfil | Proveedor | Modelo | Rol en la prueba |
-|---|---|---|---|
-| `sol` | OpenAI | `gpt-5.6-sol` | Referencia de máxima calidad |
-| `luna` | OpenAI | `gpt-5.6-luna` | Alternativa económica |
-| `free` | OpenRouter | `openai/gpt-oss-120b:free` | Alternativa de costo de inferencia USD 0 |
-
-El perfil gratuito se considera experimental hasta completar esta calibración. No se lo convierte en corrector oficial solo por ser gratuito.
+- anclaje a SHA exacto;
+- salida estructurada;
+- recálculo mecánico de puntajes;
+- controles mecánicos de evidencia para criterios frontera.
 
 ## Casos de control
 
-La comparación debe incluir, como mínimo:
+Se usan tres trabajos diseñados para calibración, no como plantillas de los trabajos reales:
 
-1. caso Excelente — referencia V5: 82/100;
-2. caso Flojo — referencia V5: 9/100;
-3. caso Tramposo — referencia V5: 31/100;
-4. repositorio externo usado en la prueba de fuego — referencia V5: 98/100.
+| Caso | Referencia V5 |
+|---|---:|
+| Excelente | 82/100 |
+| Flojo | 9/100 |
+| Tramposo | 31/100 |
 
-Además de la nota total, se comparan los 17 estados de criterio para detectar coincidencias artificiales en el total con desacuerdos internos.
+Además existe una prueba de fuego con un repositorio externo cuya referencia histórica es 98/100.
 
-## Datos que registra cada corrida
+Los puntajes esperados sirven para verificar consistencia entre modelos. Los trabajos reales pueden ser completamente distintos y obtener cualquier puntaje que corresponda a su evidencia.
 
-La app conserva junto al resultado:
+## Resultado de calibración gratuita
 
-- perfil;
-- proveedor;
-- modelo solicitado y modelo resuelto;
-- cantidad de llamadas al modelo;
-- `input_tokens`;
-- `cached_input_tokens`;
-- `output_tokens`;
-- `reasoning_tokens`;
-- `total_tokens`;
-- costo estimado USD.
+### Gemini 3.5 Flash
 
-## Criterio de aceptación
+Fue validado con los tres casos de control:
 
-Un perfil alternativo puede proponerse como modelo operativo final solo si:
+- Excelente: 82/100;
+- Flojo: 9/100;
+- Tramposo: 31/100 con alerta de manipulación.
 
-- no cambia el estado global de evaluabilidad de los casos de control;
-- no presenta fallas de herramientas, structured output o seguimiento de `previous_response_id`;
-- no genera errores de suma, estados fuera de rúbrica ni evidencia inventada;
-- mantiene una diferencia total de hasta 5 puntos frente a la referencia en cada caso;
-- las diferencias de criterio son explicables y no muestran sesgo sistemático;
-- el caso adversarial mantiene las alertas/manipulación y la precedencia de evidencia;
-- la reducción de costo es material.
+### Gemini 3.6 Flash
 
-Si el perfil `free` falla por disponibilidad o rate limit, eso se registra como limitación operativa aunque la calidad de sus corridas exitosas sea buena.
+También fue validado de punta a punta con los tres casos de control. En una prueba real de fallback, Gemini 3.7 devolvió 503 y Gemini 3.5 devolvió 429; la app continuó automáticamente a Gemini 3.6 y obtuvo:
 
-## Decisión prevista
+- Excelente: 82/100;
+- Flojo: 9/100;
+- Tramposo: 31/100.
 
-Orden de preferencia si supera la calibración:
+La app no expuso los errores intermedios al usuario y el costo estimado de esas corridas fue USD 0.
 
-1. `free`, si iguala suficientemente la calidad y estabilidad y soporta el volumen de la cursada;
-2. `luna`, si `free` no es estable pero Luna conserva calidad con fuerte reducción de costo;
-3. `sol`, si las alternativas degradan materialmente la corrección.
+### Modelos no habilitados en la cadena final
 
-La decisión final debe documentarse con los resultados reales; no se asume de antemano.
+Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados como fallback automático final porque no completaron una calibración de punta a punta suficientemente estable. Pueden volver a evaluarse en el futuro, pero no se incorporan solo por ser gratuitos.
+
+## Cadena operativa final
+
+El orden automático queda:
+
+1. `gemini-3.5-flash` — gratuito y calibrado;
+2. `gemini-3.6-flash` — gratuito y calibrado;
+3. `openai/gpt-5.6-luna` vía Vercel AI Gateway — fallback pago;
+4. `openai/gpt-5.6-sol` vía Vercel AI Gateway — último fallback de máxima calidad.
+
+El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida: rate limit, cuota, timeout, indisponibilidad del proveedor o salida que no cumple el contrato estructurado. Nunca se cambia de modelo para perseguir una nota determinada.
+
+## Experiencia del profesor
+
+El profesor solo debe:
+
+1. abrir la URL pública;
+2. pegar uno o varios repositorios públicos de GitHub, uno por línea;
+3. agregar los trabajos;
+4. ejecutar la evaluación;
+5. revisar resultados y, si lo desea, exportar CSV o JSON.
+
+No necesita:
+
+- API keys;
+- login del proveedor de IA;
+- elegir modelo;
+- indicar rama;
+- indicar SHA;
+- indicar ruta del trabajo;
+- copiar prompts manualmente.
+
+## Trazabilidad
+
+Cada evaluación registra junto al resultado:
+
+- proveedor y modelo resuelto;
+- cantidad de intentos de IA;
+- ruta de modelos recorrida;
+- tokens de entrada y salida;
+- tokens totales;
+- costo estimado USD;
+- SHA exacto evaluado.
+
+## Regla de aceptación
+
+Un nuevo modelo solo puede incorporarse al fallback automático si:
+
+- mantiene la aplicación de la rúbrica V5;
+- no inventa evidencia;
+- produce salida estructurada válida;
+- conserva las alertas del caso adversarial;
+- sus diferencias frente a la referencia son explicables y no muestran sesgo sistemático;
+- completa la calibración de punta a punta antes de quedar habilitado.
+
+La prioridad operativa es: **gratuito validado primero, pago solo como respaldo, sin trasladar ninguna complejidad al profesor**.
