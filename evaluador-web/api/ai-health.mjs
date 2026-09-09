@@ -1,5 +1,5 @@
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const MODEL = 'openai/gpt-5.6-sol';
+const MODEL = 'openai/gpt-5.6-luna';
 
 function token() {
   return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || '';
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   const auth = token();
   if (!auth) {
     res.statusCode = 503;
-    return res.end(JSON.stringify({ ok: false, oidc: false, model: MODEL }));
+    return res.end(JSON.stringify({ ok: false, oidc: false, api_key: false, model: MODEL }));
   }
 
   if (String(req.query?.live || '') !== '1') {
