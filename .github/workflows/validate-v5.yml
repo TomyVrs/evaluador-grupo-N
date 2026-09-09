@@ -48,7 +48,9 @@ jobs:
           node --check api/evaluate.mjs
           node --check api/evaluate-with-usage.mjs
           node --check api/evaluate-one-shot-core.mjs
+          node --check api/evaluate-local.mjs
           node --check api/evidence-gates.mjs
+          node --check build-static.mjs
       - name: Validate one-shot official AI safeguards
         working-directory: evaluador-web
         run: |
@@ -66,7 +68,10 @@ jobs:
           grep -q "AE-03" api/evidence-gates.mjs
           grep -q "evaluate-one-shot-core.mjs" api/evaluate-with-usage.mjs
           grep -q "Agente IA V5" public/official-ai-adapter.mjs
-          grep -q "No hace falta indicar rama ni ruta" public/official-ai-adapter.mjs
+          grep -q "No hace falta elegir modelo ni cargar credenciales" public/official-ai-adapter.mjs
+          grep -q "evaluate-local" public/official-ai-adapter.mjs
+          grep -q "createHash" api/evaluate-local.mjs
+          grep -q "HUELLA DEL PAQUETE" api/evaluate-local.mjs
       - name: Test deterministic evidence gates
         working-directory: evaluador-web
         run: node tests/evidence-gates.test.mjs
@@ -83,7 +88,10 @@ jobs:
           test -f dist/engine_v4.mjs
           grep -q "from '/official-ai-adapter.mjs'" dist/app.js
           grep -q "kind:'github'" dist/app.js
+          grep -q "sourceKind:t.sourceKind" dist/app.js
+          grep -q "máximo de 15 MB" dist/app.js
           grep -q "Agente IA V5" dist/official-ai-adapter.mjs
+          grep -q "ZIP y carpetas" dist/official-ai-adapter.mjs
       - name: Test executable runner against V5 fixtures
         working-directory: evaluador-web
         run: npm test
