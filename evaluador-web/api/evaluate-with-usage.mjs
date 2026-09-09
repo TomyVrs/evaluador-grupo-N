@@ -3,6 +3,7 @@ import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 const SOURCE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
 const FINAL_MODEL = 'openai/gpt-5.6-sol';
+const MAX_USER_CHARS = 120000;
 
 const STRICT_EVIDENCE_POLICY = `
 CONTROL DE EVIDENCIA V5 — aplicación literal de criterios, sin alterar puntajes ni perseguir una nota objetivo:
@@ -47,8 +48,12 @@ function gatewayToken() {
   return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || '';
 }
 
-// evaluate-one-shot-core conserva el nombre histórico GEMINI_API_KEY como guardia interna.
-// El valor real nunca se usa contra Google: todas las llamadas se redirigen a AI Gateway.
+function estimateSolCost(usage = {}) {
+  const input = Number(usage.input_tokens || usage.prompt_tokens || 0);
+  const output = Number(usage.output_tokens || usage.completion_tokens || 0);
+  return Number(((input * 2 + output * 10) / 1_000_000).toFixed(6));
+}
+
 if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__vercel_ai_gateway__';
 
 if (!globalThis.__evaluadorV5GatewayPatched) {
@@ -76,8 +81,11 @@ if (!globalThis.__evaluadorV5GatewayPatched) {
       if (system && typeof system.content === 'string') system.content += `\n\n${STRICT_EVIDENCE_POLICY}`;
       else body.messages.unshift({ role: 'system', content: STRICT_EVIDENCE_POLICY });
 
+      if (user && typeof user.content === 'string' && user.content.length > MAX_USER_CHARS) {
+        user.content = `${user.content.slice(0, MAX_USER_CHARS)}\n\n[PAQUETE DE EVIDENCIA TRUNCADO POR LÍMITE OPERATIVO DEL EVALUADOR. No inferir ausencias desde contenido omitido.]`;
+      }
+
       const gatewayBody = { ...body, model: FINAL_MODEL };
-      // Los modelos de razonamiento administran internamente su muestreo.
       delete gatewayBody.temperature;
 
       const response = await originalFetch(GATEWAY_ENDPOINT, {
@@ -136,6 +144,28 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.end(JSON.stringify({ error: 'Vercel AI Gateway no está habilitado para este deployment.' }));
   }
+
+  const originalEnd = res.end.bind(res);
+  res.end = (chunk, ...rest) => {
+    try {
+      const parsed = JSON.parse(Buffer.isBuffer(chunk) ? chunk.toString('utf8') : String(chunk || '{}'));
+      if (parsed?.uso_api) {
+        const usage = parsed.uso_api;
+        usage.proveedor = 'Vercel AI Gateway';
+        usage.perfil = 'sol';
+        usage.modelo = FINAL_MODEL;
+        usage.modelo_resuelto = FINAL_MODEL;
+        usage.costo_estimado_usd = estimateSolCost({
+          input_tokens: usage.input_tokens,
+          output_tokens: usage.output_tokens,
+        });
+        usage.nota = 'GPT-5.6 Sol vía Vercel AI Gateway. El consumo usa primero los créditos incluidos en la cuenta de Vercel.';
+        chunk = JSON.stringify(parsed);
+      }
+    } catch {}
+    return originalEnd(chunk, ...rest);
+  };
+
   corePromise ||= import('./evaluate-one-shot-core.mjs');
   const core = await corePromise;
   return core.default(req, res);
