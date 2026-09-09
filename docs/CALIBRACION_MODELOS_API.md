@@ -4,17 +4,7 @@
 
 Mantener fija la norma V5 y permitir que la app corrija trabajos públicos de GitHub sin que el profesor elija modelo, cargue API keys ni complete parámetros técnicos.
 
-La evaluación mantiene constantes:
-
-- `agente/system_prompt.md` V5;
-- `rubrica.md` V5;
-- `agente/configuracion.md` V5;
-- `agente/contrato_salida.md` V5;
-- acceso a GitHub solo lectura;
-- anclaje a SHA exacto;
-- salida estructurada;
-- recálculo mecánico de puntajes;
-- controles mecánicos de evidencia para criterios frontera.
+La evaluación mantiene constantes `agente/system_prompt.md`, `rubrica.md`, `agente/configuracion.md` y `agente/contrato_salida.md` V5, con GitHub solo lectura, SHA exacto, salida estructurada, recálculo mecánico y controles de evidencia para criterios frontera.
 
 ## Casos de control
 
@@ -32,7 +22,7 @@ Los casos sirven para calibrar consistencia entre modelos. Los trabajos reales p
 
 **Gemini 3.6 Flash** también fue validado de punta a punta. En una prueba real de fallback, Gemini 3.7 devolvió 503 y Gemini 3.5 devolvió 429; la app continuó automáticamente a Gemini 3.6 y obtuvo 82 / 9 / 31 sin exponer errores intermedios al usuario y con costo estimado USD 0.
 
-Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados en la cadena final porque no completaron una calibración de punta a punta suficientemente estable. No se incorpora un modelo solo por ser gratuito.
+Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados en la cadena final porque no completaron una calibración de punta a punta suficientemente estable.
 
 ## Cadena operativa final
 
@@ -41,7 +31,7 @@ Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados en
 3. `openai/gpt-5.6-luna` vía Vercel AI Gateway — fallback pago;
 4. `openai/gpt-5.6-sol` vía Vercel AI Gateway — último fallback de máxima calidad.
 
-El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida: rate limit, cuota, timeout, indisponibilidad o salida que no cumple el contrato estructurado. Nunca se cambia de modelo para perseguir una nota determinada.
+El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida. Nunca se cambia de modelo para perseguir una nota determinada.
 
 Los dos modelos gratuitos ya están calibrados. Los fallbacks pagos quedan implementados como respaldo técnico. Antes de producción se completa la prueba integrada final y se verifica el comportamiento operativo de AI Gateway.
 
