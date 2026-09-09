@@ -32,6 +32,12 @@ function capState(modelState, gateState) {
   return STATE_RANK[modelState] > STATE_RANK[gateState] ? gateState : modelState;
 }
 
+function floorState(modelState, gateState) {
+  if (!(modelState in STATE_RANK) || !(gateState in STATE_RANK)) return modelState;
+  if (modelState === 'NO_VERIFICABLE') return modelState;
+  return STATE_RANK[modelState] < STATE_RANK[gateState] ? gateState : modelState;
+}
+
 function sc02Gate(files) {
   const all = joined(files);
   const implementationFile = files.some(file =>
@@ -51,6 +57,26 @@ function sc02Gate(files) {
   if (!concrete) return 'NO_CUMPLE';
   if (!operable) return 'PARCIAL';
   return 'CUMPLE';
+}
+
+function pd01Floor(files) {
+  const processFiles = files.filter(file =>
+    /(?:decisiones|decisions|proceso|process|iteraci[oó]n|iteration|version|versi[oó]n)/i.test(file.path + '\n' + file.content)
+  );
+  const text = joined(processFiles.length ? processFiles : files);
+
+  // Regla literal V5: "varias versiones sin reconstrucción suficiente" es PARCIAL,
+  // no NO_CUMPLE. Reconoce encabezados como "Versión inicial", "Segunda versión"
+  // y etiquetas V1/V2 aunque el detalle de los cambios sea genérico.
+  const labels = text.match(/(?:^|\n)\s*(?:#{1,6}\s*)?(?:(?:versi[oó]n|version)\s+(?:inicial|final|primera|segunda|tercera|cuarta|quinta|v?\d+(?:\.\d+)*)|(?:primera|segunda|tercera|cuarta|quinta)\s+(?:versi[oó]n|version)|v\d+(?:\.\d+)*)\b/gim) || [];
+  const normalized = new Set(labels.map(label => label.toLowerCase().replace(/[#\s]+/g, ' ').trim()));
+  if (normalized.size >= 2) return 'PARCIAL';
+
+  const hasInitial = /(?:versi[oó]n|version)\s+inicial|(?:primera)\s+(?:versi[oó]n|version)|\bv1\b/i.test(text);
+  const hasConcreteChange = /(?:cambi(?:amos|o|ó|ar)|ajust(?:amos|e|ó|ar)|agreg(?:amos|ó|ar)|elimin(?:amos|ó|ar)|modific(?:amos|ó|ar))\s+[^\n]{3,}/i.test(text);
+  if (hasInitial && hasConcreteChange) return 'PARCIAL';
+
+  return null;
 }
 
 function fr03Gate(files) {
@@ -126,6 +152,16 @@ export function applyDeterministicEvidenceGates(modelOutput, userPrompt) {
     criterion.estado = capState(original, gateState);
     if (criterion.estado !== original) {
       criterion.justificacion = `${criterion.justificacion || ''} [Control mecánico V5: ${original} → ${criterion.estado}; se aplicó la condición operativa literal del criterio.]`.trim();
+    }
+  }
+
+  const pd01Minimum = pd01Floor(files);
+  const pd01 = modelOutput.criterios['PD-01'];
+  if (pd01 && pd01Minimum) {
+    const original = pd01.estado;
+    pd01.estado = floorState(original, pd01Minimum);
+    if (pd01.estado !== original) {
+      pd01.justificacion = `${pd01.justificacion || ''} [Control mecánico V5 PD-01: ${original} → ${pd01.estado}; múltiples versiones explícitas corresponden como mínimo a PARCIAL aunque la reconstrucción sea insuficiente.]`.trim();
     }
   }
 
