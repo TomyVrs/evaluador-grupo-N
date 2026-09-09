@@ -12,6 +12,9 @@
     },
     "api/evaluate-one-shot-core.mjs": {
       "maxDuration": 300
+    },
+    "api/ai-health.mjs": {
+      "maxDuration": 60
     }
   },
   "headers": [
