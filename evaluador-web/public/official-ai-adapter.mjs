@@ -1,8 +1,11 @@
-import { evaluateEvidence as evaluateLocal, FREEZE_V5 } from '/engine_v4.mjs';
+import { FREEZE_V5 } from '/engine_v4.mjs';
 
 export { FREEZE_V5 };
 
 const STATE_KEY = 'evaluador-v5-local-state-v2';
+const LOCAL_MAX_FILES = 120;
+const LOCAL_MAX_FILE_CHARS = 50000;
+const LOCAL_MAX_TOTAL_CHARS = 260000;
 let usageRefreshQueued = false;
 
 function storedItems(){try{return JSON.parse(localStorage.getItem(STATE_KEY)||'[]')}catch{return[]}}
@@ -32,9 +35,10 @@ function updateAggregateUsage(){
 function visibleUsage(){
   const detail=document.getElementById('detail');
   if(!detail)return null;
-  const sha=(detail.textContent||'').match(/SHA evaluado:\s*([0-9a-f]{7,40})/i)?.[1];
-  if(!sha)return null;
-  return storedItems().find(x=>String(x.result?.repositorio?.commit_sha||'').startsWith(sha))?.result?.uso_api||null;
+  const text=detail.textContent||'';
+  const id=text.match(/SHA evaluado:\s*([0-9a-f]{7,40})/i)?.[1]||text.match(/Huella local:\s*(local-[0-9a-f]{16,64})/i)?.[1];
+  if(!id)return null;
+  return storedItems().find(x=>String(x.result?.repositorio?.commit_sha||'')===id||String(x.result?.repositorio?.commit_sha||'').startsWith(id))?.result?.uso_api||null;
 }
 
 function updateDetailUsage(){
@@ -59,34 +63,49 @@ function queueUsageRefresh(){
 
 function simplifyLoader(){
   const source=document.querySelector('.github-source');
-  if(!source)return;
-  const title=source.querySelector('h3');
-  if(title)title.textContent='Repositorios de Trabajos Finales';
-  const desc=source.querySelector('p');
-  if(desc)desc.textContent='Pegá uno o varios links de GitHub, uno por línea. La app detecta la rama, fija el SHA y evalúa el repositorio completo automáticamente.';
-  const textarea=document.getElementById('urls');
-  if(textarea)textarea.placeholder='https://github.com/alumno1/trabajo-final\nhttps://github.com/alumno2/trabajo-final';
-  const options=source.querySelector('.github-options');
-  if(options)options.style.display='none';
-  const add=document.getElementById('add');
-  if(add)add.textContent='Agregar trabajos';
-  source.querySelectorAll('#ai-profile').forEach(el=>el.closest('div')?.remove());
+  if(source){
+    const title=source.querySelector('h3');
+    if(title)title.textContent='Repositorios GitHub';
+    const desc=source.querySelector('p');
+    if(desc)desc.textContent='Pegá uno o varios links de GitHub, uno por línea. La app detecta la rama, fija el SHA y evalúa automáticamente.';
+    const textarea=document.getElementById('urls');
+    if(textarea)textarea.placeholder='https://github.com/alumno1/trabajo-final\nhttps://github.com/alumno2/trabajo-final';
+    const options=source.querySelector('.github-options');
+    if(options)options.style.display='none';
+    const add=document.getElementById('add');
+    if(add)add.textContent='Agregar trabajos';
+    source.querySelectorAll('#ai-profile').forEach(el=>el.closest('div')?.remove());
+  }
+
+  const locals=[...document.querySelectorAll('.local-source')];
+  locals.forEach(el=>el.style.display='');
+  const folder=locals.find(el=>el.querySelector('#folder-input'));
+  if(folder){
+    const title=folder.querySelector('h3');if(title)title.textContent='Carpeta local';
+    const desc=folder.querySelector('p');if(desc)desc.textContent='Elegí una carpeta completa del trabajo. Chrome y Edge permiten cargarla directamente.';
+    const note=folder.querySelector('.privacy-note');if(note)note.textContent='La carpeta se lee en el navegador. Solo la evidencia textual necesaria se envía al evaluador; ningún archivo se ejecuta.';
+  }
+  const zip=locals.find(el=>el.querySelector('#zip-input'));
+  if(zip){
+    const title=zip.querySelector('h3');if(title)title.textContent='Archivo ZIP';
+    const desc=zip.querySelector('p');if(desc)desc.textContent='Subí uno o varios ZIP con la entrega completa. También puede contener varios trabajos en subcarpetas.';
+    const note=zip.querySelector('.privacy-note');if(note)note.textContent='El ZIP se descomprime en el navegador. Solo texto compatible se envía al evaluador; no se ejecutan archivos.';
+  }
 }
 
 function enhanceOfficialUi(){
-  document.querySelectorAll('.local-source').forEach(el=>el.style.display='none');
   const status=document.getElementById('engine-status');
   if(status){status.textContent='Agente IA V5 · Modo automático';status.className='pill ok'}
   const rate=document.getElementById('rate');
   if(rate){rate.textContent='Gemini 3.5 → 3.6 → Luna → Sol';rate.className='pill'}
   const side=document.querySelector('.side-note');
-  if(side)side.innerHTML='<b>Agente Evaluador V5.</b><br>Pegá repositorios de Trabajos Finales y ejecutá la corrección. La rúbrica V5 queda fija y el modelo se selecciona automáticamente.';
+  if(side)side.innerHTML='<b>Agente Evaluador V5.</b><br>Pegá repositorios de GitHub o cargá ZIP/carpetas y ejecutá la corrección. La rúbrica V5 queda fija y el modelo se selecciona automáticamente.';
   const scope=document.querySelector('#engine-scope .hint');
-  if(scope)scope.innerHTML='<b>La nota la calcula el agente IA V5 en modo automático.</b> Primero intenta Gemini 3.5 y Gemini 3.6, ambos validados en los casos de control; solo si no están disponibles escala a GPT-5.6 Luna y finalmente a GPT-5.6 Sol. El backend fija un SHA exacto, lee la evidencia del repositorio y el servidor recalcula mecánicamente los puntajes de los 17 criterios.';
+  if(scope)scope.innerHTML='<b>La nota la calcula el agente IA V5 en modo automático.</b> Primero intenta Gemini 3.5 y Gemini 3.6, ambos validados en los casos de control; solo si no están disponibles escala a GPT-5.6 Luna y finalmente a GPT-5.6 Sol. En GitHub fija un SHA exacto; en archivos locales genera una huella SHA-256 del paquete evaluado.';
   const loaderHint=document.querySelector('#loader .section-head .hint');
-  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. No hace falta indicar rama ni ruta; tampoco elegir modelo ni cargar credenciales.';
+  if(loaderHint)loaderHint.textContent='Pegá repositorios públicos de GitHub o cargá ZIP/carpetas. No hace falta elegir modelo ni cargar credenciales.';
   const footer=document.querySelector('footer');
-  if(footer)footer.textContent='Agente IA V5 · selección automática: Gemini 3.5 → 3.6 → Luna → Sol · GitHub solo lectura · SHA exacto.';
+  if(footer)footer.textContent='Agente IA V5 · Gemini 3.5 → 3.6 → Luna → Sol · GitHub, ZIP y carpetas · trazabilidad por SHA/huella.';
   simplifyLoader();
   ensureUsageKpi();
   updateAggregateUsage();
@@ -106,9 +125,45 @@ async function callOfficialAgent(payload){
   return data;
 }
 
+function localRelevance(path){
+  const p=String(path||'').toLowerCase();let score=0;
+  if(/readme/.test(p))score+=100;if(/prompt|system_prompt|user_prompt/.test(p))score+=95;if(/decision|iteracion|version|cambio/.test(p))score+=90;
+  if(/corrida|run|salida|output|entrada|input/.test(p))score+=85;if(/econom|costo|cost|token|precio|pricing/.test(p))score+=80;
+  if(/gobierno|riesgo|risk|supervision|permiso|security/.test(p))score+=75;if(/tool|herramient|connector|integracion|integration/.test(p))score+=70;
+  if(/\.(md|json|txt)$/i.test(p))score+=20;return score;
+}
+
+function prepareLocalFiles(files){
+  const valid=(Array.isArray(files)?files:[]).filter(f=>f&&typeof f.path==='string'&&typeof f.content==='string')
+    .sort((a,b)=>localRelevance(b.path)-localRelevance(a.path)||a.path.localeCompare(b.path)).slice(0,LOCAL_MAX_FILES);
+  const out=[];let total=0;
+  for(const file of valid){
+    if(total>=LOCAL_MAX_TOTAL_CHARS)break;
+    let content=file.content.slice(0,LOCAL_MAX_FILE_CHARS);
+    if(total+content.length>LOCAL_MAX_TOTAL_CHARS)content=content.slice(0,LOCAL_MAX_TOTAL_CHARS-total);
+    total+=content.length;out.push({path:file.path,size:Number(file.size||file.content.length),content});
+  }
+  return out;
+}
+
+async function callOfficialLocal(payload){
+  const files=prepareLocalFiles(payload.files);
+  if(!files.length)throw new Error('No se encontraron archivos de texto compatibles para evaluar.');
+  const sourceKind=String(payload.url||'').startsWith('local://')?(payload.sourceKind||'zip'):'zip';
+  const name=decodeURIComponent(String(payload.url||'local://Trabajo local').replace(/^local:\/\//,''))||'Trabajo local';
+  const response=await fetch('/api/evaluate-local',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({name,kind:sourceKind==='folder'?'folder':'zip',files}),
+  });
+  let data={};try{data=await response.json()}catch{}
+  if(!response.ok)throw new Error(data?.error?.message||data?.error||`La evaluación local falló (HTTP ${response.status}).`);
+  setTimeout(queueUsageRefresh,0);return data;
+}
+
 export async function evaluateEvidence(payload){
   if(String(payload?.url||'').startsWith('https://github.com/'))return callOfficialAgent(payload);
-  return evaluateLocal(payload);
+  if(String(payload?.url||'').startsWith('local://')&&Array.isArray(payload?.files))return callOfficialLocal(payload);
+  throw new Error('Fuente no compatible. Usá un repositorio GitHub, un ZIP o una carpeta local.');
 }
 
 enhanceOfficialUi();
