@@ -1,9 +1,9 @@
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-// Solo modelos Flash del mismo nivel de corrección. Los Flash-Lite quedaron excluidos:
-// resolvían disponibilidad, pero degradaban materialmente la calibración V5.
-const GEMINI_FREE_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash'];
+// Modelo único de corrección: es el perfil que estamos calibrando contra V5.
+// No degradar silenciosamente a otros modelos: ante falta de cuota/capacidad se devuelve error y NO se emite una nota potencialmente inválida.
+const GEMINI_FREE_MODELS = ['gemini-3.5-flash'];
 
 const STRICT_EVIDENCE_POLICY = `
 CONTROL DE EVIDENCIA V5 — aplicación literal de criterios, sin alterar puntajes ni perseguir una nota objetivo:
@@ -45,37 +45,9 @@ REGLA GENERAL DE ESTABILIDAD
 - No reveles razonamiento interno. Devolvé únicamente el JSON estructurado solicitado.`;
 
 async function requestWithFreeModelFallback(originalFetch, url, init, body) {
-  const requestedModel = String(body?.model || GEMINI_FREE_MODELS[0]);
-  const candidates = [requestedModel, ...GEMINI_FREE_MODELS.filter(model => model !== requestedModel)];
-  let lastResponse = null;
-
-  for (const model of candidates) {
-    const nextBody = { ...body, model };
-    const response = await originalFetch(url, { ...init, body: JSON.stringify(nextBody) });
-    lastResponse = response;
-
-    if (response.ok) {
-      if (model !== requestedModel) {
-        console.warn('gemini-free-fallback-success', JSON.stringify({ from: requestedModel, to: model }));
-      }
-      return response;
-    }
-
-    if (![429, 503].includes(response.status)) return response;
-
-    let message = '';
-    try {
-      const data = await response.clone().json();
-      message = data?.error?.message || data?.[0]?.error?.message || '';
-    } catch {}
-
-    const retryable = /generate_content_free_tier_requests|quota exceeded|resource_exhausted|high demand|unavailable/i.test(message);
-    if (!retryable) return response;
-
-    console.warn('gemini-free-fallback', JSON.stringify({ model, status: response.status }));
-  }
-
-  return lastResponse;
+  const requestedModel = GEMINI_FREE_MODELS[0];
+  const nextBody = { ...body, model: requestedModel };
+  return originalFetch(url, { ...init, body: JSON.stringify(nextBody) });
 }
 
 if (!globalThis.__evaluadorStrictEvidenceV5) {
