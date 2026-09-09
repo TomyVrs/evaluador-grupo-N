@@ -22,6 +22,21 @@ const officialGithubEvaluation = "try{return await evaluateEvidence({url:t.url,r
 if (!app.includes(legacyGithubEvaluation)) throw new Error('No se encontró el bloque GitHub esperado en public/app.js');
 app = app.replace(legacyGithubEvaluation, officialGithubEvaluation);
 
+const localNeedle = "return evaluateEvidence({url:t.url,ref:'local',sha:payload.fingerprint,root:'/',date:new Date().toISOString().slice(0,10),files:payload.files,inventoryComplete:true,limitations:[]});";
+const localReplacement = "return evaluateEvidence({url:t.url,ref:'local',sha:payload.fingerprint,root:'/',date:new Date().toISOString().slice(0,10),files:payload.files,sourceKind:t.sourceKind,inventoryComplete:true,limitations:[]});";
+if (!app.includes(localNeedle)) throw new Error('No se encontró el bloque local esperado en public/app.js');
+app = app.replace(localNeedle, localReplacement);
+
+const zipHeaderNeedle = "const total=view.getUint16(eocd+10,true),cdOffset=view.getUint32(eocd+16,true);";
+const zipHeaderReplacement = `${zipHeaderNeedle}\n  if(total>500)throw Error(\`${'${file.name}'}: contiene demasiadas entradas (máximo 500).\`);`;
+if (!app.includes(zipHeaderNeedle)) throw new Error('No se encontró el encabezado ZIP esperado en public/app.js');
+app = app.replace(zipHeaderNeedle, zipHeaderReplacement);
+
+const zipLoopNeedle = "for(const zip of zips){const files=await extractZip(zip);totalAdded+=await addLocalPackage(zip.name.replace(/\\.zip$/i,''),files,'zip')}";
+const zipLoopReplacement = "for(const zip of zips){if(zip.size>15*1024*1024)throw Error(`${zip.name}: supera el máximo de 15 MB.`);const files=await extractZip(zip);totalAdded+=await addLocalPackage(zip.name.replace(/\\.zip$/i,''),files,'zip')}";
+if (!app.includes(zipLoopNeedle)) throw new Error('No se encontró el loop ZIP esperado en public/app.js');
+app = app.replace(zipLoopNeedle, zipLoopReplacement);
+
 await writeFile(appPath, app, 'utf8');
 
-console.log('Build listo: GitHub usa agente IA V5 oficial; runner local queda solo como soporte interno.');
+console.log('Build listo: GitHub, ZIP y carpetas usan el agente IA V5 oficial.');
