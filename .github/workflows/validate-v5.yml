@@ -47,16 +47,20 @@ jobs:
           node --check public/integrity-runtime.js
           node --check api/evaluate.mjs
           node --check api/evaluate-with-usage.mjs
+          node --check api/evaluate-one-shot-core.mjs
       - name: Validate one-shot official AI safeguards
         working-directory: evaluador-web
         run: |
-          grep -q "GEMINI_API_KEY" api/evaluate-with-usage.mjs
-          grep -q "gemini-3.5-flash" api/evaluate-with-usage.mjs
-          grep -q "llamadas_modelo: 1" api/evaluate-with-usage.mjs
-          grep -q "FREEZE_V5" api/evaluate-with-usage.mjs
-          grep -q "GitHub no devolvió un SHA válido" api/evaluate-with-usage.mjs
-          grep -q "CUMPLE solo cuando" api/evaluate-with-usage.mjs
-          grep -q "costo_estimado_usd: 0" api/evaluate-with-usage.mjs
+          grep -q "GEMINI_API_KEY" api/evaluate-one-shot-core.mjs
+          grep -q "gemini-3.5-flash" api/evaluate-one-shot-core.mjs
+          grep -q "llamadas_modelo: 1" api/evaluate-one-shot-core.mjs
+          grep -q "FREEZE_V5" api/evaluate-one-shot-core.mjs
+          grep -q "GitHub no devolvió un SHA válido" api/evaluate-one-shot-core.mjs
+          grep -q "costo_estimado_usd: 0" api/evaluate-one-shot-core.mjs
+          grep -q "STRICT_EVIDENCE_POLICY" api/evaluate-with-usage.mjs
+          grep -q "SC-02" api/evaluate-with-usage.mjs
+          grep -q "AE-01" api/evaluate-with-usage.mjs
+          grep -q "evaluate-one-shot-core.mjs" api/evaluate-with-usage.mjs
           grep -q "Agente IA V5" public/official-ai-adapter.mjs
           grep -q "No hace falta indicar rama ni ruta" public/official-ai-adapter.mjs
       - name: Install local runner
