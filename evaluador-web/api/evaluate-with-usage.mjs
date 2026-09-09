@@ -2,7 +2,7 @@ import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
 const SOURCE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const FINAL_MODEL = 'openai/gpt-5.6-sol';
+const FINAL_MODEL = 'openai/gpt-5.6-luna';
 const MAX_USER_CHARS = 120000;
 
 const STRICT_EVIDENCE_POLICY = `
@@ -48,10 +48,10 @@ function gatewayToken() {
   return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || '';
 }
 
-function estimateSolCost(usage = {}) {
+function estimateLunaCost(usage = {}) {
   const input = Number(usage.input_tokens || usage.prompt_tokens || 0);
   const output = Number(usage.output_tokens || usage.completion_tokens || 0);
-  return Number(((input * 2 + output * 10) / 1_000_000).toFixed(6));
+  return Number(((input * 0.2 + output * 1.2) / 1_000_000).toFixed(6));
 }
 
 if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__vercel_ai_gateway__';
@@ -152,14 +152,14 @@ export default async function handler(req, res) {
       if (parsed?.uso_api) {
         const usage = parsed.uso_api;
         usage.proveedor = 'Vercel AI Gateway';
-        usage.perfil = 'sol';
+        usage.perfil = 'luna';
         usage.modelo = FINAL_MODEL;
         usage.modelo_resuelto = FINAL_MODEL;
-        usage.costo_estimado_usd = estimateSolCost({
+        usage.costo_estimado_usd = estimateLunaCost({
           input_tokens: usage.input_tokens,
           output_tokens: usage.output_tokens,
         });
-        usage.nota = 'GPT-5.6 Sol vía Vercel AI Gateway. El consumo usa primero los créditos incluidos en la cuenta de Vercel.';
+        usage.nota = 'GPT-5.6 Luna vía Vercel AI Gateway. Una llamada de IA por trabajo; costo estimado según tokens reportados.';
         chunk = JSON.stringify(parsed);
       }
     } catch {}
