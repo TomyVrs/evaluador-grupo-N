@@ -10,16 +10,10 @@
     "api/evaluate-with-usage.mjs": {
       "maxDuration": 300
     },
-    "api/evaluate-router.mjs": {
+    "api/evaluate-one-shot-core.mjs": {
       "maxDuration": 300
     }
   },
-  "rewrites": [
-    {
-      "source": "/api/evaluate-with-usage",
-      "destination": "/api/evaluate-router"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
