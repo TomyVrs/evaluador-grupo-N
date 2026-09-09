@@ -59,6 +59,17 @@ function sc02Gate(files) {
   return 'CUMPLE';
 }
 
+function sc02LiteralFloor(files) {
+  const all = joined(files);
+  // Regla literal V5: si una herramienta/conector concreto está identificado y su uso
+  // operativo está descrito, la falta de traza/configuración reproducible deja SC-02
+  // como mínimo en PARCIAL; NO_CUMPLE se reserva para clase genérica, uso no identificado
+  // o ausencia de herramienta.
+  const namedConcrete = /(?:conector(?:es)?|herramienta(?:s)?|tool(?:s)?)\s+(?:real(?:es)?\s+)?(?:de\s+)?[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]+(?:\s+(?:y|e)\s+[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]+(?:\s+[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚáéíóúÑñ0-9_.-]+)*)?/m.test(all);
+  const explicitUse = /(?:leer|enviar|crear|modificar|eliminar|consultar|buscar|escribir|actualizar|acceder|read|send|create|update|delete|search|fetch|write)\b/i.test(all);
+  return namedConcrete && explicitUse ? 'PARCIAL' : null;
+}
+
 function pd01Floor(files) {
   const processFiles = files.filter(file =>
     /(?:decisiones|decisions|proceso|process|iteraci[oó]n|iteration|version|versi[oó]n)/i.test(file.path + '\n' + file.content)
@@ -84,9 +95,6 @@ function fr03Gate(files) {
   const runText = joined(runFiles.length ? runFiles : files);
   const all = joined(files);
 
-  // Acepta tanto campos "Entrada: ..." como secciones Markdown "## Entrada".
-  // La presencia de ambas secciones en un mismo registro demuestra asociación básica
-  // entrada/salida, pero no alcanza por sí sola para CUMPLE.
   const hasInput = /(?:^|\n)\s*(?:[-*]\s*)?(?:#{1,6}\s*)?(?:\*\*)?(?:entrada|input)(?:\*\*)?\s*(?::|=|-|\n)/im.test(runText);
   const hasOutput = /(?:^|\n)\s*(?:[-*]\s*)?(?:#{1,6}\s*)?(?:\*\*)?(?:salida|output)(?:\*\*)?\s*(?::|=|-|\n)/im.test(runText);
   const hasPromptOrConfig = /(?:prompt|configuraci[oó]n|config)\s*[:=-]\s*`?[^\n]+/i.test(runText);
@@ -101,8 +109,6 @@ function ae01Gate(files) {
   const econ = joined(files, file => /(?:econom|cost|costo|pricing|precio|financ)/i.test(file.path + '\n' + file.content));
   const text = econ || joined(files);
 
-  // Reconoce variantes equivalentes: "USD 0,03 por corrida",
-  // "Costo por corrida: USD 0,03" y "Costo declarado por corrida: USD 0,03".
   const costPerRun = /(?:USD|US\$|EUR|ARS|\$)\s*\d[\d.,]*\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)|\d[\d.,]*\s*(?:USD|EUR|ARS)\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)|(?:costo|coste|cost)\s+(?:declarad[oa]\s+|estimad[oa]\s+)?(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)\s*[:=-]\s*(?:USD|US\$|EUR|ARS|\$)\s*\d[\d.,]*/i.test(text);
   const explicitBasis = /(?:base\s+de\s+c[aá]lculo|supuesto)\s*[:=-]\s*[^\n]{3,}/i.test(text);
   const tokenBasis = /(?:\d[\d.,]*\s*(?:tokens?|caracteres?)|tokens?\s*[:=-]\s*\d[\d.,]*)[\s\S]{0,160}(?:tarifa|precio|costo)|(?:tarifa|precio|costo)[\s\S]{0,160}(?:\d[\d.,]*\s*(?:tokens?|caracteres?))/i.test(text);
@@ -152,6 +158,16 @@ export function applyDeterministicEvidenceGates(modelOutput, userPrompt) {
     criterion.estado = capState(original, gateState);
     if (criterion.estado !== original) {
       criterion.justificacion = `${criterion.justificacion || ''} [Control mecánico V5: ${original} → ${criterion.estado}; se aplicó la condición operativa literal del criterio.]`.trim();
+    }
+  }
+
+  const sc02Minimum = sc02LiteralFloor(files);
+  const sc02 = modelOutput.criterios['SC-02'];
+  if (sc02 && sc02Minimum) {
+    const original = sc02.estado;
+    sc02.estado = floorState(original, sc02Minimum);
+    if (sc02.estado !== original) {
+      sc02.justificacion = `${sc02.justificacion || ''} [Control mecánico V5 SC-02: ${original} → ${sc02.estado}; herramienta/conector concreto y uso explícito corresponden como mínimo a PARCIAL aunque falte operabilidad reproducible.]`.trim();
     }
   }
 
