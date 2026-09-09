@@ -49,7 +49,7 @@ function send(res, status, body) {
 
 function normalizePath(raw) {
   const path = String(raw || '').replaceAll('\\', '/').replace(/^\/+/, '').trim();
-  if (!path || path.includes('\0') || path.split('/').some(part => !part || part === '.' || part === '..')) return null;
+  if (!path || path.includes('\u0000') || path.split('/').some(part => !part || part === '.' || part === '..')) return null;
   return path;
 }
 
@@ -110,7 +110,7 @@ function prepareEvidence(filesInput) {
 
   const hash = createHash('sha256');
   for (const file of [...normalized].sort((a, b) => a.path.localeCompare(b.path))) {
-    hash.update(file.path); hash.update('\0'); hash.update(file.content); hash.update('\1');
+    hash.update(file.path); hash.update('\u0000'); hash.update(file.content); hash.update('\u0001');
   }
 
   return {
