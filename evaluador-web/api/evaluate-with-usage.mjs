@@ -1,6 +1,7 @@
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GEMINI_FREE_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash'];
 
 const STRICT_EVIDENCE_POLICY = `
 CONTROL DE EVIDENCIA V5 — aplicación literal de criterios, sin alterar puntajes ni perseguir una nota objetivo:
@@ -41,6 +42,40 @@ REGLA GENERAL DE ESTABILIDAD
 - No uses notas históricas, casos de calibración ni puntajes esperados como objetivo. La decisión debe surgir únicamente de la evidencia del repositorio evaluado.
 - No reveles razonamiento interno. Devolvé únicamente el JSON estructurado solicitado.`;
 
+async function requestWithFreeModelFallback(originalFetch, url, init, body) {
+  const requestedModel = String(body?.model || GEMINI_FREE_MODELS[0]);
+  const candidates = [requestedModel, ...GEMINI_FREE_MODELS.filter(model => model !== requestedModel)];
+  let lastResponse = null;
+
+  for (const model of candidates) {
+    const nextBody = { ...body, model };
+    const response = await originalFetch(url, { ...init, body: JSON.stringify(nextBody) });
+    lastResponse = response;
+
+    if (response.ok) {
+      if (model !== requestedModel) {
+        console.warn('gemini-free-fallback-success', JSON.stringify({ from: requestedModel, to: model }));
+      }
+      return response;
+    }
+
+    if (![429, 503].includes(response.status)) return response;
+
+    let message = '';
+    try {
+      const data = await response.clone().json();
+      message = data?.error?.message || data?.[0]?.error?.message || '';
+    } catch {}
+
+    const retryable = /generate_content_free_tier_requests|quota exceeded|resource_exhausted|high demand|unavailable/i.test(message);
+    if (!retryable) return response;
+
+    console.warn('gemini-free-fallback', JSON.stringify({ model, status: response.status }));
+  }
+
+  return lastResponse;
+}
+
 if (!globalThis.__evaluadorStrictEvidenceV5) {
   const originalFetch = globalThis.fetch.bind(globalThis);
 
@@ -61,7 +96,7 @@ if (!globalThis.__evaluadorStrictEvidenceV5) {
           body.messages.unshift({ role: 'system', content: STRICT_EVIDENCE_POLICY });
         }
 
-        const response = await originalFetch(args[0], { ...init, body: JSON.stringify(body) });
+        const response = await requestWithFreeModelFallback(originalFetch, args[0], init, body);
         if (!response.ok) return response;
 
         let data;
