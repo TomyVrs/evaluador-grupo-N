@@ -4,7 +4,7 @@ import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.6-flash'];
+const FREE_GEMINI_MODELS = ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-3.6-flash'];
 const FREE_OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free'];
 const LUNA_MODEL = 'openai/gpt-5.6-luna';
 const SOL_MODEL = 'openai/gpt-5.6-sol';
