@@ -1,8 +1,6 @@
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.6-flash'];
-const FREE_OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free'];
+const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash'];
 const LUNA_MODEL = 'openai/gpt-5.6-luna';
 const SOL_MODEL = 'openai/gpt-5.6-sol';
 
@@ -11,16 +9,12 @@ function geminiKey() {
   return key.startsWith('__') ? '' : key;
 }
 
-function openRouterKey() {
-  return process.env.OPENROUTER_API_KEY || '';
-}
-
 function gatewayKey() {
   return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || '';
 }
 
 function route() {
-  return [...FREE_GEMINI_MODELS, ...FREE_OPENROUTER_MODELS, LUNA_MODEL, SOL_MODEL];
+  return [...FREE_GEMINI_MODELS, LUNA_MODEL, SOL_MODEL];
 }
 
 async function probe(url, key, model, provider) {
@@ -29,10 +23,6 @@ async function probe(url, key, model, provider) {
     headers: {
       Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
-      ...(provider === 'OpenRouter Free' ? {
-        'HTTP-Referer': 'https://evaluador-v5-web.vercel.app',
-        'X-Title': 'Agente Evaluador V5 UCEMA',
-      } : {}),
     },
     body: JSON.stringify({
       model,
@@ -49,11 +39,10 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
   const gemini = geminiKey();
-  const openrouter = openRouterKey();
   const gateway = gatewayKey();
-  if (!gemini && !openrouter && !gateway) {
+  if (!gemini && !gateway) {
     res.statusCode = 503;
-    return res.end(JSON.stringify({ ok: false, gemini_key: false, openrouter_key: false, gateway_key: false, route: route() }));
+    return res.end(JSON.stringify({ ok: false, gemini_key: false, gateway_key: false, route: route() }));
   }
 
   if (String(req.query?.live || '') !== '1') {
@@ -61,7 +50,6 @@ export default async function handler(req, res) {
     return res.end(JSON.stringify({
       ok: true,
       gemini_key: Boolean(gemini),
-      openrouter_key: Boolean(openrouter),
       gateway_key: Boolean(gateway),
       oidc: Boolean(process.env.VERCEL_OIDC_TOKEN),
       route: route(),
@@ -76,17 +64,6 @@ export default async function handler(req, res) {
       if (result.response.ok) {
         res.statusCode = 200;
         return res.end(JSON.stringify({ ok: true, provider: 'Google Gemini Free Tier', model: result.data.model || model, cost_usd: 0, attempts }));
-      }
-    }
-  }
-
-  if (openrouter) {
-    for (const model of FREE_OPENROUTER_MODELS) {
-      const result = await probe(OPENROUTER_ENDPOINT, openrouter, model, 'OpenRouter Free');
-      attempts.push(result.attempt);
-      if (result.response.ok) {
-        res.statusCode = 200;
-        return res.end(JSON.stringify({ ok: true, provider: 'OpenRouter Free', model: result.data.model || model, cost_usd: 0, attempts }));
       }
     }
   }
