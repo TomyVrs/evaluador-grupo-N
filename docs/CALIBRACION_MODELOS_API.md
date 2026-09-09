@@ -77,15 +77,7 @@ El profesor solo debe:
 4. ejecutar la evaluación;
 5. revisar resultados y, si lo desea, exportar CSV o JSON.
 
-No necesita:
-
-- API keys;
-- login del proveedor de IA;
-- elegir modelo;
-- indicar rama;
-- indicar SHA;
-- indicar ruta del trabajo;
-- copiar prompts manualmente.
+No necesita API keys, login del proveedor de IA, elegir modelo, indicar rama/SHA/ruta ni copiar prompts manualmente.
 
 ## Trazabilidad
 
@@ -101,13 +93,17 @@ Cada evaluación registra junto al resultado:
 
 ## Regla de aceptación
 
-Un nuevo modelo solo puede incorporarse al fallback automático si:
+Un nuevo modelo solo puede incorporarse al fallback automático si mantiene la aplicación de la rúbrica V5, no inventa evidencia, produce salida estructurada válida, conserva las alertas del caso adversarial y completa una calibración de punta a punta antes de quedar habilitado.
 
-- mantiene la aplicación de la rúbrica V5;
-- no inventa evidencia;
-- produce salida estructurada válida;
-- conserva las alertas del caso adversarial;
-- sus diferencias frente a la referencia son explicables y no muestran sesgo sistemático;
-- completa la calibración de punta a punta antes de quedar habilitado.
+## Checklist previo al merge
+
+Antes de promover esta rama al repo oficial se debe completar una última prueba integrada con la cadena final:
+
+- Excelente = 82/100;
+- Flojo = 9/100;
+- Tramposo = 31/100 y alerta de manipulación;
+- prueba con repositorio externo real;
+- prueba de lote con varios repositorios;
+- acceso público en incógnito sin login ni credenciales del profesor.
 
 La prioridad operativa es: **gratuito validado primero, pago solo como respaldo, sin trasladar ninguna complejidad al profesor**.
