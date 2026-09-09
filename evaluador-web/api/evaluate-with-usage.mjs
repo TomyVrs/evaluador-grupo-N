@@ -1,3 +1,5 @@
+import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
+
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
 
 const STRICT_EVIDENCE_POLICY = `
@@ -52,12 +54,38 @@ if (!globalThis.__evaluadorStrictEvidenceV5) {
 
       if (body && Array.isArray(body.messages)) {
         const system = body.messages.find(message => message?.role === 'system');
+        const user = body.messages.find(message => message?.role === 'user');
         if (system && typeof system.content === 'string') {
           system.content += `\n\n${STRICT_EVIDENCE_POLICY}`;
         } else {
           body.messages.unshift({ role: 'system', content: STRICT_EVIDENCE_POLICY });
         }
-        return originalFetch(args[0], { ...init, body: JSON.stringify(body) });
+
+        const response = await originalFetch(args[0], { ...init, body: JSON.stringify(body) });
+        if (!response.ok) return response;
+
+        let data;
+        try { data = await response.clone().json(); } catch { return response; }
+        const content = data?.choices?.[0]?.message?.content;
+        if (!content || typeof user?.content !== 'string') return response;
+
+        try {
+          const modelOutput = JSON.parse(content);
+          const stabilized = applyDeterministicEvidenceGates(modelOutput, user.content);
+          data.choices[0].message.content = JSON.stringify(stabilized);
+
+          const headers = new Headers(response.headers);
+          headers.delete('content-length');
+          headers.delete('content-encoding');
+          return new Response(JSON.stringify(data), {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+          });
+        } catch (error) {
+          console.warn('v5-mechanical-gates-skipped', error?.message || String(error));
+          return response;
+        }
       }
     }
 
