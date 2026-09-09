@@ -65,6 +65,8 @@ El orden automático queda:
 
 El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida: rate limit, cuota, timeout, indisponibilidad del proveedor o salida que no cumple el contrato estructurado. Nunca se cambia de modelo para perseguir una nota determinada.
 
+**Estado antes de producción:** los dos modelos gratuitos ya están calibrados. Los fallbacks pagos quedan implementados como respaldo técnico, pero la promoción final a producción requiere comprobar que el AI Gateway tenga billing/créditos habilitados y realizar una prueba controlada del fallback pago. Si Gateway no está habilitado, la app debe agotar primero los dos modelos gratuitos y luego mostrar un error amigable, sin exponer mensajes internos del proveedor.
+
 ## Experiencia del profesor
 
 El profesor solo debe:
