@@ -2,10 +2,8 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const FREE_GEMINI_MODELS = ['gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-3.6-flash'];
-const FREE_OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free'];
+const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash'];
 const LUNA_MODEL = 'openai/gpt-5.6-luna';
 const SOL_MODEL = 'openai/gpt-5.6-sol';
 const MAX_USER_CHARS = 120000;
@@ -61,15 +59,11 @@ function geminiToken() {
   return key.startsWith('__') ? '' : key;
 }
 
-function openRouterToken() {
-  return process.env.OPENROUTER_API_KEY || '';
-}
-
 function costForModel(model, usage = {}) {
   const input = Number(usage.input_tokens || usage.prompt_tokens || 0);
   const output = Number(usage.output_tokens || usage.completion_tokens || 0);
   const id = String(model || '');
-  if (id.includes('gemini') || id.endsWith(':free')) return 0;
+  if (id.includes('gemini')) return 0;
   if (id.includes('gpt-5.6-sol')) return Number(((input * 2 + output * 10) / 1_000_000).toFixed(6));
   if (id.includes('gpt-5.6-luna')) return Number(((input * 0.2 + output * 1.2) / 1_000_000).toFixed(6));
   return null;
@@ -122,30 +116,6 @@ async function callGeminiFree(originalFetch, body, store, model) {
   recordAttempt(store, 'Google Gemini Free Tier', model, response, data, accepted);
   if (!accepted) {
     console.warn('free-model-fallback', JSON.stringify({ provider: 'gemini', status: response.status, model, error: data?.error || null, invalid_json: response.ok }));
-  }
-  return { response, data, accepted };
-}
-
-async function callOpenRouterFree(originalFetch, body, store, model) {
-  const key = openRouterToken();
-  if (!key) return null;
-  const freeBody = { ...body, model };
-  delete freeBody.temperature;
-  const response = await originalFetch(OPENROUTER_ENDPOINT, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${key}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://evaluador-v5-web.vercel.app',
-      'X-Title': 'Agente Evaluador V5 UCEMA',
-    },
-    body: JSON.stringify(freeBody),
-  });
-  const data = await response.clone().json().catch(() => ({}));
-  const accepted = response.ok && isStructuredEvaluation(data);
-  recordAttempt(store, 'OpenRouter Free', model, response, data, accepted);
-  if (!accepted) {
-    console.warn('free-model-fallback', JSON.stringify({ provider: 'openrouter', status: response.status, model, error: data?.error || null, invalid_json: response.ok }));
   }
   return { response, data, accepted };
 }
@@ -206,9 +176,9 @@ function unavailableResponse(store) {
   });
 }
 
-if (!process.env.GEMINI_API_KEY && (openRouterToken() || gatewayToken())) process.env.GEMINI_API_KEY = '__auto_router__';
+if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__auto_router__';
 
-if (!globalThis.__evaluadorV5AutoRouterPatchedV2) {
+if (!globalThis.__evaluadorV5AutoRouterPatchedV3) {
   const originalFetch = globalThis.fetch.bind(globalThis);
 
   globalThis.fetch = async (...args) => {
@@ -225,11 +195,6 @@ if (!globalThis.__evaluadorV5AutoRouterPatchedV2) {
 
       for (const model of FREE_GEMINI_MODELS) {
         const free = await callGeminiFree(originalFetch, body, store, model);
-        if (free?.accepted) return stabilizedResponse(free.response, free.data, user?.content);
-      }
-
-      for (const model of FREE_OPENROUTER_MODELS) {
-        const free = await callOpenRouterFree(originalFetch, body, store, model);
         if (free?.accepted) return stabilizedResponse(free.response, free.data, user?.content);
       }
 
@@ -250,13 +215,13 @@ if (!globalThis.__evaluadorV5AutoRouterPatchedV2) {
     return originalFetch(...args);
   };
 
-  globalThis.__evaluadorV5AutoRouterPatchedV2 = true;
+  globalThis.__evaluadorV5AutoRouterPatchedV3 = true;
 }
 
 let corePromise;
 
 export default async function handler(req, res) {
-  if (!geminiToken() && !openRouterToken() && !gatewayToken()) {
+  if (!geminiToken() && !gatewayToken()) {
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.end(JSON.stringify({ error: 'No hay un proveedor de IA habilitado para este deployment.' }));
@@ -283,7 +248,7 @@ export default async function handler(req, res) {
           usage.costo_estimado_usd = costForModel(store.model, usage);
           usage.ruta_modelos = store.attempts;
           usage.nota = isFree
-            ? `Modo automático: se resolvió sin costo con ${store.model}. Si un modelo gratuito no está disponible, el sistema recorre los siguientes modelos gratuitos antes de escalar a GPT-5.6 Luna y GPT-5.6 Sol.`
+            ? `Modo automático: se resolvió sin costo con ${store.model}. La cadena gratuita validada prioriza Gemini 3.5 y luego Gemini 3.6; solo si ambos fallan escala a GPT-5.6 Luna y GPT-5.6 Sol.`
             : `Modo automático: las rutas gratuitas no estuvieron disponibles o no devolvieron una salida válida; se usó ${store.model} vía Vercel AI Gateway.`;
           chunk = JSON.stringify(parsed);
         }
