@@ -1,9 +1,11 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
-const SOURCE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions';
 const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
-const FREE_MODEL = 'gemini-3.5-flash';
+const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.6-flash'];
+const FREE_OPENROUTER_MODELS = ['nvidia/nemotron-3-super-120b-a12b:free'];
 const LUNA_MODEL = 'openai/gpt-5.6-luna';
 const SOL_MODEL = 'openai/gpt-5.6-sol';
 const MAX_USER_CHARS = 120000;
@@ -56,15 +58,20 @@ function gatewayToken() {
 
 function geminiToken() {
   const key = process.env.GEMINI_API_KEY || '';
-  return key === '__vercel_ai_gateway__' ? '' : key;
+  return key.startsWith('__') ? '' : key;
+}
+
+function openRouterToken() {
+  return process.env.OPENROUTER_API_KEY || '';
 }
 
 function costForModel(model, usage = {}) {
   const input = Number(usage.input_tokens || usage.prompt_tokens || 0);
   const output = Number(usage.output_tokens || usage.completion_tokens || 0);
-  if (String(model).includes('gemini')) return 0;
-  if (String(model).includes('gpt-5.6-sol')) return Number(((input * 2 + output * 10) / 1_000_000).toFixed(6));
-  if (String(model).includes('gpt-5.6-luna')) return Number(((input * 0.2 + output * 1.2) / 1_000_000).toFixed(6));
+  const id = String(model || '');
+  if (id.includes('gemini') || id.endsWith(':free')) return 0;
+  if (id.includes('gpt-5.6-sol')) return Number(((input * 2 + output * 10) / 1_000_000).toFixed(6));
+  if (id.includes('gpt-5.6-luna')) return Number(((input * 0.2 + output * 1.2) / 1_000_000).toFixed(6));
   return null;
 }
 
@@ -101,20 +108,44 @@ function recordAttempt(store, provider, model, response, data, accepted) {
   store.usage = data?.usage || {};
 }
 
-async function callGeminiFree(originalFetch, body, store) {
+async function callGeminiFree(originalFetch, body, store, model) {
   const key = geminiToken();
   if (!key) return null;
-  const freeBody = { ...body, model: FREE_MODEL };
-  const response = await originalFetch(SOURCE_ENDPOINT, {
+  const freeBody = { ...body, model };
+  const response = await originalFetch(GEMINI_ENDPOINT, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify(freeBody),
   });
   const data = await response.clone().json().catch(() => ({}));
   const accepted = response.ok && isStructuredEvaluation(data);
-  recordAttempt(store, 'Google Gemini Free Tier', FREE_MODEL, response, data, accepted);
+  recordAttempt(store, 'Google Gemini Free Tier', model, response, data, accepted);
   if (!accepted) {
-    console.warn('free-model-fallback', JSON.stringify({ status: response.status, model: FREE_MODEL, error: data?.error || null, invalid_json: response.ok }));
+    console.warn('free-model-fallback', JSON.stringify({ provider: 'gemini', status: response.status, model, error: data?.error || null, invalid_json: response.ok }));
+  }
+  return { response, data, accepted };
+}
+
+async function callOpenRouterFree(originalFetch, body, store, model) {
+  const key = openRouterToken();
+  if (!key) return null;
+  const freeBody = { ...body, model };
+  delete freeBody.temperature;
+  const response = await originalFetch(OPENROUTER_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${key}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://evaluador-v5-web.vercel.app',
+      'X-Title': 'Agente Evaluador V5 UCEMA',
+    },
+    body: JSON.stringify(freeBody),
+  });
+  const data = await response.clone().json().catch(() => ({}));
+  const accepted = response.ok && isStructuredEvaluation(data);
+  recordAttempt(store, 'OpenRouter Free', model, response, data, accepted);
+  if (!accepted) {
+    console.warn('free-model-fallback', JSON.stringify({ provider: 'openrouter', status: response.status, model, error: data?.error || null, invalid_json: response.ok }));
   }
   return { response, data, accepted };
 }
@@ -167,16 +198,24 @@ function stabilizedResponse(response, data, userContent) {
   }
 }
 
-if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__vercel_ai_gateway__';
+function unavailableResponse(store) {
+  console.error('all-model-routes-exhausted', JSON.stringify({ attempts: store?.attempts || [] }));
+  return new Response(JSON.stringify({ error: { message: 'La capacidad de evaluación está temporalmente ocupada. Reintentá en unos minutos.' } }), {
+    status: 503,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
 
-if (!globalThis.__evaluadorV5AutoRouterPatched) {
+if (!process.env.GEMINI_API_KEY && (openRouterToken() || gatewayToken())) process.env.GEMINI_API_KEY = '__auto_router__';
+
+if (!globalThis.__evaluadorV5AutoRouterPatchedV2) {
   const originalFetch = globalThis.fetch.bind(globalThis);
 
   globalThis.fetch = async (...args) => {
     const url = typeof args[0] === 'string' ? args[0] : String(args[0]?.url || '');
     const init = args[1] || {};
 
-    if (url === SOURCE_ENDPOINT && String(init.method || 'GET').toUpperCase() === 'POST') {
+    if (url === GEMINI_ENDPOINT && String(init.method || 'GET').toUpperCase() === 'POST') {
       let sourceBody = null;
       try { sourceBody = JSON.parse(String(init.body || '{}')); } catch {}
       if (!sourceBody || !Array.isArray(sourceBody.messages)) return originalFetch(...args);
@@ -184,37 +223,40 @@ if (!globalThis.__evaluadorV5AutoRouterPatched) {
       const store = routeStorage.getStore();
       const { body, user } = prepareBody(sourceBody);
 
-      const free = await callGeminiFree(originalFetch, body, store);
-      if (free?.accepted) return stabilizedResponse(free.response, free.data, user?.content);
+      for (const model of FREE_GEMINI_MODELS) {
+        const free = await callGeminiFree(originalFetch, body, store, model);
+        if (free?.accepted) return stabilizedResponse(free.response, free.data, user?.content);
+      }
+
+      for (const model of FREE_OPENROUTER_MODELS) {
+        const free = await callOpenRouterFree(originalFetch, body, store, model);
+        if (free?.accepted) return stabilizedResponse(free.response, free.data, user?.content);
+      }
 
       const paid = await callGateway(originalFetch, body, store, false);
       if (paid?.accepted) return stabilizedResponse(paid.response, paid.data, user?.content);
 
       const paidResolved = String(paid?.data?.model || '');
-      if (paid && !paidResolved.includes('gpt-5.6-sol')) {
+      const paidError = String(paid?.data?.error?.message || '').toLowerCase();
+      const gatewayBlocked = paid && (/credit card|billing|payment|quota/.test(paidError) || [402, 403].includes(paid.response.status));
+      if (paid && !gatewayBlocked && !paidResolved.includes('gpt-5.6-sol')) {
         const sol = await callGateway(originalFetch, body, store, true);
         if (sol?.accepted) return stabilizedResponse(sol.response, sol.data, user?.content);
-        if (sol) return sol.response;
       }
 
-      if (paid) return paid.response;
-      if (free) return free.response;
-      return new Response(JSON.stringify({ error: { message: 'No hay un proveedor de IA habilitado para este deployment.' } }), {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return unavailableResponse(store);
     }
 
     return originalFetch(...args);
   };
 
-  globalThis.__evaluadorV5AutoRouterPatched = true;
+  globalThis.__evaluadorV5AutoRouterPatchedV2 = true;
 }
 
 let corePromise;
 
 export default async function handler(req, res) {
-  if (!geminiToken() && !gatewayToken()) {
+  if (!geminiToken() && !openRouterToken() && !gatewayToken()) {
     res.statusCode = 503;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     return res.end(JSON.stringify({ error: 'No hay un proveedor de IA habilitado para este deployment.' }));
@@ -229,8 +271,9 @@ export default async function handler(req, res) {
         if (parsed?.uso_api && store.model) {
           const usage = parsed.uso_api;
           const actual = store.usage || {};
+          const isFree = store.provider !== 'Vercel AI Gateway';
           usage.proveedor = store.provider;
-          usage.perfil = store.provider === 'Google Gemini Free Tier' ? 'free' : String(store.model).includes('sol') ? 'sol' : 'luna';
+          usage.perfil = isFree ? 'free' : String(store.model).includes('sol') ? 'sol' : 'luna';
           usage.modelo = store.model;
           usage.modelo_resuelto = store.model;
           usage.llamadas_modelo = store.attempts.length;
@@ -239,9 +282,9 @@ export default async function handler(req, res) {
           usage.total_tokens = Number(actual.total_tokens || (usage.input_tokens + usage.output_tokens));
           usage.costo_estimado_usd = costForModel(store.model, usage);
           usage.ruta_modelos = store.attempts;
-          usage.nota = store.provider === 'Google Gemini Free Tier'
-            ? 'Modo automático: se resolvió con el modelo gratuito calibrado. Si el Free Tier no está disponible, el sistema escala automáticamente a GPT-5.6 Luna y luego a GPT-5.6 Sol.'
-            : `Modo automático: los modelos gratuitos no estuvieron disponibles o no devolvieron una salida válida; se usó ${store.model} vía Vercel AI Gateway.`;
+          usage.nota = isFree
+            ? `Modo automático: se resolvió sin costo con ${store.model}. Si un modelo gratuito no está disponible, el sistema recorre los siguientes modelos gratuitos antes de escalar a GPT-5.6 Luna y GPT-5.6 Sol.`
+            : `Modo automático: las rutas gratuitas no estuvieron disponibles o no devolvieron una salida válida; se usó ${store.model} vía Vercel AI Gateway.`;
           chunk = JSON.stringify(parsed);
         }
       } catch {}
