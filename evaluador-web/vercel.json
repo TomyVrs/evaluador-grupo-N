@@ -3,6 +3,20 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "cleanUrls": false,
+  "functions": {
+    "api/evaluate.mjs": {
+      "maxDuration": 300
+    },
+    "api/evaluate-with-usage.mjs": {
+      "maxDuration": 300
+    },
+    "api/evaluate-one-shot-core.mjs": {
+      "maxDuration": 300
+    },
+    "api/ai-health.mjs": {
+      "maxDuration": 60
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
