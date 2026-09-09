@@ -58,8 +58,11 @@ function fr03Gate(files) {
   const runText = joined(runFiles.length ? runFiles : files);
   const all = joined(files);
 
-  const hasInput = /(?:entrada|input)\s*[:=-]\s*`?[^\n]+/i.test(runText);
-  const hasOutput = /(?:salida|output)\s*[:=-]\s*`?[^\n]+/i.test(runText);
+  // Acepta tanto campos "Entrada: ..." como secciones Markdown "## Entrada".
+  // La presencia de ambas secciones en un mismo registro demuestra asociación básica
+  // entrada/salida, pero no alcanza por sí sola para CUMPLE.
+  const hasInput = /(?:^|\n)\s*(?:[-*]\s*)?(?:#{1,6}\s*)?(?:\*\*)?(?:entrada|input)(?:\*\*)?\s*(?::|=|-|\n)/im.test(runText);
+  const hasOutput = /(?:^|\n)\s*(?:[-*]\s*)?(?:#{1,6}\s*)?(?:\*\*)?(?:salida|output)(?:\*\*)?\s*(?::|=|-|\n)/im.test(runText);
   const hasPromptOrConfig = /(?:prompt|configuraci[oó]n|config)\s*[:=-]\s*`?[^\n]+/i.test(runText);
   const exactVersion = /(?:ref(?:erencia)?|commit|sha|versi[oó]n|version|modelo|model)\s*(?:exact[ao])?\s*[:=#]\s*`?(?:[0-9a-f]{7,40}|v?\d+(?:\.\d+)+|main\b|develop\b|[A-Za-z0-9._/-]*\d[A-Za-z0-9._/-]*)/i.test(all);
 
@@ -72,7 +75,9 @@ function ae01Gate(files) {
   const econ = joined(files, file => /(?:econom|cost|costo|pricing|precio|financ)/i.test(file.path + '\n' + file.content));
   const text = econ || joined(files);
 
-  const costPerRun = /(?:USD|US\$|EUR|ARS|\$)\s*\d[\d.,]*\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)|\d[\d.,]*\s*(?:USD|EUR|ARS)\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)/i.test(text);
+  // Reconoce variantes equivalentes: "USD 0,03 por corrida",
+  // "Costo por corrida: USD 0,03" y "Costo declarado por corrida: USD 0,03".
+  const costPerRun = /(?:USD|US\$|EUR|ARS|\$)\s*\d[\d.,]*\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)|\d[\d.,]*\s*(?:USD|EUR|ARS)\s*(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)|(?:costo|coste|cost)\s+(?:declarad[oa]\s+|estimad[oa]\s+)?(?:por|\/|cada)\s*(?:corrida|ejecuci[oó]n|run)\s*[:=-]\s*(?:USD|US\$|EUR|ARS|\$)\s*\d[\d.,]*/i.test(text);
   const explicitBasis = /(?:base\s+de\s+c[aá]lculo|supuesto)\s*[:=-]\s*[^\n]{3,}/i.test(text);
   const tokenBasis = /(?:\d[\d.,]*\s*(?:tokens?|caracteres?)|tokens?\s*[:=-]\s*\d[\d.,]*)[\s\S]{0,160}(?:tarifa|precio|costo)|(?:tarifa|precio|costo)[\s\S]{0,160}(?:\d[\d.,]*\s*(?:tokens?|caracteres?))/i.test(text);
   const providerBasis = /(?:precio|tarifa)\s+(?:oficial|del\s+proveedor|por\s+mill[oó]n|por\s+1m)|(?:pricing|price)\s+(?:page|source|fuente)/i.test(text);
