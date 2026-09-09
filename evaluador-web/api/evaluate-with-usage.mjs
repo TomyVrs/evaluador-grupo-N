@@ -1,13 +1,9 @@
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-const GEMINI_FREE_MODELS = [
-  'gemini-3.1-flash-lite',
-  'gemini-2.5-flash-lite',
-  'gemini-3.5-flash',
-  'gemini-3.6-flash',
-  'gemini-3.7-flash',
-];
+// Solo modelos Flash del mismo nivel de corrección. Los Flash-Lite quedaron excluidos:
+// resolvían disponibilidad, pero degradaban materialmente la calibración V5.
+const GEMINI_FREE_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash'];
 
 const STRICT_EVIDENCE_POLICY = `
 CONTROL DE EVIDENCIA V5 — aplicación literal de criterios, sin alterar puntajes ni perseguir una nota objetivo:
@@ -49,8 +45,8 @@ REGLA GENERAL DE ESTABILIDAD
 - No reveles razonamiento interno. Devolvé únicamente el JSON estructurado solicitado.`;
 
 async function requestWithFreeModelFallback(originalFetch, url, init, body) {
-  const requestedModel = String(body?.model || '');
-  const candidates = [...new Set([...GEMINI_FREE_MODELS, requestedModel].filter(Boolean))];
+  const requestedModel = String(body?.model || GEMINI_FREE_MODELS[0]);
+  const candidates = [requestedModel, ...GEMINI_FREE_MODELS.filter(model => model !== requestedModel)];
   let lastResponse = null;
 
   for (const model of candidates) {
@@ -60,7 +56,7 @@ async function requestWithFreeModelFallback(originalFetch, url, init, body) {
 
     if (response.ok) {
       if (model !== requestedModel) {
-        console.warn('gemini-free-fallback-success', JSON.stringify({ from: requestedModel || null, to: model }));
+        console.warn('gemini-free-fallback-success', JSON.stringify({ from: requestedModel, to: model }));
       }
       return response;
     }
