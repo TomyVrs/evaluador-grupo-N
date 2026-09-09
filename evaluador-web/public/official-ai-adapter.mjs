@@ -84,7 +84,7 @@ function enhanceOfficialUi(){
   const scope=document.querySelector('#engine-scope .hint');
   if(scope)scope.innerHTML='<b>La nota la calcula el agente IA V5 en modo automático.</b> Primero intenta un modelo gratuito calibrado; si no está disponible, escala a GPT-5.6 Luna y finalmente a GPT-5.6 Sol. El backend fija un SHA exacto, lee la evidencia del repositorio y el servidor recalcula mecánicamente los puntajes de los 17 criterios.';
   const loaderHint=document.querySelector('#loader .section-head .hint');
-  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. No hace falta indicar rama, ruta, modelo ni credenciales.';
+  if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. No hace falta indicar rama ni ruta; tampoco elegir modelo ni cargar credenciales.';
   const footer=document.querySelector('footer');
   if(footer)footer.textContent='Agente IA V5 · selección automática gratis → Luna → Sol · GitHub solo lectura · SHA exacto.';
   simplifyLoader();
