@@ -6,7 +6,8 @@ const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
 const FREE_GEMINI_MODELS = ['gemini-3.5-flash', 'gemini-3.6-flash'];
 const LUNA_MODEL = 'openai/gpt-5.6-luna';
 const SOL_MODEL = 'openai/gpt-5.6-sol';
-const MAX_USER_CHARS = 120000;
+const MAX_USER_CHARS = 300000;
+const FREE_TRANSIENT_RETRY_MS = 5000;
 
 const routeStorage = globalThis.__evaluadorV5RouteStorage || new AsyncLocalStorage();
 globalThis.__evaluadorV5RouteStorage = routeStorage;
@@ -102,22 +103,38 @@ function recordAttempt(store, provider, model, response, data, accepted) {
   store.usage = data?.usage || {};
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function callGeminiFree(originalFetch, body, store, model) {
   const key = geminiToken();
   if (!key) return null;
   const freeBody = { ...body, model };
-  const response = await originalFetch(GEMINI_ENDPOINT, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(freeBody),
-  });
-  const data = await response.clone().json().catch(() => ({}));
-  const accepted = response.ok && isStructuredEvaluation(data);
-  recordAttempt(store, 'Google Gemini Free Tier', model, response, data, accepted);
-  if (!accepted) {
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const response = await originalFetch(GEMINI_ENDPOINT, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(freeBody),
+    });
+    const data = await response.clone().json().catch(() => ({}));
+    const accepted = response.ok && isStructuredEvaluation(data);
+    recordAttempt(store, 'Google Gemini Free Tier', model, response, data, accepted);
+    if (accepted) return { response, data, accepted };
+
+    const transient = [502, 503, 504].includes(response.status);
+    if (transient && attempt === 0) {
+      console.warn('free-model-retry', JSON.stringify({ provider: 'gemini', status: response.status, model, wait_ms: FREE_TRANSIENT_RETRY_MS }));
+      await sleep(FREE_TRANSIENT_RETRY_MS);
+      continue;
+    }
+
     console.warn('free-model-fallback', JSON.stringify({ provider: 'gemini', status: response.status, model, error: data?.error || null, invalid_json: response.ok }));
+    return { response, data, accepted };
   }
-  return { response, data, accepted };
+
+  return null;
 }
 
 async function callGateway(originalFetch, body, store, forceSol = false) {
@@ -178,7 +195,7 @@ function unavailableResponse(store) {
 
 if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__auto_router__';
 
-if (!globalThis.__evaluadorV5AutoRouterPatchedV3) {
+if (!globalThis.__evaluadorV5AutoRouterPatchedV4) {
   const originalFetch = globalThis.fetch.bind(globalThis);
 
   globalThis.fetch = async (...args) => {
@@ -215,7 +232,7 @@ if (!globalThis.__evaluadorV5AutoRouterPatchedV3) {
     return originalFetch(...args);
   };
 
-  globalThis.__evaluadorV5AutoRouterPatchedV3 = true;
+  globalThis.__evaluadorV5AutoRouterPatchedV4 = true;
 }
 
 let corePromise;
@@ -248,7 +265,7 @@ export default async function handler(req, res) {
           usage.costo_estimado_usd = costForModel(store.model, usage);
           usage.ruta_modelos = store.attempts;
           usage.nota = isFree
-            ? `Modo automático: se resolvió sin costo con ${store.model}. La cadena gratuita validada prioriza Gemini 3.5 y luego Gemini 3.6; solo si ambos fallan escala a GPT-5.6 Luna y GPT-5.6 Sol.`
+            ? `Modo automático: se resolvió sin costo con ${store.model}. La cadena gratuita validada prioriza Gemini 3.5 y luego Gemini 3.6; los errores transitorios 5xx se reintentan una vez antes de escalar a GPT-5.6 Luna y GPT-5.6 Sol.`
             : `Modo automático: las rutas gratuitas no estuvieron disponibles o no devolvieron una salida válida; se usó ${store.model} vía Vercel AI Gateway.`;
           chunk = JSON.stringify(parsed);
         }
