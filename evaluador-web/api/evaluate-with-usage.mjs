@@ -1,9 +1,8 @@
 import { applyDeterministicEvidenceGates } from './evidence-gates.mjs';
 
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-// Modelo único de corrección: es el perfil que estamos calibrando contra V5.
-// No degradar silenciosamente a otros modelos: ante falta de cuota/capacidad se devuelve error y NO se emite una nota potencialmente inválida.
-const GEMINI_FREE_MODELS = ['gemini-3.5-flash'];
+const SOURCE_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
+const GATEWAY_ENDPOINT = 'https://ai-gateway.vercel.sh/v1/chat/completions';
+const FINAL_MODEL = 'openai/gpt-5.6-sol';
 
 const STRICT_EVIDENCE_POLICY = `
 CONTROL DE EVIDENCIA V5 — aplicación literal de criterios, sin alterar puntajes ni perseguir una nota objetivo:
@@ -44,69 +43,99 @@ REGLA GENERAL DE ESTABILIDAD
 - No uses notas históricas, casos de calibración ni puntajes esperados como objetivo. La decisión debe surgir únicamente de la evidencia del repositorio evaluado.
 - No reveles razonamiento interno. Devolvé únicamente el JSON estructurado solicitado.`;
 
-async function requestWithFreeModelFallback(originalFetch, url, init, body) {
-  const requestedModel = GEMINI_FREE_MODELS[0];
-  const nextBody = { ...body, model: requestedModel };
-  return originalFetch(url, { ...init, body: JSON.stringify(nextBody) });
+function gatewayToken() {
+  return process.env.AI_GATEWAY_API_KEY || process.env.VERCEL_OIDC_TOKEN || '';
 }
 
-if (!globalThis.__evaluadorStrictEvidenceV5) {
+// evaluate-one-shot-core conserva el nombre histórico GEMINI_API_KEY como guardia interna.
+// El valor real nunca se usa contra Google: todas las llamadas se redirigen a AI Gateway.
+if (!process.env.GEMINI_API_KEY && gatewayToken()) process.env.GEMINI_API_KEY = '__vercel_ai_gateway__';
+
+if (!globalThis.__evaluadorV5GatewayPatched) {
   const originalFetch = globalThis.fetch.bind(globalThis);
 
   globalThis.fetch = async (...args) => {
     const url = typeof args[0] === 'string' ? args[0] : String(args[0]?.url || '');
     const init = args[1] || {};
 
-    if (url === GEMINI_ENDPOINT && String(init.method || 'GET').toUpperCase() === 'POST') {
+    if (url === SOURCE_ENDPOINT && String(init.method || 'GET').toUpperCase() === 'POST') {
       let body = null;
       try { body = JSON.parse(String(init.body || '{}')); } catch {}
+      if (!body || !Array.isArray(body.messages)) return originalFetch(...args);
 
-      if (body && Array.isArray(body.messages)) {
-        const system = body.messages.find(message => message?.role === 'system');
-        const user = body.messages.find(message => message?.role === 'user');
-        if (system && typeof system.content === 'string') {
-          system.content += `\n\n${STRICT_EVIDENCE_POLICY}`;
-        } else {
-          body.messages.unshift({ role: 'system', content: STRICT_EVIDENCE_POLICY });
-        }
+      const token = gatewayToken();
+      if (!token) {
+        return new Response(JSON.stringify({ error: { message: 'Vercel AI Gateway no está habilitado para este deployment.' } }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
 
-        const response = await requestWithFreeModelFallback(originalFetch, args[0], init, body);
-        if (!response.ok) return response;
+      const system = body.messages.find(message => message?.role === 'system');
+      const user = body.messages.find(message => message?.role === 'user');
+      if (system && typeof system.content === 'string') system.content += `\n\n${STRICT_EVIDENCE_POLICY}`;
+      else body.messages.unshift({ role: 'system', content: STRICT_EVIDENCE_POLICY });
 
-        let data;
-        try { data = await response.clone().json(); } catch { return response; }
-        const content = data?.choices?.[0]?.message?.content;
-        if (!content || typeof user?.content !== 'string') return response;
+      const gatewayBody = { ...body, model: FINAL_MODEL };
+      // Los modelos de razonamiento administran internamente su muestreo.
+      delete gatewayBody.temperature;
 
-        try {
-          const modelOutput = JSON.parse(content);
-          const stabilized = applyDeterministicEvidenceGates(modelOutput, user.content);
-          data.choices[0].message.content = JSON.stringify(stabilized);
+      const response = await originalFetch(GATEWAY_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Vercel-AI-Gateway-App': 'agente-evaluador-v5-ucema',
+        },
+        body: JSON.stringify(gatewayBody),
+      });
 
-          const headers = new Headers(response.headers);
-          headers.delete('content-length');
-          headers.delete('content-encoding');
-          return new Response(JSON.stringify(data), {
-            status: response.status,
-            statusText: response.statusText,
-            headers,
-          });
-        } catch (error) {
-          console.warn('v5-mechanical-gates-skipped', error?.message || String(error));
-          return response;
-        }
+      if (!response.ok) {
+        let detail = {};
+        try { detail = await response.clone().json(); } catch {}
+        console.error('ai-gateway-error', JSON.stringify({ status: response.status, model: FINAL_MODEL, error: detail?.error || detail }));
+        return response;
+      }
+
+      let data;
+      try { data = await response.clone().json(); } catch { return response; }
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content || typeof user?.content !== 'string') return response;
+
+      try {
+        const modelOutput = JSON.parse(content);
+        const stabilized = applyDeterministicEvidenceGates(modelOutput, user.content);
+        data.choices[0].message.content = JSON.stringify(stabilized);
+        data.model = data.model || FINAL_MODEL;
+
+        const headers = new Headers(response.headers);
+        headers.delete('content-length');
+        headers.delete('content-encoding');
+        return new Response(JSON.stringify(data), {
+          status: response.status,
+          statusText: response.statusText,
+          headers,
+        });
+      } catch (error) {
+        console.warn('v5-mechanical-gates-skipped', error?.message || String(error));
+        return response;
       }
     }
 
     return originalFetch(...args);
   };
 
-  globalThis.__evaluadorStrictEvidenceV5 = true;
+  globalThis.__evaluadorV5GatewayPatched = true;
 }
 
 let corePromise;
 
 export default async function handler(req, res) {
+  if (!gatewayToken()) {
+    res.statusCode = 503;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.end(JSON.stringify({ error: 'Vercel AI Gateway no está habilitado para este deployment.' }));
+  }
   corePromise ||= import('./evaluate-one-shot-core.mjs');
   const core = await corePromise;
   return core.default(req, res);
