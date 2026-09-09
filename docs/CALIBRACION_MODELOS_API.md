@@ -18,54 +18,32 @@ La evaluación mantiene constantes:
 
 ## Casos de control
 
-Se usan tres trabajos diseñados para calibración, no como plantillas de los trabajos reales:
-
 | Caso | Referencia V5 |
 |---|---:|
 | Excelente | 82/100 |
 | Flojo | 9/100 |
 | Tramposo | 31/100 |
 
-Además existe una prueba de fuego con un repositorio externo cuya referencia histórica es 98/100.
-
-Los puntajes esperados sirven para verificar consistencia entre modelos. Los trabajos reales pueden ser completamente distintos y obtener cualquier puntaje que corresponda a su evidencia.
+Los casos sirven para calibrar consistencia entre modelos. Los trabajos reales pueden ser completamente distintos y obtener cualquier puntaje que corresponda a su evidencia. Además existe una prueba de fuego con un repositorio externo cuya referencia histórica es 98/100.
 
 ## Resultado de calibración gratuita
 
-### Gemini 3.5 Flash
+**Gemini 3.5 Flash** fue validado con Excelente 82, Flojo 9 y Tramposo 31 con alerta de manipulación.
 
-Fue validado con los tres casos de control:
+**Gemini 3.6 Flash** también fue validado de punta a punta. En una prueba real de fallback, Gemini 3.7 devolvió 503 y Gemini 3.5 devolvió 429; la app continuó automáticamente a Gemini 3.6 y obtuvo 82 / 9 / 31 sin exponer errores intermedios al usuario y con costo estimado USD 0.
 
-- Excelente: 82/100;
-- Flojo: 9/100;
-- Tramposo: 31/100 con alerta de manipulación.
-
-### Gemini 3.6 Flash
-
-También fue validado de punta a punta con los tres casos de control. En una prueba real de fallback, Gemini 3.7 devolvió 503 y Gemini 3.5 devolvió 429; la app continuó automáticamente a Gemini 3.6 y obtuvo:
-
-- Excelente: 82/100;
-- Flojo: 9/100;
-- Tramposo: 31/100.
-
-La app no expuso los errores intermedios al usuario y el costo estimado de esas corridas fue USD 0.
-
-### Modelos no habilitados en la cadena final
-
-Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados como fallback automático final porque no completaron una calibración de punta a punta suficientemente estable. Pueden volver a evaluarse en el futuro, pero no se incorporan solo por ser gratuitos.
+Gemini 3.7 y el modelo gratuito probado vía OpenRouter no quedan habilitados en la cadena final porque no completaron una calibración de punta a punta suficientemente estable. No se incorpora un modelo solo por ser gratuito.
 
 ## Cadena operativa final
-
-El orden automático queda:
 
 1. `gemini-3.5-flash` — gratuito y calibrado;
 2. `gemini-3.6-flash` — gratuito y calibrado;
 3. `openai/gpt-5.6-luna` vía Vercel AI Gateway — fallback pago;
 4. `openai/gpt-5.6-sol` vía Vercel AI Gateway — último fallback de máxima calidad.
 
-El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida: rate limit, cuota, timeout, indisponibilidad del proveedor o salida que no cumple el contrato estructurado. Nunca se cambia de modelo para perseguir una nota determinada.
+El cambio de modelo ocurre únicamente por un problema técnico o por una respuesta inválida: rate limit, cuota, timeout, indisponibilidad o salida que no cumple el contrato estructurado. Nunca se cambia de modelo para perseguir una nota determinada.
 
-**Estado antes de producción:** los dos modelos gratuitos ya están calibrados. Los fallbacks pagos quedan implementados como respaldo técnico. La promoción final a producción requiere comprobar el comportamiento del AI Gateway y completar la prueba integrada final. Si Gateway no está habilitado, la app debe agotar primero los dos modelos gratuitos y luego mostrar un error amigable, sin exponer mensajes internos del proveedor.
+Los dos modelos gratuitos ya están calibrados. Los fallbacks pagos quedan implementados como respaldo técnico. Antes de producción se completa la prueba integrada final y se verifica el comportamiento operativo de AI Gateway.
 
 ## Experiencia del profesor
 
@@ -77,19 +55,13 @@ No necesita API keys, login del proveedor de IA, elegir modelo, indicar rama/SHA
 
 Cada evaluación registra proveedor y modelo resuelto, cantidad de intentos, ruta de modelos recorrida, tokens, costo estimado USD y SHA exacto evaluado.
 
-## Regla de aceptación
-
-Un nuevo modelo solo puede incorporarse al fallback automático si mantiene la aplicación de la rúbrica V5, no inventa evidencia, produce salida estructurada válida, conserva las alertas del caso adversarial y completa una calibración de punta a punta antes de quedar habilitado.
-
 ## Checklist previo al merge
-
-Antes de promover esta rama al repo oficial se debe completar una última prueba integrada con la cadena final:
 
 - Excelente = 82/100;
 - Flojo = 9/100;
 - Tramposo = 31/100 y alerta de manipulación;
-- prueba con repositorio externo real;
-- prueba de lote con varios repositorios;
+- repositorio externo real;
+- lote con varios repositorios;
 - acceso público en incógnito sin login ni credenciales del profesor.
 
 La prioridad operativa es: **gratuito validado primero, pago solo como respaldo, sin trasladar ninguna complejidad al profesor**.
