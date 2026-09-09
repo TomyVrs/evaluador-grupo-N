@@ -44,7 +44,7 @@ function updateDetailUsage(){
   const old=document.getElementById('usage-api-card');
   if(old){const h=old.previousElementSibling;if(h?.textContent==='Consumo de IA')h.remove();old.remove()}
   if(!usage)return;
-  const html=`<h3>Consumo de IA</h3><div class="feedback" id="usage-api-card"><b>${usage.proveedor||'Vercel AI Gateway'} · ${usage.modelo_resuelto||usage.modelo||'GPT-5.6 Sol'}</b><br><b>Llamadas de IA:</b> ${usage.llamadas_modelo||1}<br><b>Entrada:</b> ${fmtInt(usage.input_tokens)} tokens · <b>Salida:</b> ${fmtInt(usage.output_tokens)} tokens<br><b>Total:</b> ${fmtInt(usage.total_tokens)} tokens · <b>Costo estimado:</b> ${fmtUsd(usage.costo_estimado_usd)}<br><span class="hint">${usage.nota||'Una llamada de IA por trabajo mediante Vercel AI Gateway.'}</span></div>`;
+  const html=`<h3>Consumo de IA</h3><div class="feedback" id="usage-api-card"><b>${usage.proveedor||'Vercel AI Gateway'} · ${usage.modelo_resuelto||usage.modelo||'GPT-5.6 Luna'}</b><br><b>Llamadas de IA:</b> ${usage.llamadas_modelo||1}<br><b>Entrada:</b> ${fmtInt(usage.input_tokens)} tokens · <b>Salida:</b> ${fmtInt(usage.output_tokens)} tokens<br><b>Total:</b> ${fmtInt(usage.total_tokens)} tokens · <b>Costo estimado:</b> ${fmtUsd(usage.costo_estimado_usd)}<br><span class="hint">${usage.nota||'Una llamada de IA por trabajo mediante Vercel AI Gateway.'}</span></div>`;
   detail.insertAdjacentHTML('beforeend',html);
 }
 
@@ -73,17 +73,17 @@ function simplifyLoader(){
 function enhanceOfficialUi(){
   document.querySelectorAll('.local-source').forEach(el=>el.style.display='none');
   const status=document.getElementById('engine-status');
-  if(status){status.textContent='Agente IA V5 · GPT-5.6 Sol';status.className='pill ok'}
+  if(status){status.textContent='Agente IA V5 · GPT-5.6 Luna';status.className='pill ok'}
   const rate=document.getElementById('rate');
   if(rate){rate.textContent='GitHub · lectura server-side';rate.className='pill'}
   const side=document.querySelector('.side-note');
   if(side)side.innerHTML='<b>Agente Evaluador V5.</b><br>Pegá repositorios de Trabajos Finales y ejecutá la corrección. La rúbrica V5 queda fija y GitHub se usa solo en lectura.';
   const scope=document.querySelector('#engine-scope .hint');
-  if(scope)scope.innerHTML='<b>La nota la calcula el agente IA V5 con GPT-5.6 Sol.</b> El backend detecta la rama, resuelve un SHA exacto, inventaría y lee la evidencia relevante del repositorio, y envía un único paquete de evidencia al modelo. El servidor recalcula mecánicamente los puntajes de los 17 criterios.';
+  if(scope)scope.innerHTML='<b>La nota la calcula el agente IA V5 con GPT-5.6 Luna.</b> El backend detecta la rama, resuelve un SHA exacto, inventaría y lee la evidencia relevante del repositorio, y envía un único paquete de evidencia al modelo. El servidor recalcula mecánicamente los puntajes de los 17 criterios.';
   const loaderHint=document.querySelector('#loader .section-head .hint');
   if(loaderHint)loaderHint.textContent='Pegá uno o varios repositorios públicos de GitHub. No hace falta indicar rama ni ruta para una entrega normal.';
   const footer=document.querySelector('footer');
-  if(footer)footer.textContent='Agente IA V5 · GPT-5.6 Sol vía Vercel AI Gateway · GitHub solo lectura · SHA exacto · una llamada IA por trabajo.';
+  if(footer)footer.textContent='Agente IA V5 · GPT-5.6 Luna vía Vercel AI Gateway · GitHub solo lectura · SHA exacto · una llamada IA por trabajo.';
   simplifyLoader();
   ensureUsageKpi();
   updateAggregateUsage();
