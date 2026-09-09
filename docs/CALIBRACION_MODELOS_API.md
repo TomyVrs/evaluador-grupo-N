@@ -69,27 +69,13 @@ El cambio de modelo ocurre únicamente por un problema técnico o por una respue
 
 ## Experiencia del profesor
 
-El profesor solo debe:
-
-1. abrir la URL pública;
-2. pegar uno o varios repositorios públicos de GitHub, uno por línea;
-3. agregar los trabajos;
-4. ejecutar la evaluación;
-5. revisar resultados y, si lo desea, exportar CSV o JSON.
+El profesor solo debe abrir la URL pública, pegar uno o varios repositorios públicos de GitHub, agregarlos y ejecutar la evaluación. Puede revisar resultados y exportar CSV o JSON.
 
 No necesita API keys, login del proveedor de IA, elegir modelo, indicar rama/SHA/ruta ni copiar prompts manualmente.
 
 ## Trazabilidad
 
-Cada evaluación registra junto al resultado:
-
-- proveedor y modelo resuelto;
-- cantidad de intentos de IA;
-- ruta de modelos recorrida;
-- tokens de entrada y salida;
-- tokens totales;
-- costo estimado USD;
-- SHA exacto evaluado.
+Cada evaluación registra proveedor y modelo resuelto, cantidad de intentos, ruta de modelos recorrida, tokens, costo estimado USD y SHA exacto evaluado.
 
 ## Regla de aceptación
 
