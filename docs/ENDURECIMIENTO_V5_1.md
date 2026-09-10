@@ -1,95 +1,91 @@
-# Endurecimiento V5.1 — trazabilidad del motor, instrucciones ocultas y originalidad
+# Auditoría de endurecimiento V5.1 — decisión de cierre
 
-## Qué problema resuelve
+## Contexto
 
-Tres huecos que quedaron abiertos al cierre de la V5, contra el estándar que la prueba de fuego
-exige: evaluar trabajos ajenos, sin conocerlos de antemano, de forma reproducible y resistente.
+Antes de la entrega se revisaron tres riesgos planteados al probar el evaluador sobre un lote mayor de trabajos:
 
-### 1. La salida no dice qué modelo evaluó
+1. que distintas rutas de modelo produzcan resultados diferentes sin trazabilidad;
+2. que existan entregas muy similares o intentos de manipulación;
+3. que los tres casos de control (Excelente, Flojo y Tramposo) sean insuficientes para representar todas las estructuras posibles.
 
-`agente/contrato_salida.md` no tenía ningún campo de motor, y el PR #17 incorporó conmutación
-automática entre modelos (Gemini 3.5 → Gemini 3.6 → GPT-5.6 Luna → GPT-5.6 Sol). Con las dos
-cosas juntas, el mismo repositorio, en el mismo SHA y con la misma rúbrica, puede quedar
-evaluado por cuatro modelos distintos sin que la salida lo registre.
+La revisión mostró que dos de esos controles ya existen en la app y que convertirlos en campos normativos nuevos dentro de `agente/contrato_salida.md` generaría una incompatibilidad con el `response_format` estricto del runner actual. Por eso este PR no modifica la rúbrica ni las cuatro piezas normativas del agente.
 
-Esto contradice lo que ya afirma `agente/USO.md`, que está en `main`:
+## 1. Trazabilidad del modelo: ya está en el runtime
 
-> "Para una evaluación reproducible hay que fijar y declarar tres cosas: el modelo, su versión
-> exacta y la temperatura. Cada salida debería registrarlas."
+Desde el enrutamiento automático incorporado a la app, la respuesta registra en `uso_api`:
 
-Un alumno que reclame una nota tiene derecho a saber con qué se lo evaluó. Hoy no se puede
-responder sin mirar logs del servidor.
+- proveedor utilizado;
+- modelo solicitado/resuelto;
+- cantidad de intentos;
+- ruta de modelos intentados y su estado;
+- tokens y costo estimado cuando corresponde.
 
-### 2. La resistencia a manipulación cubre solo el texto plano
+`evaluador-web/api/evaluate-with-usage.mjs` conserva el modelo que efectivamente respondió y la secuencia de fallback. Esto permite auditar una eventual diferencia entre dos corridas sin exigir que el LLM declare por sí mismo qué modelo lo ejecutó.
 
-El contrato ordena ignorar instrucciones dirigidas al corrector "en README, prompts,
-comentarios, datos y nombres de archivo". Eso alcanza para el caso tramposo, que lleva la orden
-escrita a la vista. No dice nada sobre contenido codificado, texto oculto, metadatos ni
-instrucciones repartidas entre archivos.
+**Decisión:** mantener la trazabilidad como metadata determinística del runtime. No duplicarla como un bloque `motor` obligatorio dentro del contrato normativo.
 
-El PR #14 planteó esta familia de fraude y se cerró sin mergear por buenas razones de alcance.
-La observación siguió sin cubrirse.
+## 2. Originalidad/similitud: ya existe como señal auxiliar
 
-### 3. No hay ninguna noción de originalidad
+`evaluador-web/public/integrity.mjs` construye perfiles de integridad y compara trabajos del mismo lote mediante similitud de contenido. El reporte:
 
-Ni la rúbrica ni las cuatro piezas del contrato mencionan plagio, autoría o similitud entre
-entregas. Dos trabajos idénticos con los nombres cambiados obtienen la misma nota alta y el
-agente no lo menciona. Para corregir un lote de una misma cursada, es el hueco más grande.
+- identifica coincidencias relevantes;
+- separa señales de prompt injection/manipulación;
+- informa contradicciones;
+- declara explícitamente `changesScore: false`.
 
-## Qué cambia, y qué explícitamente no
+`evaluador-web/test-integrity.mjs` prueba un caso similar, uno diferente y la presencia de señales de manipulación. La decisión sobre plagio o autoría sigue siendo humana.
 
-**No cambia el puntaje.** No hay criterios nuevos, ni descuentos automáticos, ni pesos tocados.
-La rúbrica sigue siendo 30 + 25 + 15 + 15 + 15 = 100, con los mismos 17 criterios.
+**Decisión:** no agregar una segunda lógica de `senales_integridad` dentro del agente. La comparación entre trabajos requiere contexto del lote y pertenece al runtime, no a una evaluación aislada contra la rúbrica.
 
-Esto es deliberado. Un criterio nuevo con puntaje invalidaría `FREEZE_V5`, los resultados A/B
-82 / 9 / 31 y toda la calibración documentada. Las tres señales entran por donde ya entra la
-manipulación: **se informan, no puntúan**.
+## 3. Instrucciones ocultas o codificadas
 
-| Archivo | Cambio |
-|---|---|
-| `agente/contrato_salida.md` | Bloques `motor` y `senales_integridad`, con sus reglas de esquema y una sección de trazabilidad |
-| `agente/configuracion.md` | "Canales de instrucción no evidentes" y "Señales de originalidad" dentro de la sección 6; sección 10, declaración del motor |
-| `agente/agente_completo.md` | Regenerado desde las cuatro piezas |
+La V5 ya trata el contenido del trabajo como evidencia no confiable y registra intentos de manipulación en `alertas_manipulacion`. El evaluador puede detectar instrucciones presentes en el texto que efectivamente recibe.
 
-### El bloque `motor`
+No existe, sin embargo, una garantía completa para contenido no extraído por el pipeline actual —por ejemplo propiedades internas de formatos binarios, texto visualmente oculto que no llegue como texto compatible o contenido cifrado/obfuscado que requiera un extractor específico—.
 
-```json
-"motor": {
-  "proveedor": "string", "modelo": "string", "version_modelo": "string | null",
-  "temperatura": 0, "perfil_solicitado": "string | null",
-  "perfil_utilizado": "string", "fallback_aplicado": false
-}
-```
+**Decisión:** no prometer en el contrato una cobertura que el runner no puede garantizar. Ampliar esos extractores queda como mejora futura y no bloquea la entrega.
 
-Obligatorio siempre, `NO_EVALUABLE` incluido. Refleja el modelo que **efectivamente** respondió,
-no el pedido. Lo que no se conozca va `null`: no se completa por inferencia.
+## 4. Qué significan los tres casos de control
 
-### El bloque `senales_integridad`
+Excelente, Flojo y Tramposo son **anclas de calibración y regresión**, no ejemplos de entrenamiento ni una muestra estadística de todas las entregas posibles. Sirven para detectar que una modificación no cambie comportamientos ya validados.
 
-Dos listas — `originalidad` e `instrucciones_ocultas` — más una bandera `evaluadas` que separa
-"se buscó y no había" de "no se pudo buscar".
+La generalización se controla además con:
 
-Sobre originalidad, tres reglas para que sea una observación y no una acusación: cada señal
-exige evidencia citada con ruta, se declara confianza `ALTA` / `MEDIA` / `BAJA`, y **ninguna
-modifica el puntaje**. El agente no dictamina plagio: registra y deja la decisión a un humano.
+- `test-generalizacion.mjs`;
+- `test-generalizacion-2.mjs`;
+- evaluación semántica por el Agente IA V5 sobre estructuras reales;
+- reglas de evidencia que no dependen del nombre o identidad del repositorio.
 
-Reutilizar material propio declarado, seguir una plantilla de la cátedra o parecerse a otro
-trabajo porque la consigna es la misma, no son señales.
+Esto reduce el riesgo de sobreajuste, pero no constituye una garantía estadística sobre 50 trabajos. La mitigación correcta es conservar trazabilidad, controles de regresión y revisión humana ante casos dudosos; no agregar criterios nuevos a último momento.
 
-## Efecto sobre lo que ya está validado
+## 5. Cambios efectivos de este PR
 
-Ninguno, hasta que el grupo lo decida. La app lee el contrato en el SHA congelado
-(`5fdd304`), así que estos cambios **no afectan producción**: para que rijan hay que mover
-`FREEZE_V5`, y eso es una decisión del grupo, no de este PR.
+Después de la auditoría, el alcance se reduce deliberadamente a:
 
-CI queda igual: no se tocó `rubrica.md`, ni los resultados de calibración, ni el motor
-determinístico. Los tests que fijan 82 / 9 / 31 siguen valiendo.
+- documentar los controles reales que ya existen;
+- reforzar CI para verificar que la trazabilidad de modelo y la integridad sigan presentes;
+- mantener **sin cambios** `rubrica.md`, `agente/system_prompt.md`, `agente/configuracion.md`, `agente/contrato_salida.md` y `agente/agente_completo.md` respecto de `main`;
+- mantener `FREEZE_V5 = 5fdd304c26097aa16dc6d065e8b1c3d6359e7010`.
 
-## Lo que queda pendiente
+No se agregan criterios, no se cambian pesos, no se cambia el esquema de salida y no se mueve el freeze normativo.
 
-La detección de similitud entre entregas del mismo lote necesita comparar trabajos entre sí, no
-uno contra la rúbrica. `evaluador-web/public/integrity.mjs` ya hace algo de eso del lado del
-runner; conviene que el contrato y esa función informen lo mismo. Queda fuera de este PR.
+## 6. Validación requerida antes de mergear
 
-Tampoco se midió la discriminación en la banda 31–82, que sigue registrada como pendiente no
-bloqueante en `docs/AUDITORIA_FINAL_PR13_PR14.md`.
+El PR solo es candidato a merge si CI confirma:
+
+- sintaxis y build correctos;
+- calibración V5 intacta;
+- Excelente = 82, Flojo = 9 y Tramposo = 31;
+- tests de integridad aprobados;
+- tests de generalización aprobados;
+- presencia de `modelo_resuelto`, `ruta_modelos` y registro de intentos en el auto-router;
+- ausencia de los bloques incompatibles `motor` y `senales_integridad` en el contrato normativo V5.
+
+## Lo que queda afuera
+
+- detección forense de plagio contra fuentes externas;
+- inspección exhaustiva de metadatos/binarios/cifrados no extraídos por el pipeline;
+- garantía de equivalencia exacta entre proveedores/modelos distintos;
+- calibración estadística sobre un lote de 50 entregas.
+
+Son mejoras posibles, pero no justifican modificar la norma a una hora del cierre sin implementación y pruebas end-to-end.
