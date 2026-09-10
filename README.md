@@ -51,10 +51,10 @@ Las credenciales quedan del lado servidor en Vercel; el usuario de la app no deb
 - Control de inconsistencias y contradicciones.
 - Evaluación de uno o varios repositorios GitHub en un mismo lote.
 - Detección automática de rama/ruta y anclaje a SHA exacto en GitHub.
-- Carga de **ZIP** y **carpetas locales** desde el navegador.
+- Carga de **ZIP** y **carpetas locales** mediante selector o **drag & drop**.
 - Huella SHA-256 para trazabilidad de trabajos cargados localmente.
-- Archivos locales: solo se envía al evaluador la evidencia textual compatible; no se ejecutan archivos.
-- Fallback y retry entre modelos cuando un proveedor gratuito devuelve límites o errores transitorios.
+- Archivos locales: se leen/descomprimen en el navegador; solo se envía al evaluador la evidencia textual compatible y ningún archivo se ejecuta.
+- Fallback y retry entre modelos cuando un proveedor devuelve límites o errores transitorios.
 - Exportación de resultados a CSV y JSON.
 - Acceso público sin login de Vercel.
 - CI con validación de sintaxis, build, fixtures, controles de integridad y pruebas sobre estructuras reales.
@@ -85,7 +85,7 @@ Fuentes aceptadas:
 - carpetas locales;
 - uno o varios archivos ZIP estándar sin contraseña.
 
-La app fue validada en ventana de incógnito, sin autenticación, y ejecutó correctamente un caso de control desde el dominio público.
+La app fue validada en ventana de incógnito, sin autenticación, y ejecutó correctamente casos de control y trabajos reales desde el dominio público.
 
 ### Runner local complementario
 
@@ -98,7 +98,7 @@ La comparación histórica entre ambos mecanismos se conserva en:
 
 ## Qué falta o qué falló
 
-Durante el desarrollo aparecieron límites reales de los proveedores gratuitos: respuestas `429` por cuota y algún `503` transitorio. La versión final los maneja con retry y fallback automático antes de escalar a modelos pagos.
+Durante el desarrollo aparecieron límites reales de los proveedores gratuitos: respuestas `429` por cuota y algún `503` transitorio. La versión final los maneja con retry y fallback automático antes de escalar a modelos de respaldo.
 
 También se detectó que el runner determinístico local podía divergir de una evaluación semántica hecha por un LLM sobre repositorios reales. Esa diferencia no se ocultó ni se corrigió forzando notas: quedó documentada como limitación del mecanismo local.
 
@@ -108,15 +108,18 @@ No queda ningún bloqueo funcional conocido para la entrega. Como mejora futura,
 
 ## Estado final
 
-- PR #13: **mergeado**.
-- PR #14: **cerrado sin mergear**.
-- PR #15: **mergeado**.
-- PR #16: **mergeado**.
+- PR #13: **mergeado** — V5 base.
+- PR #14: **cerrado sin mergear** — aportes útiles absorbidos/documentados.
+- PR #15: **mergeado** — hardening V5.
+- PR #16: **mergeado** — documentación y accesos de entrega.
 - PR #17: **mergeado** — Agente IA V5 público.
 - PR #18: **mergeado** — soporte ZIP y carpetas locales.
+- PR #19: **mergeado** — README actualizado al cierre de la app IA.
+- PR #20: **mergeado** — drag & drop para ZIP y carpetas.
+- PR #21: **mergeado** — documentación final alineada al estado posterior a PR #17.
 - `main`: **versión final de entrega**.
 - App pública Vercel: **READY**.
-- Prueba final pública en incógnito: **aprobada**.
+- Acceso público en incógnito: **aprobado**.
 
 ## Qué aprendí
 
