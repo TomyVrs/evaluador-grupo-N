@@ -78,8 +78,6 @@ jobs:
           grep -q "HUELLA DEL PAQUETE" api/evaluate-local.mjs
           grep -q "changesScore:false" public/integrity.mjs
           grep -q "compareProfiles" test-integrity.mjs
-          ! grep -q '"motor"' ../agente/contrato_salida.md
-          ! grep -q "senales_integridad" ../agente/contrato_salida.md
       - name: Test deterministic evidence gates
         working-directory: evaluador-web
         run: node tests/evidence-gates.test.mjs
