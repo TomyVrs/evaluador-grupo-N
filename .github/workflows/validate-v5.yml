@@ -58,10 +58,14 @@ jobs:
           grep -q "gemini-3.5-flash" api/evaluate-one-shot-core.mjs
           grep -q "llamadas_modelo: 1" api/evaluate-one-shot-core.mjs
           grep -q "FREEZE_V5" api/evaluate-one-shot-core.mjs
+          grep -q "5fdd304c26097aa16dc6d065e8b1c3d6359e7010" api/evaluate-one-shot-core.mjs
           grep -q "GitHub no devolvió un SHA válido" api/evaluate-one-shot-core.mjs
           grep -q "costo_estimado_usd: 0" api/evaluate-one-shot-core.mjs
           grep -q "STRICT_EVIDENCE_POLICY" api/evaluate-with-usage.mjs
           grep -q "applyDeterministicEvidenceGates" api/evaluate-with-usage.mjs
+          grep -q "modelo_resuelto" api/evaluate-with-usage.mjs
+          grep -q "ruta_modelos" api/evaluate-with-usage.mjs
+          grep -q "store.attempts" api/evaluate-with-usage.mjs
           grep -q "SC-02" api/evidence-gates.mjs
           grep -q "FR-03" api/evidence-gates.mjs
           grep -q "AE-01" api/evidence-gates.mjs
@@ -72,6 +76,8 @@ jobs:
           grep -q "evaluate-local" public/official-ai-adapter.mjs
           grep -q "createHash" api/evaluate-local.mjs
           grep -q "HUELLA DEL PAQUETE" api/evaluate-local.mjs
+          grep -q "changesScore:false" public/integrity.mjs
+          grep -q "compareProfiles" test-integrity.mjs
       - name: Test deterministic evidence gates
         working-directory: evaluador-web
         run: node tests/evidence-gates.test.mjs
