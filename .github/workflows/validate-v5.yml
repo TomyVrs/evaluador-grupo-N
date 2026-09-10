@@ -5,6 +5,7 @@ on:
     branches:
       - work/final-hardening-v4
       - work/post-merge-hardening-v5
+      - review/pr23-safe
       - main
     paths:
       - 'calibracion/resultados_v5/**'
